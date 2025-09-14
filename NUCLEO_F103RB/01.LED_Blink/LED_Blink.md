@@ -44,11 +44,12 @@
     /* USER CODE BEGIN 3 */
   }
 ```
-
-![led2](https://github.com/user-attachments/assets/2913028b-7544-4911-a75c-a2f5b65fc78b)
+<img src="" width="400" alt="LED Blink Animation">
+<br>
+<img " width="400" alt="LED2 Blink Animation">
 <br><br>
 
-<img width="583" height="360" alt="shield-101" src="https://github.com/user-attachments/assets/b614372a-7016-45c8-9bda-873a4b3c9944" width="400" alt="LED2 Blink Animation">
+<img width="583" height="360" alt="shield-101" src="https://github.com/user-attachments/assets/b614372a-7016-45c8-9bda-873a4b3c9944" />
 <br>
 
 * main.c
