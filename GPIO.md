@@ -1,5 +1,10 @@
 # GPIO
 
+- [Architecture](#Architecture)
+- [GPIO 레지스터 구조](#gpio-레지스터-구조)
+- [Test](#Test)
+
+
 ## Architecture
 <img width="1185" height="852" alt="GPIO_Register_010" src="https://github.com/user-attachments/assets/45a3773c-c552-4388-b9bb-01d889790867" />
 <br>
