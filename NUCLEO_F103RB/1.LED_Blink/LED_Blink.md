@@ -1,6 +1,7 @@
 ## 1. LED_Blink
 
-https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/1.LED_Blink/LED_Blinks.gif
+![LED Blink](https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/1.LED_Blink/LED_Blinks.gif?raw=true)
+
 
 <img width="520" height="350" alt="LED_Blinks_001" src="https://github.com/user-attachments/assets/3aa18d2c-5bc8-4d24-ae1f-898272f96bf9" />
 <br>
