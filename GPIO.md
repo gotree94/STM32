@@ -1,5 +1,6 @@
 # GPIO
 
+## Architecture
 <img width="1185" height="852" alt="GPIO_Register_010" src="https://github.com/user-attachments/assets/45a3773c-c552-4388-b9bb-01d889790867" />
 <br>
 <img width="1269" height="360" alt="GPIO_Register_011" src="https://github.com/user-attachments/assets/2eb0bbf5-16f7-4f15-a5b5-51e834e80615" />
@@ -9,6 +10,10 @@
    * I/O의 대체 기능 구성은 필요 시 특정 순서를 따라 잠글 수 있으며, 이는 I/O 레지스터에 불필요한 기록이 이루어지는 것을 방지하기 위함입니다.<br>
    * I/O는 APB2 버스에 연결되어 있으며, 최대 18 MHz의 토글 속도를 지원합니다.<br>
 <br>
+<img width="710" height="909" alt="GPIO_Register_012" src="https://github.com/user-attachments/assets/b48ca11a-e702-4809-b98a-dbe8e864ecfa" />
+<br>
+
+## Test
 <img width="459" height="151" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/46223b7e-ec0a-41c5-86ec-ef612250b98a" />
 <br>
 <img width="486" height="69" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/43a3d8b7-8d07-493e-a005-b04296b30bb5" />
@@ -27,6 +32,4 @@
 <br>
 <img width="967" height="453" alt="GPIO_Register_009" src="https://github.com/user-attachments/assets/2258a120-7b56-4842-919f-4b8f4af537ad" />
 <br>
-
-
 
