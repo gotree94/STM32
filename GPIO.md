@@ -65,3 +65,6 @@
 <br>
 <img width="960" height="480" alt="GPIO_Setting_004" src="https://github.com/user-attachments/assets/e06ae1a8-5137-46f3-adfe-0fb37fa52d46" />
 <br>
+
+<img width="804" height="590" alt="GPIO_Register_008" src="https://github.com/user-attachments/assets/85cb1220-d9d6-44d6-9d2a-4e46640ce6ca" />
+
