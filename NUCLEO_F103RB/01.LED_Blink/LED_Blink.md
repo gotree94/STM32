@@ -44,3 +44,26 @@
     /* USER CODE BEGIN 3 */
   }
 ```
+
+<img width="583" height="360" alt="shield-101" src="https://github.com/user-attachments/assets/b614372a-7016-45c8-9bda-873a4b3c9944" />
+<br>
+
+* main.c
+```c
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+      HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, 1);
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);
+	  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, 0);
+	  HAL_Delay(1000);
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+```
+
+
+
