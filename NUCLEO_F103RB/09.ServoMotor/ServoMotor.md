@@ -1,5 +1,3 @@
-# SG90 Servo Motor
-
 # SG90 Servo 제어를 위한 Timer 설정 (STM32 예제)
 
 ## 1. 기본 조건
