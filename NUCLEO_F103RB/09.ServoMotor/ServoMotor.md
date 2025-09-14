@@ -90,3 +90,98 @@ HAL_Delay(1000);
 SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
+----
+# 코드 수정
+----
+
+```c
+/* USER CODE BEGIN PD */
+#define MAX 125
+#define MIN 25
+#define STEP 1
+/* USER CODE END PD */
+```
+
+
+```c
+/* USER CODE BEGIN PV */
+uint8_t ch;
+uint8_t pos_pan = 75;
+uint8_t pos_tilt = 75;
+/* USER CODE END PV */
+```
+
+
+```c
+  /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
+  /* USER CODE END 2 */
+﻿
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  HAL_UART_Receive(&huart2, &ch, sizeof(ch), 10);
+		  if(ch == 's')
+		  {
+			if(pos_tilt + STEP <= MAX)	pos_tilt = pos_tilt + STEP;
+			else						pos_tilt = MAX;
+		  }
+		  else if(ch == 'w')
+		  {
+			if(pos_tilt - STEP >= MIN)	pos_tilt = pos_tilt - STEP;
+			else						pos_tilt = MIN;
+		  }
+	  	  		  if(ch == 'a')
+	  	  		  {
+	  	  			if(pos_pan + STEP <= MAX)	pos_pan = pos_pan + STEP;
+	  	  			else						pos_pan = MAX;
+	  	  		  }
+	  	  		  else if(ch == 'd')
+	  	  		  {
+	  	  			if(pos_pan - STEP >= MIN)	pos_pan = pos_pan - STEP;
+	  	  			else						pos_pan = MIN;
+	  	  		  }
+	  	  		  else if(ch == 'i'){
+	  	  			  pos_pan = 75;
+	  	  			  pos_tilt = 75;
+	  	  		  }
+	  	  		  else;
+		  ch = ' ';
+		__HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, pos_pan);	HAL_Delay(10);
+		__HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, pos_tilt);	HAL_Delay(10);
+```
+
+
+```c
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 1280-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1000-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+```
+
+
+```c
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 1280-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 1000-1;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+```
+
+
+
+
+
+
+
+
+
+
+
