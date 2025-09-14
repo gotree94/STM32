@@ -94,6 +94,10 @@ HAL_Delay(1000);
 # 코드 수정
 ----
 
+   * TIM2_CH1 - PA0
+   * TIM3_CH1 - PA6
+
+
 ```c
 /* USER CODE BEGIN 0 */
 #ifdef __GNUC__
