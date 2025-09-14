@@ -44,10 +44,8 @@
     /* USER CODE BEGIN 3 */
   }
 ```
-<img src="" width="400" alt="LED Blink Animation">
+<img src="https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/01.LED_Blink/led2.gif?raw=true" width="400" alt="LED Blink Animation">
 <br>
-<img " width="400" alt="LED2 Blink Animation">
-<br><br>
 
 <img width="583" height="360" alt="shield-101" src="https://github.com/user-attachments/assets/b614372a-7016-45c8-9bda-873a4b3c9944" />
 <br>
