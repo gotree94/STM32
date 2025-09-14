@@ -2,6 +2,9 @@
 
    * PA0 - DATA
 
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/8e00380d-6d85-49b3-b845-88558092ffc0" />
+<br>
+
 <img width="995" height="550" alt="DHT11_001" src="https://github.com/user-attachments/assets/a487c821-8c1c-4ec8-a241-ed420251dc1e" />
 <br>
 
