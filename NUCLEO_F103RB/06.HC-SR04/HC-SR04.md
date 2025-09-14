@@ -5,15 +5,15 @@
 <img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/e67d445b-c3b0-483c-92b6-4100a39a662e" />
 <br>
 
-<img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/48183bb9-3a11-42a8-9ab9-c07975e4e6f8" />
+<img width="500" height="320" alt="shield-002" src="https://github.com/user-attachments/assets/48183bb9-3a11-42a8-9ab9-c07975e4e6f8" />
 <br><br>
-<img width="600" height="480" alt="ultrasonic_001" src="https://github.com/user-attachments/assets/1827803d-4843-4b12-a703-df4b046097b6" />
+<img width="500" height="320" alt="ultrasonic_001" src="https://github.com/user-attachments/assets/1827803d-4843-4b12-a703-df4b046097b6" />
 <br>
-<img width="600" height="480" alt="ultrasonic_002" src="https://github.com/user-attachments/assets/4fcc69d9-bb62-4270-856b-af036091733e" />
+<img width="500" height="320" alt="ultrasonic_002" src="https://github.com/user-attachments/assets/4fcc69d9-bb62-4270-856b-af036091733e" />
 <br>
-<img width="600" height="480" alt="ultrasonic_003" src="https://github.com/user-attachments/assets/3d8242ce-dfee-400f-bc4e-84e069c0e1b2" />
+<img width="500" height="320" alt="ultrasonic_003" src="https://github.com/user-attachments/assets/3d8242ce-dfee-400f-bc4e-84e069c0e1b2" />
 <br>
-<img width="600" height="480" alt="ultrasonic_004" src="https://github.com/user-attachments/assets/878c5a3f-8f04-4ad9-b35d-cde7ff035420" />
+<img width="500" height="320" alt="ultrasonic_004" src="https://github.com/user-attachments/assets/878c5a3f-8f04-4ad9-b35d-cde7ff035420" />
 <br>
 
 
