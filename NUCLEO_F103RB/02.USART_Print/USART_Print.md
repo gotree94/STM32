@@ -2,6 +2,21 @@
 
    * 터미널 통신 프로그램 설치 : [https://github.com/TeraTermProject/teraterm/releases?authuser=0]
 
+<img width="492" height="558" alt="USART_Print_001" src="https://github.com/user-attachments/assets/d34b82d1-3857-4a56-8ef8-f7c648daaab7" />
+<br>
+<img width="1433" height="908" alt="USART_Print_002" src="https://github.com/user-attachments/assets/bdee0660-b056-4837-b4da-2f156bdc31ff" />
+<br>
+<img width="1433" height="908" alt="USART_Print_003" src="https://github.com/user-attachments/assets/3136549e-c240-4625-bcbe-558c9b17aede" />
+<br>
+<img width="1137" height="545" alt="USART_Print_004" src="https://github.com/user-attachments/assets/356b2b6a-f610-47f8-8711-b5e8af35d6ca" />
+<br>
+<img width="1137" height="545" alt="USART_Print_005" src="https://github.com/user-attachments/assets/10aa62af-c7d3-48a6-98d3-5948047a0ddf" />
+<br>
+<img width="1137" height="545" alt="USART_Print_006" src="https://github.com/user-attachments/assets/a400b2dd-8cf2-4094-b7e6-4633bdb62cd3" />
+<br>
+<img width="1137" height="545" alt="USART_Print_007" src="https://github.com/user-attachments/assets/2124890a-c43d-4be2-8c53-bc3875f66168" />
+<br>
+
 ```c
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
