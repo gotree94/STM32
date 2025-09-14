@@ -16,20 +16,23 @@
 <img width="600" height="450" alt="ultrasonic_004" src="https://github.com/user-attachments/assets/878c5a3f-8f04-4ad9-b35d-cde7ff035420" />
 <br>
 
-
 ```c
-void timer_start(void)
-{
-   HAL_TIM_Base_Start(&htim1);
-}
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
 ```
 
 ```c
-void delay_us(uint16_t us)
-{
-   __HAL_TIM_SET_COUNTER(&htim1, 0); // initislize counter to start from 0
-   while((__HAL_TIM_GET_COUNTER(&htim1))<us); // wait count until us
-}
+/* USER CODE BEGIN PD */
+#define HIGH 1
+#define LOW 0
+long unsigned int echo_time;
+int dist;
+/* USER CODE END PD */
 ```
 
 ```c
@@ -57,54 +60,61 @@ PUTCHAR_PROTOTYPE
 
   return ch;
 }
-```
 
-```c
-    void trig(void)
-   {
-       HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, HIGH);
-       delay_us(10);
-       HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, LOW);
-   }
-
-   /**
-    * @brief echo 신호가 HIGH를 유지하는 시간을 (㎲)단위로 측정하여 리턴한다.
-    * @param no param(void)
-    */
-   long unsigned int echo(void)
-   {
-       long unsigned int echo = 0;
-
-       while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) == LOW){}
-            __HAL_TIM_SET_COUNTER(&htim1, 0);
-            while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) == HIGH);
-            echo = __HAL_TIM_GET_COUNTER(&htim1);
-       if( echo >= 240 && echo <= 23000 ) return echo;
-       else return 0;
-   }
-```
-
-```c
-timer_start();
-printf("Ranging with HC-SR04\n");
-/* USER CODE END 2 */
-
-/* Infinite loop */
-/* USER CODE BEGIN WHILE */
-while (1)
+void timer_start(void)
 {
-    trig();
-    echo_time = echo();
-    if( echo_time != 0){
-        dist = (int)(17 * echo_time / 100);
-        printf("Distance = %d(mm)\n", dist);
-    }
-    else printf("Out of Range!\n");
-
-/* USER CODE END WHILE */
-
-/* USER CODE BEGIN 3 */
+   HAL_TIM_Base_Start(&htim1);
 }
-/* USER CODE END 3 */
+
+void delay_us(uint16_t us)
+{
+   __HAL_TIM_SET_COUNTER(&htim1, 0); // initislize counter to start from 0
+   while((__HAL_TIM_GET_COUNTER(&htim1))<us); // wait count until us
 }
+
+void trig(void)
+{
+   HAL_GPIO_WritePin(TRIG1_GPIO_Port, TRIG1_Pin, HIGH);
+   delay_us(10);
+   HAL_GPIO_WritePin(TRIG1_GPIO_Port, TRIG1_Pin, LOW);
+}
+
+/**
+* @brief echo 신호가 HIGH를 유지하는 시간을 (㎲)단위로 측정하여 리턴한다.
+* @param no param(void)
+*/
+long unsigned int echo(void)
+{
+   long unsigned int echo = 0;
+
+   while(HAL_GPIO_ReadPin(ECHO1_GPIO_Port, ECHO1_Pin) == LOW){}
+        __HAL_TIM_SET_COUNTER(&htim1, 0);
+        while(HAL_GPIO_ReadPin(ECHO1_GPIO_Port, ECHO1_Pin) == HIGH);
+        echo = __HAL_TIM_GET_COUNTER(&htim1);
+   if( echo >= 240 && echo <= 23000 ) return echo;
+   else return 0;
+}
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  timer_start();
+  printf("Ranging with HC-SR04\n");
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  trig();
+	      echo_time = echo();
+	      if( echo_time != 0){
+	          dist = (int)(17 * echo_time / 100);
+	          printf("Distance = %d(mm)\n", dist);
+	      }
+	      else printf("Out of Range!\n");
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
 ```
