@@ -1,5 +1,10 @@
 # SG90 Servo 제어를 위한 Timer 설정 (STM32 예제)
 
+
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/23e365b4-1bdf-4074-9724-d795ea1da5b7" />
+
+
+
 ## 1. 기본 조건
 - **타이머 클럭** = 64 MHz  
 - **Prescaler** = 1280 - 1 = 1279  
