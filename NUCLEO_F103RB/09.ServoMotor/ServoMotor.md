@@ -4,10 +4,11 @@
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/23e365b4-1bdf-4074-9724-d795ea1da5b7" />
 <br><br>
 
-<img width="800" height="608" alt="SERVO_004" src="https://github.com/user-attachments/assets/f20ec8df-36e9-42e1-8671-6223fc108338" />
-<br>
 <img width="800" height="608" alt="SERVO_003" src="https://github.com/user-attachments/assets/a6ca154d-6616-407b-9e77-ab1566bb1a80" />
 <br>
+<img width="800" height="608" alt="SERVO_004" src="https://github.com/user-attachments/assets/f20ec8df-36e9-42e1-8671-6223fc108338" />
+<br>
+
 
 ## 1. 기본 조건
 - **타이머 클럭** = 64 MHz  
@@ -228,6 +229,9 @@ PUTCHAR_PROTOTYPE
 ---
 # 각도표시
 ---
+
+<img width="995" height="550" alt="servo_result" src="https://github.com/user-attachments/assets/c42adba2-96aa-4ff5-a119-5044486adb6e" />
+
 
 ```c
 /* USER CODE BEGIN Includes */
