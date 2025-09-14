@@ -2,6 +2,12 @@
 
    * 터미널 통신 프로그램 설치 : [https://github.com/TeraTermProject/teraterm/releases?authuser=0]
 
+```c
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
+```
 
 ```c
 /* USER CODE BEGIN 0 */
@@ -28,5 +34,14 @@ PUTCHAR_PROTOTYPE
 
   return ch;
 }
+```
+
+```c
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  printf("Hello World!\n");
+	  HAL_Delay(1000);
+    /* USER CODE END WHILE */
 ```
 
