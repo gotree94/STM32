@@ -22,12 +22,20 @@
 
 ## Register
 <img width="836" height="789" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/8bdea1c9-775c-49a1-9edc-1561dbcb336a" />
+<br>
 <img width="828" height="707" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/4f3f19c2-9a94-42b4-a0b5-114d87a409a4" />
+<br>
 <img width="801" height="368" alt="GPIO_Register_003" src="https://github.com/user-attachments/assets/45f106f2-e432-4dcb-bf74-c4dd08d2fef7" />
+<br>
 <img width="804" height="376" alt="GPIO_Register_004" src="https://github.com/user-attachments/assets/6c4b1f8f-dbe2-4374-8908-ee492f53d153" />
+<br>
 <img width="814" height="481" alt="GPIO_Register_005" src="https://github.com/user-attachments/assets/07bf0f6b-c3d9-465c-a002-17d2ac9a41b5" />
+<br>
 <img width="813" height="376" alt="GPIO_Register_006" src="https://github.com/user-attachments/assets/48daf395-3145-41ca-b3a3-8a4fb0201697" />
+<br>
 <img width="807" height="813" alt="GPIO_Register_007" src="https://github.com/user-attachments/assets/01aab0d6-81dd-4590-b46d-19f6201a8980" />
+<br>
+
 
 ## Test
 <img width="459" height="151" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/46223b7e-ec0a-41c5-86ec-ef612250b98a" />
@@ -49,3 +57,11 @@
 <img width="967" height="453" alt="GPIO_Register_009" src="https://github.com/user-attachments/assets/2258a120-7b56-4842-919f-4b8f4af537ad" />
 <br>
 
+<img width="901" height="415" alt="GPIO_Setting_001" src="https://github.com/user-attachments/assets/f5b0951f-8288-4978-8622-63b2873af74c" />
+<br>
+<img width="854" height="358" alt="GPIO_Setting_002" src="https://github.com/user-attachments/assets/aea09dcf-1953-46b5-97f3-3e0d9f0572d5" />
+<br>
+<img width="862" height="403" alt="GPIO_Setting_003" src="https://github.com/user-attachments/assets/7c4257d6-a1ca-4d63-b56d-22b2201cd2ea" />
+<br>
+<img width="960" height="480" alt="GPIO_Setting_004" src="https://github.com/user-attachments/assets/e06ae1a8-5137-46f3-adfe-0fb37fa52d46" />
+<br>
