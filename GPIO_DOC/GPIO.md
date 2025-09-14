@@ -22,6 +22,10 @@
 <br>
 <img width="705" height="685" alt="clock_tree" src="https://github.com/user-attachments/assets/416aed77-6d31-471f-b18d-dee1bc57e469" />
 <br>
+<img width="851" height="541" alt="gpio_001" src="https://github.com/user-attachments/assets/1140a763-b73a-469a-b128-425ddf8dbb6c" />
+<br>
+<img width="825" height="572" alt="gpio_002" src="https://github.com/user-attachments/assets/15d26c36-b388-4465-9624-5942e86d6738" />
+<br>
 
 ## MemoryMap
 <br>
