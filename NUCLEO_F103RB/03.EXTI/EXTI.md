@@ -1,6 +1,6 @@
 # EXTI
 
-<img src="https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/01.LED_Blink/LED_Blinks.gif?raw=true" width="400" alt="LED Blink Animation">
+<img src="https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/03.EXTI/exti.gif?raw=true" width="400" alt="LED Blink Animation">
 <br>
 
    * 파란색 버튼을 외부 인터럽트로 받아서 LD2를 켜는 인터럽트를 구현한다.
