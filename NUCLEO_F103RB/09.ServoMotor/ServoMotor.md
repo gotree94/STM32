@@ -48,9 +48,45 @@ T_{PWM} = \frac{Period + 1}{f_{timer}} = \frac{1000}{50,000} = 0.02 \, s = 20 \,
 
 ---
 
-## 요약
+## 5. 요약
 - Prescaler = **1279**, Period = **999** → 정확히 **50 Hz (20 ms)** PWM 생성  
 - CCR 값 50 ~ 100 사이로 설정하여 SG90 서보 각도 (0°~180°) 제어 가능  
 
 
+## 6. 각도별 CCR 값
+   * 0° → 1 ms → CCR = 50
+   * 90° → 1.5 ms → CCR = 75
+   * 180° → 2 ms → CCR = 100
+```ㅊ
+// 0도
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 50);
 
+// 90도
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 75);
+
+// 180도
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 100);
+```
+
+## 7. 각도를 일반화한 함수
+```ㅊ
+void SG90_SetAngle(uint8_t angle)
+{
+    // angle: 0 ~ 180도
+    // CCR: 50(1ms) ~ 100(2ms)
+    uint32_t ccr_val = 50 + ((angle * (100 - 50)) / 180);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr_val);
+}
+```
+
+## 8. 사용 예시:
+```ㅊ
+SG90_SetAngle(0);    // 0도
+HAL_Delay(1000);
+
+SG90_SetAngle(90);   // 90도
+HAL_Delay(1000);
+
+SG90_SetAngle(180);  // 180도
+HAL_Delay(1000);
+```
