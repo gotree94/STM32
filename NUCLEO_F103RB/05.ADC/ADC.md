@@ -2,6 +2,15 @@
 
 
 ```c
+/* USER CODE BEGIN PV */
+const float AVG_SLOPE = 4.3E-03;
+const float V25 = 1.43;
+const float ADC_TO_VOLT = 3.3 / 4096;
+/* USER CODE END PV */
+```
+
+
+```c
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -40,6 +49,9 @@ PUTCHAR_PROTOTYPE
   /* USER CODE BEGIN 2 */
   uint16_t adc1;
 
+  float vSense;
+  float temp;
+
   if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
   {
 	  Error_Handler();
@@ -57,7 +69,11 @@ PUTCHAR_PROTOTYPE
   {
 	  HAL_ADC_PollForConversion(&hadc1, 100);
 	  adc1 = HAL_ADC_GetValue(&hadc1);
-	  printf("ADC1_temperature : %d \n",adc1);
+	  //printf("ADC1_temperature : %d \n",adc1);
+
+	  vSense = adc1 * ADC_TO_VOLT;
+	  temp = (V25 - vSense) / AVG_SLOPE + 25.0;
+	  printf("temperature : %d, %f \n",adc1, temp);
 
 	  HAL_Delay(100);
     /* USER CODE END WHILE */
