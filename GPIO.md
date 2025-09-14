@@ -1,11 +1,11 @@
 # GPIO
 
-- [Architecture](#Architecture)
+- [1.Architecture](#1.Architecture)
 - [GPIO 레지스터 구조](#gpio-레지스터-구조)
-- [Test](#Test)
+- [3.Test](#3.Test)
 
 
-## Architecture
+## 1.Architecture
 <img width="1185" height="852" alt="GPIO_Register_010" src="https://github.com/user-attachments/assets/45a3773c-c552-4388-b9bb-01d889790867" />
 <br>
 <img width="1269" height="360" alt="GPIO_Register_011" src="https://github.com/user-attachments/assets/2eb0bbf5-16f7-4f15-a5b5-51e834e80615" />
@@ -18,7 +18,7 @@
 <img width="710" height="909" alt="GPIO_Register_012" src="https://github.com/user-attachments/assets/b48ca11a-e702-4809-b98a-dbe8e864ecfa" />
 <br>
 
-## Test
+## 3.Test
 <img width="459" height="151" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/46223b7e-ec0a-41c5-86ec-ef612250b98a" />
 <br>
 <img width="486" height="69" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/43a3d8b7-8d07-493e-a005-b04296b30bb5" />
