@@ -37,8 +37,16 @@ PUTCHAR_PROTOTYPE
 ```
 
 ```c
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include <stdio.h>
-/* USER CODE END Includes */
+  while (1)
+  {
+	  if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
+	  {
+		  Error_Handler();
+	  }
+
+	  if(HAL_ADC_Start(&hadc1) != HAL_OK)
+	  {
+		  Error_Handler();
+	  }
+    /* USER CODE END WHILE */
 ```
