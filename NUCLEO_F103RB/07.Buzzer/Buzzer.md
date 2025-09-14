@@ -2,7 +2,6 @@
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/774d7903-5392-4df3-b8da-f16d6996ea9c" />
 
-
 ### 타이머 설정 (TIM1):
    * Timers → TIM1 → Clock Source: Internal Clock
    * Channel1 → PWM Generation CH1
@@ -10,6 +9,12 @@
       * Prescaler: 64MHz ÷ 64 (1MHz 클록)
       * Counter Period: 1000 (초기값, 코드에서 동적 변경)
       * Pulse: 500 (50% duty cycle)
+
+<img width="600" height="408" alt="piezo_002" src="https://github.com/user-attachments/assets/6cd1ec46-4fc0-4612-98e3-4301c19f623a" />
+<br>
+<img width="600" height="408" alt="piezo_001" src="https://github.com/user-attachments/assets/d07acb56-dbe3-4881-80dd-251518bbb7a4" />
+<br>
+
 
 ```c
 /* USER CODE BEGIN PD */
