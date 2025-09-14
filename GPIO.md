@@ -3,8 +3,9 @@
 
 
 - 1.[Architecture](#Architecture)
-- 2.[Register](#Register)
-- 3.[Test](#Test)
+- 2.[MemoryMap](#MemoryMap)
+- 3.[Register](#Register)
+- 4.[Test](#Test)
 
 
 ## Architecture
@@ -18,6 +19,31 @@
    * I/O는 APB2 버스에 연결되어 있으며, 최대 18 MHz의 토글 속도를 지원합니다.<br>
 <br>
 <img width="710" height="909" alt="GPIO_Register_012" src="https://github.com/user-attachments/assets/b48ca11a-e702-4809-b98a-dbe8e864ecfa" />
+<br>
+
+## MemoryMap
+<br>
+<img width="705" height="554" alt="memory_map_001" src="https://github.com/user-attachments/assets/484f6555-89aa-4b1e-8b21-b2d93045dc71" />
+<br>
+<img width="703" height="638" alt="memory_map_002" src="https://github.com/user-attachments/assets/72cf784d-3cc2-4f82-af47-cb56706edd09" />
+<br>
+<img width="818" height="599" alt="memory_map_003" src="https://github.com/user-attachments/assets/058abfec-9e1a-47d2-8387-a5e3f275a2ba" />
+<br>
+<img width="796" height="681" alt="memory_map_004" src="https://github.com/user-attachments/assets/9ead6b79-6af2-4b08-8dd5-e46634ac0314" />
+<br>
+<img width="632" height="797" alt="memory_map_005" src="https://github.com/user-attachments/assets/02d6abe9-3942-4416-9c25-0f624d0352b0" />
+<br>
+<img width="810" height="789" alt="memory_map_006" src="https://github.com/user-attachments/assets/595e60d5-ad9e-4091-b8a6-6aecc00cfdc4" />
+<br>
+<img width="642" height="834" alt="memory_map_007" src="https://github.com/user-attachments/assets/95f81606-7960-477c-ac24-2c0f2a77c976" />
+<br>
+<img width="475" height="670" alt="memory_map_008" src="https://github.com/user-attachments/assets/7d815b4c-e36b-4469-9396-7dadfe013d79" />
+<br>
+<img width="472" height="631" alt="memory_map_009" src="https://github.com/user-attachments/assets/ff78b8af-c6df-44b6-8b46-f83db18ba049" />
+<br>
+<img width="463" height="495" alt="memory_map_010" src="https://github.com/user-attachments/assets/e2354241-30d5-4466-9b4a-d8c7a74369fc" />
+<br>
+<img width="469" height="337" alt="memory_map_011" src="https://github.com/user-attachments/assets/1705425a-930b-49b5-9602-48708ed5360e" />
 <br>
 
 ## Register
