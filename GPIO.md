@@ -1,6 +1,6 @@
 # GPIO
 - [RM0008 Reference Manual (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
-
+- [DS5319 Datasheet (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
 
 - 1.[Architecture](#Architecture)
 - 2.[MemoryMap](#MemoryMap)
@@ -20,8 +20,12 @@
 <br>
 <img width="710" height="909" alt="GPIO_Register_012" src="https://github.com/user-attachments/assets/b48ca11a-e702-4809-b98a-dbe8e864ecfa" />
 <br>
+<img width="705" height="685" alt="clock_tree" src="https://github.com/user-attachments/assets/416aed77-6d31-471f-b18d-dee1bc57e469" />
+<br>
 
 ## MemoryMap
+<br>
+<img width="641" height="841" alt="memory_map_000" src="https://github.com/user-attachments/assets/61b183dc-5844-4e6e-af76-f233ff1be6e5" />
 <br>
 <img width="705" height="554" alt="memory_map_001" src="https://github.com/user-attachments/assets/484f6555-89aa-4b1e-8b21-b2d93045dc71" />
 <br>
