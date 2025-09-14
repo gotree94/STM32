@@ -37,16 +37,31 @@ PUTCHAR_PROTOTYPE
 ```
 
 ```c
+  /* USER CODE BEGIN 2 */
+  uint16_t adc1;
+
+  if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
+  {
+	  Error_Handler();
+  }
+
+  if(HAL_ADC_Start(&hadc1) != HAL_OK)
+  {
+	  Error_Handler();
+  }
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
-	  {
-		  Error_Handler();
-	  }
+	  HAL_ADC_PollForConversion(&hadc1, 100);
+	  adc1 = HAL_ADC_GetValue(&hadc1);
+	  printf("ADC1_temperature : %d \n",adc1);
 
-	  if(HAL_ADC_Start(&hadc1) != HAL_OK)
-	  {
-		  Error_Handler();
-	  }
+	  HAL_Delay(100);
     /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
 ```
