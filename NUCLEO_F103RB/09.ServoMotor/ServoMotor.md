@@ -2,8 +2,12 @@
 
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/23e365b4-1bdf-4074-9724-d795ea1da5b7" />
+<br><br>
 
-
+<img width="800" height="608" alt="SERVO_004" src="https://github.com/user-attachments/assets/f20ec8df-36e9-42e1-8671-6223fc108338" />
+<br>
+<img width="800" height="608" alt="SERVO_003" src="https://github.com/user-attachments/assets/a6ca154d-6616-407b-9e77-ab1566bb1a80" />
+<br>
 
 ## 1. 기본 조건
 - **타이머 클럭** = 64 MHz  
@@ -102,6 +106,26 @@ HAL_Delay(1000);
    * TIM2_CH1 - PA0
    * TIM3_CH1 - PA6
 
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define MAX 125  // 2.5ms pulse width (최대 각도)
+#define MIN 25   // 0.5ms pulse width (최소 각도)
+#define CENTER 75 // 1.5ms pulse width (중앙 각도)
+#define STEP 5
+/* USER CODE END PD */
+
+/* USER CODE BEGIN PV */
+uint8_t ch;
+uint8_t pos_pan = 75;
+uint8_t pos_tilt = 75;
+/* USER CODE END PV */
+```
 
 ```c
 /* USER CODE BEGIN 0 */
@@ -131,86 +155,75 @@ PUTCHAR_PROTOTYPE
 ```
 
 ```c
-/* USER CODE BEGIN PD */
-#define MAX 125
-#define MIN 25
-#define STEP 1
-/* USER CODE END PD */
-```
-
-
-```c
-/* USER CODE BEGIN PV */
-uint8_t ch;
-uint8_t pos_pan = 75;
-uint8_t pos_tilt = 75;
-/* USER CODE END PV */
-```
-
-
-```c
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+
+  // 초기 위치 설정
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_pan);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pos_tilt);
+
+  printf("Servo Control Ready\r\n");
+  printf("Commands: w(up), s(down), a(left), d(right), i(center)\r\n");
   /* USER CODE END 2 */
-﻿
-  /* Infinite loop */
+```
+
+```c
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_UART_Receive(&huart2, &ch, sizeof(ch), 10);
-		  if(ch == 's')
-		  {
-			if(pos_tilt + STEP <= MAX)	pos_tilt = pos_tilt + STEP;
-			else						pos_tilt = MAX;
-		  }
-		  else if(ch == 'w')
-		  {
-			if(pos_tilt - STEP >= MIN)	pos_tilt = pos_tilt - STEP;
-			else						pos_tilt = MIN;
-		  }
-	  	  		  if(ch == 'a')
-	  	  		  {
-	  	  			if(pos_pan + STEP <= MAX)	pos_pan = pos_pan + STEP;
-	  	  			else						pos_pan = MAX;
-	  	  		  }
-	  	  		  else if(ch == 'd')
-	  	  		  {
-	  	  			if(pos_pan - STEP >= MIN)	pos_pan = pos_pan - STEP;
-	  	  			else						pos_pan = MIN;
-	  	  		  }
-	  	  		  else if(ch == 'i'){
-	  	  			  pos_pan = 75;
-	  	  			  pos_tilt = 75;
-	  	  		  }
-	  	  		  else;
-		  ch = ' ';
-		__HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, pos_pan);	HAL_Delay(10);
-		__HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, pos_tilt);	HAL_Delay(10);
+    if(HAL_UART_Receive(&huart2, &ch, sizeof(ch), 10) == HAL_OK)
+    {
+      if(ch == 's')
+      {
+        printf("Down\r\n");
+        if(pos_tilt + STEP <= MAX)
+          pos_tilt = pos_tilt + STEP;
+        else
+          pos_tilt = MAX;
+      }
+      else if(ch == 'w')
+      {
+        printf("Up\r\n");
+        if(pos_tilt - STEP >= MIN)
+          pos_tilt = pos_tilt - STEP;
+        else
+          pos_tilt = MIN;
+      }
+      else if(ch == 'a')
+      {
+        printf("Left\r\n");
+        if(pos_pan + STEP <= MAX)
+          pos_pan = pos_pan + STEP;
+        else
+          pos_pan = MAX;
+      }
+      else if(ch == 'd')
+      {
+        printf("Right\r\n");
+        if(pos_pan - STEP >= MIN)
+          pos_pan = pos_pan - STEP;
+        else
+          pos_pan = MIN;
+      }
+      else if(ch == 'i')
+      {
+        printf("Center\r\n");
+        pos_pan = CENTER;
+        pos_tilt = CENTER;
+      }
+
+      // PWM 듀티 사이클 업데이트
+      __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_pan);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pos_tilt);
+
+      printf("Pan: %d, Tilt: %d\r\n", pos_pan, pos_tilt);
+
+      HAL_Delay(50); // 서보 응답 시간
+    }
+
+    /* USER CODE END WHILE */
 ```
-
-
-```c
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 1280-1;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 1000-1;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-```
-
-
-```c
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 1280-1;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 1000-1;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-```
-
 
 
 
