@@ -1,4 +1,5 @@
 # GPIO
+- RM0008_STM32F101xx, STM32F102xx, STM32F103xx, STM32F105xx and STM32F107xx advanced Arm®-based 32-bit MCUs
 
 - 1.[Architecture](#Architecture)
 - [GPIO 레지스터 구조](#gpio-레지스터-구조)
