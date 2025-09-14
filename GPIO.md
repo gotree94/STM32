@@ -69,11 +69,11 @@
 
 ## Test
 
-   * 1.	LED test 프로그램을 작성합니다.<br>
+#### 1.	LED test 프로그램을 작성합니다.<br>
 <img width="459" height="151" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/46223b7e-ec0a-41c5-86ec-ef612250b98a" />
 <br>
 
-   * 2.	디버그를 시작합니다.<br>
+#### 2.	디버그를 시작합니다.<br>
 <img width="486" height="69" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/43a3d8b7-8d07-493e-a005-b04296b30bb5" />
 <br>
 
