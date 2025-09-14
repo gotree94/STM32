@@ -16,6 +16,13 @@
 <img width="600" height="450" alt="ultrasonic_004" src="https://github.com/user-attachments/assets/878c5a3f-8f04-4ad9-b35d-cde7ff035420" />
 <br>
 
+<img width="1392" height="908" alt="hc_sr40_001" src="https://github.com/user-attachments/assets/0957fd23-ceb9-459e-9d91-7be4f3750c26" />
+<br>
+<img width="1392" height="908" alt="hc_sr40_002" src="https://github.com/user-attachments/assets/8e359bc7-de92-41ec-9859-8f212bbca60f" />
+<br>
+<img width="995" height="550" alt="hc_sr40_003" src="https://github.com/user-attachments/assets/43f8cc02-e8e5-496e-8031-85a921506eee" />
+<br>
+
 ```c
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
