@@ -32,19 +32,13 @@ $$
 ## 4. 펄스 폭 (CCR 값으로 각도 제어)
 
 - **1 ms** 펄스 폭  
-$$
-\frac{1 \, ms}{20 \, \mu s} = 50 \quad \Rightarrow \quad CCR = 50
-$$
+$$\frac{1 \, \text{ms}}{20 \, \mu\text{s}} = 50 \quad \Rightarrow \quad \text{CCR} = 50$$
 
 - **1.5 ms** 펄스 폭  
-$$
-\frac{1.5 \, ms}{20 \, \mu s} = 75 \quad \Rightarrow \quad CCR = 75
-$$
+$$\frac{1.5 \, \text{ms}}{20 \, \mu\text{s}} = 75 \quad \Rightarrow \quad \text{CCR} = 75$$
 
 - **2 ms** 펄스 폭  
-$$
-\frac{2 \, ms}{20 \, \mu s} = 100 \quad \Rightarrow \quad CCR = 100
-$$
+$$\frac{2 \, \text{ms}}{20 \, \mu\text{s}} = 100 \quad \Rightarrow \quad \text{CCR} = 100$$
 
 ---
 
