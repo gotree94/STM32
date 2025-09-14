@@ -1,5 +1,7 @@
 # DHT11 : 온도 습도 센서
 
+   * PA0 - DATA
+
 <img width="995" height="550" alt="DHT11_001" src="https://github.com/user-attachments/assets/a487c821-8c1c-4ec8-a241-ed420251dc1e" />
 <br>
 
