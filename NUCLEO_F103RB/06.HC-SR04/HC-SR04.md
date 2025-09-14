@@ -7,7 +7,7 @@
 <img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/48183bb9-3a11-42a8-9ab9-c07975e4e6f8" />
 <br><br>
 
-<img width="400" height="200" alt="ultrasonic_001" src="https://github.com/user-attachments/assets/1827803d-4843-4b12-a703-df4b046097b6" />
+<img width="600" height="520" alt="ultrasonic_001" src="https://github.com/user-attachments/assets/1827803d-4843-4b12-a703-df4b046097b6" />
 <br>
 <img width="500" height="320" alt="ultrasonic_002" src="https://github.com/user-attachments/assets/4fcc69d9-bb62-4270-856b-af036091733e" />
 <br>
