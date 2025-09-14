@@ -117,7 +117,7 @@ HAL_Delay(1000);
 #define MAX 125  // 2.5ms pulse width (최대 각도)
 #define MIN 25   // 0.5ms pulse width (최소 각도)
 #define CENTER 75 // 1.5ms pulse width (중앙 각도)
-#define STEP 5
+#define STEP 1
 /* USER CODE END PD */
 
 /* USER CODE BEGIN PV */
@@ -225,6 +225,180 @@ PUTCHAR_PROTOTYPE
     /* USER CODE END WHILE */
 ```
 
+---
+#각도표시
+---
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define MAX 125      // 2.5ms pulse width (180도)
+#define MIN 25       // 0.5ms pulse width (0도)
+#define CENTER 75    // 1.5ms pulse width (90도)
+#define STEP 5       // 이동 단위
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+uint8_t ch;
+uint8_t pos_pan = CENTER;
+uint8_t pos_tilt = CENTER;
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+uint16_t pwm_to_angle(uint8_t pwm_value);
+void display_servo_status(uint8_t pan, uint8_t tilt);
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+/**
+  * @brief  PWM 값을 각도로 변환하는 함수
+  * @param  pwm_value: PWM 듀티 사이클 값 (25~125)
+  * @retval 각도 값 (0~1800, 실제 각도 x 10)
+  */
+uint16_t pwm_to_angle(uint8_t pwm_value)
+{
+  // PWM 25~125 범위를 0~180도로 변환
+  // 소수점 계산을 위해 10배로 확대 (0~1800)
+  // 공식: angle = (pwm_value - 25) * 1800 / (125 - 25)
+  return ((uint16_t)(pwm_value - MIN) * 1800) / (MAX - MIN);
+}
+
+/**
+  * @brief  서보모터 상태를 화면에 출력하는 함수
+  * @param  pan: Pan 서보 PWM 값
+  * @param  tilt: Tilt 서보 PWM 값
+  * @retval None
+  */
+void display_servo_status(uint8_t pan, uint8_t tilt)
+{
+  uint16_t pan_angle = pwm_to_angle(pan);
+  uint16_t tilt_angle = pwm_to_angle(tilt);
+  
+  printf("Pan: %3d (%3d.%d°) | Tilt: %3d (%3d.%d°)\r\n", 
+         pan, pan_angle/10, pan_angle%10,
+         tilt, tilt_angle/10, tilt_angle%10);
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  // PWM 시작
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  
+  // 초기 위치 설정
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_pan);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pos_tilt);
+  
+  printf("\r\n=== SG90 Servo Control System ===\r\n");
+  printf("Commands: w(up), s(down), a(left), d(right), i(center)\r\n");
+  printf("Initial Position:\r\n");
+  display_servo_status(pos_pan, pos_tilt);
+  printf("Ready!\r\n\r\n");
+  /* USER CODE END 2 */
+
+```
+
+```c
+ /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    if(HAL_UART_Receive(&huart2, &ch, sizeof(ch), 10) == HAL_OK)
+    {
+      // 명령 처리
+      if(ch == 's')  // Down
+      {
+        printf("Command: Down\r\n");
+        if(pos_tilt + STEP <= MAX) 
+          pos_tilt = pos_tilt + STEP;
+        else 
+          pos_tilt = MAX;
+      }
+      else if(ch == 'w')  // Up
+      {
+        printf("Command: Up\r\n");
+        if(pos_tilt - STEP >= MIN) 
+          pos_tilt = pos_tilt - STEP;
+        else 
+          pos_tilt = MIN;
+      }
+      else if(ch == 'a')  // Left
+      {
+        printf("Command: Left\r\n");
+        if(pos_pan + STEP <= MAX)	
+          pos_pan = pos_pan + STEP;
+        else 
+          pos_pan = MAX;
+      }
+      else if(ch == 'd')  // Right
+      {
+        printf("Command: Right\r\n");
+        if(pos_pan - STEP >= MIN)	
+          pos_pan = pos_pan - STEP;
+        else 
+          pos_pan = MIN;
+      }
+      else if(ch == 'i')  // Center
+      {
+        printf("Command: Center\r\n");
+        pos_pan = CENTER;
+        pos_tilt = CENTER;
+      }
+      else
+      {
+        printf("Invalid command: %c\r\n", ch);
+        continue;  // 잘못된 명령이면 PWM 업데이트 하지 않음
+      }
+
+      // PWM 듀티 사이클 업데이트
+      __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_pan);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pos_tilt);
+      
+      // 상태 출력 (pwm_to_angle 함수 실제 사용됨)
+      display_servo_status(pos_pan, pos_tilt);
+      
+      HAL_Delay(50); // 서보 응답 시간
+    }
+    
+    /* USER CODE END WHILE */
+```
 
 
 
