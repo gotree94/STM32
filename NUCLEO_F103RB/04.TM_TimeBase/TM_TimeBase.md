@@ -1,5 +1,8 @@
 # TIM_TimeBase
 
+<img src="https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/04.TM_TimeBase/TIM_TimeBase.gif?raw=true" width="400" alt="Timer TimeBase Animation">
+
+
 <img width="1392" height="908" alt="TIM_001" src="https://github.com/user-attachments/assets/7ce97fe1-b422-4790-aada-bf41b0a9cf8a" />
 <br>
 <img width="1392" height="908" alt="TIM_002" src="https://github.com/user-attachments/assets/f6bb2bde-8fd6-476e-93c1-31aad5b148ca" />
