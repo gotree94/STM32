@@ -13,7 +13,7 @@
  - [완료] 11.LCD-SPI
  - [완료] 12.DHT11
  - [완료] 13.JoyStick
- - [] 14.ILI9341
+ - [완료] 14.ILI9341
  - [완료] 15.CDS
  - [완료] 16.I2C-EEPROM
  - [] 17.Encoder
