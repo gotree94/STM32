@@ -13,7 +13,8 @@
  - [완료] 11.LCD-SPI
  - [완료] 12.DHT11
  - [완료] 13.JoyStick
- - [] CDS
+ - [] 14.ILI9341
+ - [] 15.CDS
 
 ## NUCLEO_F411RE
  - [] 01.LED_Blink
@@ -29,4 +30,5 @@
  - [] 11.LCD-SPI
  - [] 12.DHT11
  - [] 13.JoyStick
- - [] CDS
+ - [] 14.ILI9341
+ - [] 15.CDS
