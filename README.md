@@ -17,6 +17,7 @@
  - [완료] 15.CDS
  - [완료] 16.I2C-EEPROM
  - [] 17.Encoder
+ - [] 18.MPU6050
 
 ## NUCLEO_F411RE
  - [] 01.LED_Blink
