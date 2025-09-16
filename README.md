@@ -15,6 +15,7 @@
  - [완료] 13.JoyStick
  - [] 14.ILI9341
  - [완료] 15.CDS
+ - [] 16.I2C-EEPROM
 
 ## NUCLEO_F411RE
  - [] 01.LED_Blink
@@ -32,3 +33,4 @@
  - [] 13.JoyStick
  - [] 14.ILI9341
  - [] 15.CDS
+ - [] 16.I2C-EEPROM
