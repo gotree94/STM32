@@ -18,6 +18,7 @@
  - [완료] 16.I2C-EEPROM
  - [] 17.MPU6050
  - [] 18.Encoder
+ - [] 19.RTC
 
 
 ## NUCLEO_F411RE
@@ -39,3 +40,4 @@
  - [] 16.I2C-EEPROM
  - [] 17.MPU6050
  - [] 18.Encoder
+ - [] 19.RTC
