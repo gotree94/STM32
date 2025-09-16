@@ -16,8 +16,9 @@
  - [완료] 14.ILI9341 - 터치/SDCard 미구현
  - [완료] 15.CDS
  - [완료] 16.I2C-EEPROM
- - [] 17.Encoder
- - [] 18.MPU6050
+ - [] 17.MPU6050
+ - [] 18.Encoder
+
 
 ## NUCLEO_F411RE
  - [] 01.LED_Blink
@@ -36,4 +37,5 @@
  - [] 14.ILI9341
  - [] 15.CDS
  - [] 16.I2C-EEPROM
- - [] 17.Encoder
+ - [] 17.MPU6050
+ - [] 18.Encoder
