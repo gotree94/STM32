@@ -8,6 +8,26 @@
 <br>
 
 ### 1. ADC
+#### 1. ADC1 기본 설정
+ - Mode: Independent mode
+ - Data Alignment: Right alignment
+ - Scan Conversion Mode: Enabled (다중 채널용)
+ - Continuous Conversion Mode: Enabled
+ - Discontinuous Conversion Mode: Disabled
+ - Number of Conversion: 2
+ - External Trigger Conversion Source: Regular Conversion launched by software
+
+#### 2. ADC 채널 설정
+##### Channel 0 (PA0 - 조이스틱 X축):
+ - Rank: 1
+ - Channel: IN0
+ - Sampling Time: 239.5 Cycles
+
+##### Channel 1 (PA1 - 조이스틱 Y축):
+ - Rank: 2
+ - Channel: IN1
+ - Sampling Time: 239.5 Cycles
+
 <img width="1590" height="908" alt="JoyStick_008" src="https://github.com/user-attachments/assets/d50097cc-3b15-4190-8378-1369cddd7647" />
 
 ### 2. DMA
