@@ -1,4 +1,4 @@
-# LCD-I2C
+# LCD-SPI
 
 <img width="600" height="400" alt="Sheild-001" src="https://github.com/user-attachments/assets/9df5b8c3-d81a-4026-9f86-67fa4dde1e38" />
 <br>
