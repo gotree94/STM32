@@ -1,6 +1,5 @@
 # STM32
-
-## STM32F103
+## NUCLEO_F103RB
  - [완료] 01.LED_Blink
  - [완료] 02.USART_Print
  - [완료] 03.EXTI
@@ -16,7 +15,7 @@
  - [완료] 13.JoyStick
  - [] CDS
 
-## STM32F411
+## NUCLEO_F411RE
  - [] 01.LED_Blink
  - [] 02.USART_Print
  - [] 03.EXTI
