@@ -3,6 +3,9 @@
 <img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
 <br>
 
+<img width="600" height="400" alt="K24C256" src="https://github.com/user-attachments/assets/19e7704c-dd37-47b5-a35d-39d4bba37158" />
+<br>
+
 <img width="800" height="600" alt="I2C_EEPROM_003" src="https://github.com/user-attachments/assets/6f12cb52-ecb1-41d0-a5b5-b02cc4c5c4db" />
 <br>
 <img width="800" height="600" alt="I2C_EEPROM_001" src="https://github.com/user-attachments/assets/e78b6b0c-52c2-41e7-b09c-bbc37888d74e" />
