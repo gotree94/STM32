@@ -8,7 +8,7 @@
 <br>
 
 ### 1. ADC
-#### 1. ADC1 기본 설정
+#### 1.1 ADC1 기본 설정
  - Mode: Independent mode
  - Data Alignment: Right alignment
  - Scan Conversion Mode: Enabled (다중 채널용)
@@ -17,7 +17,7 @@
  - Number of Conversion: 2
  - External Trigger Conversion Source: Regular Conversion launched by software
 
-#### 2. ADC 채널 설정
+#### 1.2 ADC 채널 설정
 ##### Channel 0 (PA0 - 조이스틱 X축):
  - Rank: 1
  - Channel: IN0
@@ -31,21 +31,39 @@
 <img width="1590" height="908" alt="JoyStick_008" src="https://github.com/user-attachments/assets/d50097cc-3b15-4190-8378-1369cddd7647" />
 
 ### 2. DMA
+#### 2.1 DMA 설정
+ - DMA Request: ADC1
+ - Stream: DMA1 Channel1
+ - Direction: Peripheral to Memory
+ - Priority: Medium
+ - Mode: Circular
+ - Data Width: Half Word (16 bit)
+
 <img width="1590" height="908" alt="JoyStick_002" src="https://github.com/user-attachments/assets/ad2b9640-f1a9-4ade-a354-30f18fdea471" />
 <br>
 <img width="1590" height="908" alt="JoyStick_003" src="https://github.com/user-attachments/assets/f4d2fcd3-085b-4550-bb63-981509525fbe" />
 <br>
 
-### 5. TIMER2
+### 3. TIMER2
+#### 3.1 타이머 설정 (TIM2)
+ - Prescaler: 6399 (64MHz → 10kHz)
+ - Auto-reload value: 499 (50ms 주기)
+ - Counter Mode: Up
+ - Auto-reload preload: Disabled
+ - 
 <img width="1590" height="908" alt="JoyStick_007" src="https://github.com/user-attachments/assets/c876d8c8-0f72-4a18-bf5f-90af1e1a4fa2" />
 <br>
 
-### 5.NVC
+### 4.NVC
 <img width="1590" height="811" alt="JoyStick_009" src="https://github.com/user-attachments/assets/6a936b1e-64b8-4aed-a805-6e9df8a8ce50" />
 <br>
 <img width="1590" height="811" alt="JoyStick_010" src="https://github.com/user-attachments/assets/50417a08-1165-4ecc-9406-185de267f636" />
 
-### 6. CLOCK Fix
+### 5. CLOCK Fix
+#### 5.1. 클럭 설정
+ - ADC Clock Prescaler: PCLK2 divided by 6 (약 10.67MHz)
+ - System Clock: 64MHz (일반적인 STM32F103 설정)
+
 <img width="1590" height="908" alt="JoyStick_004" src="https://github.com/user-attachments/assets/31810fd1-7e02-4ee5-8e7e-3b4f6375ef93" />
 <br>
 <img width="1590" height="908" alt="JoyStick_005" src="https://github.com/user-attachments/assets/990ab66d-569e-4802-b185-2187e4f89c4c" />
@@ -53,7 +71,7 @@
 <img width="1590" height="908" alt="JoyStick_006" src="https://github.com/user-attachments/assets/689ceff1-105a-4b55-ad20-611e44fd2303" />
 <br>
 
-###. 10. Result
+### 6. Result
 <img width="995" height="550" alt="JoyStick_011" src="https://github.com/user-attachments/assets/68c84c4d-5152-4c73-89d5-93761282f754" />
 <br>
 
