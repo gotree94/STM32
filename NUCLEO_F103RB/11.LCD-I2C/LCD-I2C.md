@@ -9,6 +9,28 @@
 <img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
 <br>
 
+```
+BLK
+CS - 5 - PB6
+DC - 19 - PA6
+RES - 4 - PA1
+SDA - 23 - PA7
+SCL - 18 - PA5
+VCC
+GND
+```
+
+```
+BLK -  NC
+CS - PB6
+DC - PA6
+RES - PA1
+SDA - PA7
+SCL -  PA5
+VCC - 3.3V
+GND - GND
+```
+
 ## 전체 프로젝트 구성:
 
 ### 1. main.c (위 코드)
