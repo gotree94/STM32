@@ -44,8 +44,204 @@
 /* USER CODE END Includes */
 ```
 
+```c
+/* USER CODE BEGIN PD */
+#define ADC_BUFFER_SIZE 2
+#define FILTER_SIZE 8        // 이동평균 필터 크기
+#define ADC_MAX_VALUE 4095   // 12bit ADC 최대값
+/* USER CODE END PD */
+```
 
+```c
+/* USER CODE BEGIN PV */
+uint16_t adc_buffer[ADC_BUFFER_SIZE];  // DMA 버퍼
+uint16_t joystick_x_raw = 0;           // 조이스틱 X축 원시값
+uint16_t joystick_y_raw = 0;           // 조이스틱 Y축 원시값
 
+// 이동평균 필터를 위한 배열
+uint32_t x_filter_buffer[FILTER_SIZE] = {0};
+uint32_t y_filter_buffer[FILTER_SIZE] = {0};
+uint8_t filter_index = 0;
+
+// 필터링된 값
+uint16_t joystick_x_filtered = 0;
+uint16_t joystick_y_filtered = 0;
+
+// 백분율로 변환된 값 (-100 ~ +100)
+int16_t joystick_x_percent = 0;
+int16_t joystick_y_percent = 0;
+
+char uart_buffer[100];  // 필요시 사용할 버퍼 (현재는 printf 사용)
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void process_joystick_data(void);
+uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer);
+int16_t convert_to_percentage(uint16_t adc_value);
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+/**
+  * @brief  이동평균 필터 적용
+  * @param  new_value: 새로운 ADC 값
+  * @param  filter_buffer: 필터 버퍼 포인터
+  * @retval 필터링된 값
+  */
+uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer)
+{
+    static uint8_t x_init = 0, y_init = 0;
+    uint32_t sum = 0;
+
+    // 필터 버퍼 구분 (X축 또는 Y축)
+    if (filter_buffer == x_filter_buffer) {
+        if (!x_init) {
+            // 초기화: 모든 버퍼를 첫 번째 값으로 채움
+            for (int i = 0; i < FILTER_SIZE; i++) {
+                filter_buffer[i] = new_value;
+            }
+            x_init = 1;
+            return new_value;
+        }
+    } else {
+        if (!y_init) {
+            // 초기화: 모든 버퍼를 첫 번째 값으로 채움
+            for (int i = 0; i < FILTER_SIZE; i++) {
+                filter_buffer[i] = new_value;
+            }
+            y_init = 1;
+            return new_value;
+        }
+    }
+
+    // 새로운 값을 버퍼에 추가
+    filter_buffer[filter_index] = new_value;
+
+    // 평균 계산
+    for (int i = 0; i < FILTER_SIZE; i++) {
+        sum += filter_buffer[i];
+    }
+
+    return (uint16_t)(sum / FILTER_SIZE);
+}
+
+/**
+  * @brief  ADC 값을 백분율로 변환 (-100 ~ +100)
+  * @param  adc_value: ADC 값 (0 ~ 4095)
+  * @retval 백분율 값
+  */
+int16_t convert_to_percentage(uint16_t adc_value)
+{
+    // ADC 중앙값을 기준으로 -100 ~ +100으로 변환
+    int16_t centered_value = (int16_t)adc_value - (ADC_MAX_VALUE / 2);
+    int16_t percentage = (centered_value * 100) / (ADC_MAX_VALUE / 2);
+
+    // 범위 제한
+    if (percentage > 100) percentage = 100;
+    if (percentage < -100) percentage = -100;
+
+    return percentage;
+}
+
+/**
+  * @brief  조이스틱 데이터 처리
+  * @param  None
+  * @retval None
+  */
+void process_joystick_data(void)
+{
+    // 원시 ADC 값 읽기
+    joystick_x_raw = adc_buffer[0];  // ADC Channel 0 (PA0)
+    joystick_y_raw = adc_buffer[1];  // ADC Channel 1 (PA1)
+
+    // 이동평균 필터 적용
+    joystick_x_filtered = apply_moving_average_filter(joystick_x_raw, x_filter_buffer);
+    joystick_y_filtered = apply_moving_average_filter(joystick_y_raw, y_filter_buffer);
+
+    // 필터 인덱스 업데이트 (두 축 공통 사용)
+    filter_index = (filter_index + 1) % FILTER_SIZE;
+
+    // 백분율로 변환
+    joystick_x_percent = convert_to_percentage(joystick_x_filtered);
+    joystick_y_percent = convert_to_percentage(joystick_y_filtered);
+}
+
+/**
+  * @brief  타이머 콜백 함수 (주기적 ADC 읽기용)
+  * @param  htim: 타이머 핸들
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2) {
+        // 조이스틱 데이터 처리
+        process_joystick_data();
+
+        // UART로 데이터 출력 (디버깅용)
+        printf("X: %d%% (%d), Y: %d%% (%d)\n",
+                joystick_x_percent, joystick_x_filtered,
+                joystick_y_percent, joystick_y_filtered);
+    }
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  if (HAL_DMA_Init(&hdma_adc1) != HAL_OK) {
+      Error_Handler();
+  }
+
+  // ADC1 핸들과 DMA 링크
+  __HAL_LINKDMA(&hadc1, DMA_Handle, hdma_adc1);
+
+  // ADC 캘리브레이션
+  HAL_ADCEx_Calibration_Start(&hadc1);
+
+  // DMA를 사용한 연속 ADC 변환 시작
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_BUFFER_SIZE);
+
+  // 타이머 시작 (50ms 주기로 데이터 처리)
+  HAL_TIM_Base_Start_IT(&htim2);
+
+  // 시작 메시지
+  printf("STM32F103 조이스틱 ADC 읽기 시작\n");
+  /* USER CODE END 2 */
+```
+
+```c
+    /* USER CODE BEGIN 3 */
+	  HAL_Delay(10);  // 메인 루프 딜레이
+  }
+  /* USER CODE END 3 */
+```
 
 
 
