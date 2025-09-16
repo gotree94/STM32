@@ -19,7 +19,8 @@
  - [] 17.MPU6050
  - [] 18.Encoder
  - [] 19.RTC
-
+ - [] 20.BLDC Motor
+ - [] 21.Step Motor
 
 ## NUCLEO_F411RE
  - [] 01.LED_Blink
@@ -41,3 +42,5 @@
  - [] 17.MPU6050
  - [] 18.Encoder
  - [] 19.RTC
+ - [] 20.BLDC Motor
+ - [] 21.Step Motor
