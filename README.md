@@ -9,12 +9,12 @@
  - [완료] 07.Buzzer
  - [완료] 08.CLCD
  - [완료] 09.ServoMotor
- - [완료] 10.CDS_sensor
+ - [완료] 10.GM009605_LCD 
  - [완료] 11.LCD-SPI
  - [완료] 12.DHT11
  - [완료] 13.JoyStick
  - [완료] 14.ILI9341 - 터치/SDCard 미구현
- - [] 15.GM009605 LCD 
+ - [완료] 15.CDS_sensorx
  - [완료] 16.I2C-EEPROM
  - [] 17.MPU6050
  - [] 18.Encoder
