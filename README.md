@@ -14,7 +14,7 @@
  - [완료] 12.DHT11
  - [완료] 13.JoyStick
  - [완료] 14.ILI9341 - 터치/SDCard 미구현
- - [완료] 15.CDS
+ - [] 15.GM009605 LCD 
  - [완료] 16.I2C-EEPROM
  - [] 17.MPU6050
  - [] 18.Encoder
