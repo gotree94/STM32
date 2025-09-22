@@ -190,7 +190,108 @@ Over Sampling: 16
 3. **속도가 느림**: 전원 전압 확인 (12V 유지)
 4. **UART 명령 무응답**: 인터럽트 활성화 확인
 
-이 설정으로 안전하고 효율적인 센서리스 BLDC 모터 제어가 가능합니다.
+```
+=== Sensorless BLDC Motor Control with DRV8313 ===
+Initializing DRV8313...
+DRV8313 initialized successfully
+Sensorless Motor Control System Initialized
+Commands: 'a'=Forward, 's'=Stop, 'd'=Reverse
+Speed Control: 'w'=Speed Up, 'x'=Speed Down
+Speed Range: 30% - 80%
+Ready for commands!
+
+Status: STOP | DRV: READY | Speed: 30% | Target: 0.0 RPM
+Status: STOP | DRV: READY | Speed: 30% | Target: 0.0 RPM
+RX: 0x61 (a)
+Processing command: 0x61 (a)
+FORWARD command
+Motor:=1624, B=1255, C=1919, Angle=3.6
+�Status: FWD | DRV: RUNNING | Speed: 30% | Target: 600.0 RPM
+PWM: A=1648, B=1245, C=1905, Angle=7.2°, Inc=3.600°
+PWM: A=1671, B=1237, C=1890, Angle=10.8°, Inc=3.600°
+Status: FWD | DRV: RUNNING | Speed: 30% | Target: 600.0 RPM
+RX: 0x73 (s)
+Processing command: 0x73 (s)
+STOP command
+Motor: STOPPED
+RX: 0x64 (d)
+Processing command: 0x64 (d)
+REVERSE command
+Motor:=1575, B=1280, C=1944, Angle=356.Status: REV | DRV: RUNNING | Speed: 30% | Target: -600.0 RPM
+PWM: A=1551, B=1294, C=1954, Angle=352.8°, Inc=-3.600°
+PWM: A=1527, B=1309, C=1962, Angle=349.2°, Inc=-3.600°
+Status: REV | DRV: RUNNING | Speed: 30% | Target: -600.0 RPM
+RX: 0x73 (s)
+Processing command: 0x73 (s)
+STOP command
+Motor: STOPPED
+RX: 0x61 (a)
+Processing command: 0x61 (a)
+FORWARD command
+Motor:=1624, B=1255, C=1919, Angle=3.6
+�RX: 0x77 (w)
+Processing command: 0x77 (w)
+SPEED UP command
+Speed: 35%
+Status: FWD | DRV: RUNNING | Speed: 35% | Target: 700.0 RPM
+PWM: A=1205, B=1613, C=1980, Angle=298.2°, Inc=4.200°
+PWM: A=1548, B=2011, C=1240, Angle=186.6°, Inc=4.200°
+RX: 0x77 (w)
+Processing command: 0x77 (w)
+SPEED UP command
+Speed: 40%
+RX: 0x77 (w)
+Processing command: 0x77 (w)
+SPEED UP command
+Speed: 45%
+Status: FWD | DRV: RUNNING | Speed: 45% | Target: 900.0 RPM
+PWM: A=1689, B=1125, C=1985, Angle=10.2°, Inc=5.400°
+RX: 0x77 (w)
+Processing command: 0x77 (w)
+SPEED UP command
+Speed: 50%
+RX: 0x77 (w)
+Processing command: 0x77 (w)
+SPEED UP command
+Speed: 55%
+PWM: A=2094, B=1034, C=1670, Angle=53.4°, Inc=6.600°
+RX: 0x77 (w)
+Processing command: 0x77 (w)
+SPEED UP command
+Speed: 60%
+Status: FWD | DRV: RUNNING | Speed: 60% | Target: 1200.0 RPM
+PWM: A=998, B=2159, C=1642, Angle=243.6°, Inc=7.200°
+PWM: A=942, B=2049, C=1807, Angle=258.0°, Inc=7.200°
+RX: 0x78 (x)
+Processing command: 0x78 (x)
+SPEED DOWN command
+Speed: 55%
+RX: 0x78 (x)
+Processing command: 0x78 (x)
+SPEED DOWN command
+Speed: 50%
+RX: 0x78 (x)
+Processing command: 0x78 (x)
+SPEED DOWN command
+Speed: 45%
+RX: 0x78 (x)
+Processing command: 0x78 (x)
+SPEED DOWN command
+Speed: 40%
+Status: FWD | DRV: RUNNING | Speed: 40% | Target: 800.0 RPM
+RX: 0x78 (x)
+Processing command: 0x78 (x)
+SPEED DOWN command2Speed: 35%
+PWM: A=2033, B=1479, C=1286, Angle=104.4°, Inc=4.200°
+RX: 0x73 (s)
+Processing command: 0x73 (s)
+STOP command
+Motor: STOPPED
+Status: STOP | DRV: READY | Speed: 35% | Target: 0.0 RPM
+Status: STOP | DRV: READY | Speed: 35% | Target: 0.0 RPM
+Status: STOP | DRV: READY | Speed: 35% | Target: 0.0 RPM
+Status: STOP | DRV: READY | Speed: 35% | Target: 0.0 RPM
+```
 
 <img width="800" height="600" alt="LCD-SPI" src="https://github.com/user-attachments/assets/beee2466-55d7-44cf-956a-0a860e1a189a" />
 <br>
