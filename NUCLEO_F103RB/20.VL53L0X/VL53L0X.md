@@ -1,52 +1,52 @@
 # VL53L0X
 
-# STM32CubeMX Configuration Guide
-## VL53L0X Distance Sensor with I2C Address Scanner
+# STM32CubeMX 설정 가이드
+## VL53L0X 거리 센서와 I2C 주소 스캐너
 
-### Hardware Requirements
-- STM32F103 NUCLEO Board
-- VL53L0X ToF Distance Sensor Module
-- Jumper wires
-- Pull-up resistors (4.7kΩ) if not present on VL53L0X module
+### 필요한 하드웨어
+- STM32F103 NUCLEO 보드
+- VL53L0X ToF 거리 센서 모듈
+- 점퍼 와이어
+- 풀업 저항 (4.7kΩ) - VL53L0X 모듈에 없는 경우
 
-### Hardware Connections
+### 하드웨어 연결
 ```
-VL53L0X Module    →    STM32F103 NUCLEO
-VCC               →    3.3V (CN7-16 or CN6-4)
-GND               →    GND (CN7-20 or CN6-6)
+VL53L0X 모듈      →    STM32F103 NUCLEO
+VCC               →    3.3V (CN7-16 또는 CN6-4)
+GND               →    GND (CN7-20 또는 CN6-6)
 SCL               →    PB8 (CN10-3)
 SDA               →    PB9 (CN10-5)
-GPIO1 (optional)  →    Not connected
-XSHUT (optional)  →    Not connected
+GPIO1 (선택사항)   →    연결하지 않음
+XSHUT (선택사항)   →    연결하지 않음
 ```
 
 ---
 
-## STM32CubeMX Configuration Steps
+## STM32CubeMX 설정 단계
 
-### 1. Project Setup
-1. Open STM32CubeMX
-2. Start New Project
-3. Select STM32F103RB (NUCLEO-F103RB)
-4. Click "Start Project"
+### 1. 프로젝트 생성
+1. STM32CubeMX 실행
+2. Start My project from MCU 클릭
+3. STM32F103RB (NUCLEO-F103RB) 선택
+4. Start Project 클릭
 
-### 2. System Configuration
+### 2. 시스템 설정
 
-#### 2.1 RCC (Reset and Clock Control)
+#### 2.1 RCC (리셋 및 클럭 제어)
 - **Pinout & Configuration → System Core → RCC**
-- **High Speed Clock (HSE)**: Disable
-- **Low Speed Clock (LSE)**: Disable
-- **Master Clock Output**: Disable
+- **High Speed Clock (HSE)**: 비활성화
+- **Low Speed Clock (LSE)**: 비활성화
+- **Master Clock Output**: 비활성화
 
-#### 2.2 SYS (System)
+#### 2.2 SYS (시스템)
 - **Pinout & Configuration → System Core → SYS**
-- **Debug**: Serial Wire (default)
-- **Timebase Source**: SysTick (default)
+- **Debug**: Serial Wire (기본값)
+- **Timebase Source**: SysTick (기본값)
 
-### 3. Clock Configuration
-- **Clock Configuration Tab**
+### 3. 클럭 설정
+- **Clock Configuration 탭**
 - **Input frequency**: 8 MHz (HSI)
-- **PLLCLK**: 
+- **PLLCLK 설정**: 
   - PLL Source Mux: HSI/2
   - PLLMUL: x16 (결과: 64MHz)
 - **System Clock Mux**: PLLCLK
@@ -54,61 +54,61 @@ XSHUT (optional)  →    Not connected
 - **APB1 Prescaler**: /2 (32 MHz)
 - **APB2 Prescaler**: /1 (64 MHz)
 
-### 4. Peripheral Configuration
+### 4. 주변 장치 설정
 
-#### 4.1 USART2 (Serial Communication)
+#### 4.1 USART2 (시리얼 통신)
 - **Pinout & Configuration → Connectivity → USART2**
 - **Mode**: Asynchronous
-- **Configuration**:
+- **설정**:
   - Baud Rate: 115200 Bits/s
   - Word Length: 8 Bits
   - Parity: None
   - Stop Bits: 1
   - Data Direction: Receive and Transmit
-- **Pins**: 
-  - PA2: USART2_TX (automatic)
-  - PA3: USART2_RX (automatic)
+- **핀 배치**: 
+  - PA2: USART2_TX (자동 설정)
+  - PA3: USART2_RX (자동 설정)
 
-#### 4.2 I2C1 (Sensor Communication)
+#### 4.2 I2C1 (센서 통신)
 - **Pinout & Configuration → Connectivity → I2C1**
-- **I2C**: I2C
-- **Configuration**:
+- **I2C**: I2C 선택
+- **설정**:
   - I2C Speed Mode: Standard Mode
   - I2C Clock Speed: 100000 Hz (100 kHz)
   - Clock No Stretch Mode: Disable
   - General Call: Disable
   - Primary Address Length selection: 7-bit
-- **Pins**:
-  - PB8: I2C1_SCL (automatic)
-  - PB9: I2C1_SDA (automatic)
+- **핀 배치**:
+  - PB8: I2C1_SCL (자동 설정)
+  - PB9: I2C1_SDA (자동 설정)
 
-### 5. GPIO Configuration
-- **User LED (LD2)**: PA5 - GPIO_Output (automatic)
-- **User Button (B1)**: PC13 - GPIO_EXTI13 (automatic)
+### 5. GPIO 설정
+- **사용자 LED (LD2)**: PA5 - GPIO_Output (자동 설정)
+- **사용자 버튼 (B1)**: PC13 - GPIO_EXTI13 (자동 설정)
 
-### 6. Project Manager Settings
+### 6. 프로젝트 관리자 설정
 
-#### 6.1 Project Tab
+#### 6.1 Project 탭
 - **Project Name**: VL53L0X_Distance_Sensor
-- **Project Location**: Choose your directory
+- **Project Location**: 원하는 디렉토리 선택
 - **Toolchain/IDE**: STM32CubeIDE
 
-#### 6.2 Code Generator Tab
-- **STM32Cube MCU Package**: Latest version
-- **Generated files**:
+#### 6.2 Code Generator 탭
+- **STM32Cube MCU Package**: 최신 버전
+- **생성 파일 옵션**:
   - ✅ Generate peripheral initialization as a pair of '.c/.h' files per peripheral
   - ✅ Keep User Code when re-generating
   - ✅ Delete previously generated files when not re-generated
 
-### 7. Additional Settings
+### 7. 추가 설정
 
-#### 7.1 NVIC Settings
+#### 7.1 NVIC 설정
 - **Pinout & Configuration → System Core → NVIC**
-- **EXTI line[15:10] interrupts**: Enabled (for user button)
-- Priority: 0
+- **EXTI line[15:10] interrupts**: 활성화 (사용자 버튼용)
+- 우선순위: 0
 
-#### 7.2 GPIO Settings Check
-Verify these pins are configured:
+#### 7.2 GPIO 설정 확인
+다음 핀들이 올바르게 설정되었는지 확인:
 - **PA2**: USART2_TX
 - **PA3**: USART2_RX  
 - **PA5**: GPIO_Output (LD2)
@@ -118,43 +118,43 @@ Verify these pins are configured:
 
 ---
 
-## Code Generation and Integration
+## 코드 생성 및 통합
 
-### 8. Generate Code
-1. Click **"GENERATE CODE"**
-2. Open project in STM32CubeIDE when prompted
+### 8. 코드 생성
+1. **"GENERATE CODE"** 클릭
+2. 프롬프트가 나타나면 STM32CubeIDE에서 프로젝트 열기
 
-### 9. Project Settings in STM32CubeIDE
+### 9. STM32CubeIDE 프로젝트 설정
 
-#### 9.1 Printf Support
-1. **Right-click project → Properties**
+#### 9.1 Printf 지원
+1. **프로젝트 우클릭 → Properties**
 2. **C/C++ Build → Settings → Tool Settings**
 3. **MCU GCC Linker → Libraries**
-4. **Libraries (-l)**: Add `c`, `m`, `nosys`
+4. **Libraries (-l)**: `c`, `m`, `nosys` 추가
 5. **MCU C Compiler → Miscellaneous**
-6. **Other flags**: Add `-u _printf_float` (if using float with printf)
+6. **Other flags**: `-u _printf_float` 추가 (printf에서 float 사용 시)
 
-#### 9.2 Optimization
+#### 9.2 최적화 설정
 - **C/C++ Build → Settings → MCU GCC Compiler → Optimization**
-- **Optimization Level**: Optimize for debug (-Og) or Optimize (-O1)
+- **Optimization Level**: Optimize for debug (-Og) 또는 Optimize (-O1)
 
-### 10. Code Integration
-1. Replace generated `main.c` with the provided VL53L0X code
-2. Ensure all USER CODE sections are properly placed
-3. Verify includes and function declarations
+### 10. 코드 통합
+1. 생성된 `main.c`를 제공된 VL53L0X 코드로 교체
+2. 모든 USER CODE 섹션이 올바른 위치에 있는지 확인
+3. include 파일과 함수 선언 확인
 
 ---
 
-## Hardware Testing Checklist
+## 하드웨어 테스트 체크리스트
 
-### Before First Run:
-- [ ] VL53L0X connected to 3.3V (NOT 5V)
-- [ ] Ground connection secure
-- [ ] I2C pins connected: PB8 (SCL), PB9 (SDA)
-- [ ] Pull-up resistors present on I2C lines (4.7kΩ)
-- [ ] USB cable connected for serial output
+### 첫 실행 전 확인사항:
+- [ ] VL53L0X가 3.3V에 연결됨 (5V 아님!)
+- [ ] 접지 연결 확실
+- [ ] I2C 핀 연결: PB8 (SCL), PB9 (SDA)
+- [ ] I2C 라인에 풀업 저항 존재 (4.7kΩ)
+- [ ] 시리얼 출력용 USB 케이블 연결
 
-### Expected Serial Output:
+### 예상 시리얼 출력:
 ```
 VL53L0X Distance Measurement Test
 System Clock: 64MHz
@@ -182,41 +182,41 @@ Distance: 245 mm
 
 ---
 
-## Troubleshooting
+## 문제 해결
 
-### No I2C Devices Found:
-1. Check 3.3V power supply
-2. Verify ground connection
-3. Confirm PB8/PB9 connections
-4. Add/check 4.7kΩ pull-up resistors on SCL/SDA
-5. Test with different VL53L0X module
+### I2C 장치를 찾을 수 없음:
+1. 3.3V 전원 공급 확인
+2. 접지 연결 확인
+3. PB8/PB9 연결 확인
+4. SCL/SDA에 4.7kΩ 풀업 저항 추가/확인
+5. 다른 VL53L0X 모듈로 테스트
 
-### Device Found but Wrong ID:
-1. Verify VL53L0X module (not VL53L1X or other sensor)
-2. Check I2C timing and clock speed
-3. Ensure stable power supply
+### 장치는 발견되지만 잘못된 ID:
+1. VL53L0X 모듈 확인 (VL53L1X나 다른 센서가 아닌지)
+2. I2C 타이밍과 클럭 속도 확인
+3. 안정적인 전원 공급 확인
 
-### Measurement Timeout:
-1. Confirm device initialization was successful
-2. Check for I2C communication errors
-3. Verify sensor is not covered or obstructed
-4. Try different measurement timing settings
+### 측정 타임아웃:
+1. 장치 초기화가 성공했는지 확인
+2. I2C 통신 오류 확인
+3. 센서가 가려지거나 방해받지 않는지 확인
+4. 다른 측정 타이밍 설정 시도
 
-### Build Errors:
-1. Ensure printf support is enabled
-2. Check that all USER CODE sections are preserved
-3. Verify library linking (c, m, nosys)
-4. Update STM32CubeIDE and HAL libraries
+### 빌드 오류:
+1. printf 지원이 활성화되었는지 확인
+2. 모든 USER CODE 섹션이 보존되었는지 확인
+3. 라이브러리 링크 확인 (c, m, nosys)
+4. STM32CubeIDE와 HAL 라이브러리 업데이트
 
 ---
 
-## Performance Notes
+## 성능 참고사항
 
-- **Measurement Range**: 30mm - 2000mm (typical)
-- **Accuracy**: ±3% (typical conditions)
-- **Measurement Rate**: ~10Hz with current settings
-- **I2C Speed**: 100kHz (can be increased to 400kHz if needed)
-- **System Clock**: 64MHz optimized for balance of performance and power
+- **측정 범위**: 30mm - 2000mm (일반적)
+- **정확도**: ±3% (일반적 조건)
+- **측정 속도**: 현재 설정으로 약 10Hz
+- **I2C 속도**: 100kHz (필요시 400kHz까지 증가 가능)
+- **시스템 클럭**: 64MHz - 성능과 전력의 균형 최적화
 
 <img width="800" height="600" alt="LCD-SPI" src="https://github.com/user-attachments/assets/beee2466-55d7-44cf-956a-0a860e1a189a" />
 <br>
