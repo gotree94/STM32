@@ -1,77 +1,196 @@
-# LCD-SPI
+# SimpleFOC_BLDC
 
-<img width="600" height="400" alt="Sheild-001" src="https://github.com/user-attachments/assets/9df5b8c3-d81a-4026-9f86-67fa4dde1e38" />
-<br>
+# 센서리스 BLDC 모터 제어 시스템 - CubeMX 설정 가이드
 
-<img width="600" height="400" alt="Sheild-002" src="https://github.com/user-attachments/assets/29bdd8e8-3e94-45da-87f4-426694f32622" />
-<br>
+## STM32F103 NUCLEO + DRV8313 최종 설정
 
-<img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
-<br>
+### 1. 클럭 설정 (Clock Configuration)
+- **Clock Source**: HSI (Internal 8MHz RC)
+- **PLLMUL**: x16 (4MHz × 16 = 64MHz)
+- **System Clock (SYSCLK)**: 64MHz
+- **AHB Clock (HCLK)**: 64MHz
+- **APB1 Clock (PCLK1)**: 32MHz (64MHz ÷ 2)
+- **APB2 Clock (PCLK2)**: 64MHz
 
+### 2. GPIO 핀 설정
+
+#### DRV8313 PWM 입력 핀 (모터 3상 제어)
+| 핀 | 기능 | 타이머 | 설정 |
+|----|------|--------|------|
+| **PA8** | TIM1_CH1 (IN1 - Phase A) | TIM1 Channel 1 | Alternate Function Push Pull |
+| **PA9** | TIM1_CH2 (IN2 - Phase B) | TIM1 Channel 2 | Alternate Function Push Pull |
+| **PA10** | TIM1_CH3 (IN3 - Phase C) | TIM1 Channel 3 | Alternate Function Push Pull |
+
+#### DRV8313 제어 핀
+| 핀 | 기능 | 설정 | 초기값 |
+|----|------|------|--------|
+| **PA4** | DRV_EN (Enable) | GPIO Output Push Pull | LOW |
+| **PA6** | DRV_nSP (Sleep) | GPIO Input No Pull | HIGH (Active Low) |
+| **PA7** | DRV_nRT (Reset) | GPIO Output Push Pull | HIGH (Active Low) |
+| **PA12** | DRV_nFT (Fault) | GPIO Input Pull-up | HIGH (Active Low) |
+
+#### UART 통신 핀
+| 핀 | 기능 | 설정 |
+|----|------|------|
+| **PA2** | USART2_TX | Alternate Function Push Pull |
+| **PA3** | USART2_RX | Alternate Function with Pull-up |
+
+#### 상태 표시
+| 핀 | 기능 | 설정 |
+|----|------|------|
+| **PA5** | LD2 (Status LED) | GPIO Output Push Pull |
+
+### 3. 타이머 설정
+
+#### TIM1 (20kHz PWM 생성)
 ```
-BLK
-CS - 5 - PB6
-DC - 19 - PA6
-RES - 4 - PA1
-SDA - 23 - PA7
-SCL - 18 - PA5
-VCC
-GND
+Mode: PWM Generation CH1, CH2, CH3
+Clock Source: Internal Clock (64MHz)
+Prescaler (PSC): 0 (분주 없음)
+Counter Period (ARR): 3199
+Counter Mode: Up
+Clock Division: No Division
+Auto-reload preload: Disable
+
+PWM Mode 1: Output Compare
+Initial Pulse: 0
+Polarity: High
+Fast Mode: Disable
 ```
 
+**계산**: 64MHz ÷ (0+1) ÷ (3199+1) = 20kHz
+
+#### TIM3 (1kHz 제어 루프 타이머)
 ```
-BLK -  NC
-CS - PB6
-DC - PA6
-RES - PA1
-SDA - PA7
-SCL -  PA5
-VCC - 3.3V
-GND - GND
+Mode: Internal Clock
+Clock Source: Internal Clock (64MHz)
+Prescaler (PSC): 63
+Counter Period (ARR): 999
+Counter Mode: Up
+Auto-reload preload: Disable
 ```
 
-## 전체 프로젝트 구성:
+**계산**: 64MHz ÷ (63+1) ÷ (999+1) = 1kHz
 
-### 1. main.c (위 코드)
-STM32 CubeIDE에서 프로젝트의 main.c 파일을 위 코드로 교체하세요.
+### 4. USART2 설정
+```
+Mode: Asynchronous
+Baud Rate: 115200
+Word Length: 8 Bits
+Parity: None
+Stop Bits: 1
+Data Direction: Receive and Transmit
+Hardware Flow Control: None
+Over Sampling: 16
+```
 
-### 2. 추가로 필요한 설정:
- * CubeMX에서 설정할 사항:
- * System Clock: HSE 8MHz → PLL × 8 = 64MHz
-    * SPI1 활성화:
-       * PA5 (SPI1_SCK)
-       * PA7 (SPI1_MOSI)
-   * GPIO 출력핀 설정:
-      * PA1 (LCD_RES)
-      * PA6 (LCD_DC)
-      * PB6 (LCD_CS)
+### 5. NVIC (인터럽트) 설정
+| 인터럽트 | 우선순위 | 기능 |
+|----------|----------|------|
+| **TIM3 global interrupt** | 0 (highest) | 1kHz 모터 제어 루프 |
+| **USART2 global interrupt** | 1 | UART 명령 수신 |
 
-### 3. 하드웨어 연결:
-   * LCD 핀    →  STM32F103 핀
-   * BLK      →  NC (연결 안함)
-   * CS       →  PB6
-   * DC       →  PA6
-   * RES      →  PA1
-   * SDA(MOSI)→  PA7
-   * SCL(SCK) →  PA5
-   * VCC      →  3.3V
-   * GND      →  GND
+### 6. Project Manager 설정
+- **Toolchain/IDE**: STM32CubeIDE
+- **Code Generator Options**:
+  - Generate peripheral initialization as pair of .c/.h files: Checked
+  - Keep User Code when re-generating: Checked
+  - Delete previously generated files: Unchecked
 
-### 4. 코드 특징:
-   * 완전한 ST7735S 초기화 시퀀스
-   * 8x8 폰트 포함 (ASCII 32-126)
-   * RGB565 컬러 지원
-   * 텍스트 출력 기능
-   * 64MHz 시스템 클럭 설정
+## 하드웨어 연결
 
-### 5. 실행 결과:
-   * LCD에 다음과 같이 표시됩니다:
-      * "Hello" (흰색)
-      * "World!" (흰색)
-      * "STM32F103" (녹색)
-      * "ST7735S" (시안색)
-      * "80x160" (노란색)
+### DRV8313 SimpleFOC Board → STM32F103 NUCLEO
+| DRV8313 핀 | STM32 핀 | 선 색깔 (권장) | 기능 |
+|------------|----------|----------------|------|
+| **EN** | PA4 | 빨강 | Enable Control |
+| **IN1** | PA8 | 노랑 | Phase A PWM |
+| **IN2** | PA9 | 초록 | Phase B PWM |
+| **IN3** | PA10 | 파랑 | Phase C PWM |
+| **nFT** | PA12 | 주황 | Fault Detection |
+| **nSP** | PA6 | 보라 | Sleep Control |
+| **nRT** | PA7 | 회색 | Reset Control |
+| **GND** | GND | 검정 | Ground |
+| **3V3** | 3.3V | 빨강 | Logic Power |
+
+### BLDC 모터 연결
+| 모터 단자 | DRV8313 출력 | 기능 |
+|-----------|--------------|------|
+| **Wire 1** | M1 | Phase A |
+| **Wire 2** | M2 | Phase B |
+| **Wire 3** | M3 | Phase C |
+
+**주의**: 모터 배선 순서가 중요합니다. 진동이나 역회전이 발생하면 두 선을 바꿔 연결해보세요.
+
+### 전원 연결
+- **DRV8313 전원**: 6V-40V (HDD 모터는 12V 권장)
+- **STM32 전원**: USB 또는 5V 어댑터
+- **공통 GND**: 모든 장치의 그라운드 연결 필수
+
+## 소프트웨어 설정
+
+### 컴파일러 설정
+1. **Project Properties** → **C/C++ Build** → **Settings**
+2. **MCU GCC Linker** → **Libraries**
+   - Add library: `c`, `m`, `nosys`
+3. **MCU Settings**
+   - Use float with printf: Checked
+   - Runtime library: Newlib-nano
+
+### 플래시 설정
+- **Optimization Level**: 
+  - Debug: -Og
+  - Release: -O2
+- **Enable printf float**: Checked
+
+## 제어 명령어
+
+### 기본 명령
+- **'a'**: 정방향 회전 시작
+- **'s'**: 모터 정지
+- **'d'**: 역방향 회전 시작
+- **'w'**: 속도 증가 (+5%)
+- **'x'**: 속도 감소 (-5%)
+
+### 운전 범위
+- **속도 범위**: 30% ~ 80% (600 ~ 1600 RPM)
+- **최대 RPM**: 2000 RPM
+- **PWM 주파수**: 20kHz
+- **제어 주파수**: 1kHz
+
+## 성능 지표
+
+### 전류 소모 (12V 기준)
+- **정지**: 30-50mA
+- **저속 (30-50%)**: 150-200mA
+- **중속 (50-70%)**: 100-150mA  
+- **고속 (70-80%)**: 80-120mA
+
+### 예상 실제 RPM (센서리스)
+- **30%**: ~400-500 RPM
+- **50%**: ~600-800 RPM
+- **80%**: ~900-1200 RPM
+
+## 안전 기능
+
+### 자동 보호
+- **DRV8313 고장 감지**: nFT 핀 실시간 모니터링
+- **과전류 방지**: 적응형 PWM 제한
+- **과열 방지**: 저전류 운전 모드
+
+### 수동 안전 조치
+- **전류 모니터링**: 200mA 초과시 즉시 정지
+- **온도 확인**: 모터/드라이버 온도 주기적 점검
+- **운전 시간 제한**: 연속 운전 후 냉각 시간 확보
+
+## 문제 해결
+
+### 일반적인 문제
+1. **모터가 진동만 함**: 배선 순서 확인 (두 선 교체)
+2. **과전류 발생**: magnitude 값 감소 (0.3 → 0.2)
+3. **속도가 느림**: 전원 전압 확인 (12V 유지)
+4. **UART 명령 무응답**: 인터럽트 활성화 확인
+
+이 설정으로 안전하고 효율적인 센서리스 BLDC 모터 제어가 가능합니다.
 
 <img width="800" height="600" alt="LCD-SPI" src="https://github.com/user-attachments/assets/beee2466-55d7-44cf-956a-0a860e1a189a" />
 <br>
