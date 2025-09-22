@@ -190,6 +190,8 @@ Over Sampling: 16
 3. **속도가 느림**: 전원 전압 확인 (12V 유지)
 4. **UART 명령 무응답**: 인터럽트 활성화 확인
 
+## 터미널 입/출력 결과
+
 ```
 === Sensorless BLDC Motor Control with DRV8313 ===
 Initializing DRV8313...
