@@ -1,77 +1,222 @@
-# LCD-SPI
+# VL53L0X
 
-<img width="600" height="400" alt="Sheild-001" src="https://github.com/user-attachments/assets/9df5b8c3-d81a-4026-9f86-67fa4dde1e38" />
-<br>
+# STM32CubeMX Configuration Guide
+## VL53L0X Distance Sensor with I2C Address Scanner
 
-<img width="600" height="400" alt="Sheild-002" src="https://github.com/user-attachments/assets/29bdd8e8-3e94-45da-87f4-426694f32622" />
-<br>
+### Hardware Requirements
+- STM32F103 NUCLEO Board
+- VL53L0X ToF Distance Sensor Module
+- Jumper wires
+- Pull-up resistors (4.7kΩ) if not present on VL53L0X module
 
-<img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
-<br>
-
+### Hardware Connections
 ```
-BLK
-CS - 5 - PB6
-DC - 19 - PA6
-RES - 4 - PA1
-SDA - 23 - PA7
-SCL - 18 - PA5
-VCC
-GND
-```
-
-```
-BLK -  NC
-CS - PB6
-DC - PA6
-RES - PA1
-SDA - PA7
-SCL -  PA5
-VCC - 3.3V
-GND - GND
+VL53L0X Module    →    STM32F103 NUCLEO
+VCC               →    3.3V (CN7-16 or CN6-4)
+GND               →    GND (CN7-20 or CN6-6)
+SCL               →    PB8 (CN10-3)
+SDA               →    PB9 (CN10-5)
+GPIO1 (optional)  →    Not connected
+XSHUT (optional)  →    Not connected
 ```
 
-## 전체 프로젝트 구성:
+---
 
-### 1. main.c (위 코드)
-STM32 CubeIDE에서 프로젝트의 main.c 파일을 위 코드로 교체하세요.
+## STM32CubeMX Configuration Steps
 
-### 2. 추가로 필요한 설정:
- * CubeMX에서 설정할 사항:
- * System Clock: HSE 8MHz → PLL × 8 = 64MHz
-    * SPI1 활성화:
-       * PA5 (SPI1_SCK)
-       * PA7 (SPI1_MOSI)
-   * GPIO 출력핀 설정:
-      * PA1 (LCD_RES)
-      * PA6 (LCD_DC)
-      * PB6 (LCD_CS)
+### 1. Project Setup
+1. Open STM32CubeMX
+2. Start New Project
+3. Select STM32F103RB (NUCLEO-F103RB)
+4. Click "Start Project"
 
-### 3. 하드웨어 연결:
-   * LCD 핀    →  STM32F103 핀
-   * BLK      →  NC (연결 안함)
-   * CS       →  PB6
-   * DC       →  PA6
-   * RES      →  PA1
-   * SDA(MOSI)→  PA7
-   * SCL(SCK) →  PA5
-   * VCC      →  3.3V
-   * GND      →  GND
+### 2. System Configuration
 
-### 4. 코드 특징:
-   * 완전한 ST7735S 초기화 시퀀스
-   * 8x8 폰트 포함 (ASCII 32-126)
-   * RGB565 컬러 지원
-   * 텍스트 출력 기능
-   * 64MHz 시스템 클럭 설정
+#### 2.1 RCC (Reset and Clock Control)
+- **Pinout & Configuration → System Core → RCC**
+- **High Speed Clock (HSE)**: Disable
+- **Low Speed Clock (LSE)**: Disable
+- **Master Clock Output**: Disable
 
-### 5. 실행 결과:
-   * LCD에 다음과 같이 표시됩니다:
-      * "Hello" (흰색)
-      * "World!" (흰색)
-      * "STM32F103" (녹색)
-      * "ST7735S" (시안색)
-      * "80x160" (노란색)
+#### 2.2 SYS (System)
+- **Pinout & Configuration → System Core → SYS**
+- **Debug**: Serial Wire (default)
+- **Timebase Source**: SysTick (default)
+
+### 3. Clock Configuration
+- **Clock Configuration Tab**
+- **Input frequency**: 8 MHz (HSI)
+- **PLLCLK**: 
+  - PLL Source Mux: HSI/2
+  - PLLMUL: x16 (결과: 64MHz)
+- **System Clock Mux**: PLLCLK
+- **HCLK**: 64 MHz
+- **APB1 Prescaler**: /2 (32 MHz)
+- **APB2 Prescaler**: /1 (64 MHz)
+
+### 4. Peripheral Configuration
+
+#### 4.1 USART2 (Serial Communication)
+- **Pinout & Configuration → Connectivity → USART2**
+- **Mode**: Asynchronous
+- **Configuration**:
+  - Baud Rate: 115200 Bits/s
+  - Word Length: 8 Bits
+  - Parity: None
+  - Stop Bits: 1
+  - Data Direction: Receive and Transmit
+- **Pins**: 
+  - PA2: USART2_TX (automatic)
+  - PA3: USART2_RX (automatic)
+
+#### 4.2 I2C1 (Sensor Communication)
+- **Pinout & Configuration → Connectivity → I2C1**
+- **I2C**: I2C
+- **Configuration**:
+  - I2C Speed Mode: Standard Mode
+  - I2C Clock Speed: 100000 Hz (100 kHz)
+  - Clock No Stretch Mode: Disable
+  - General Call: Disable
+  - Primary Address Length selection: 7-bit
+- **Pins**:
+  - PB8: I2C1_SCL (automatic)
+  - PB9: I2C1_SDA (automatic)
+
+### 5. GPIO Configuration
+- **User LED (LD2)**: PA5 - GPIO_Output (automatic)
+- **User Button (B1)**: PC13 - GPIO_EXTI13 (automatic)
+
+### 6. Project Manager Settings
+
+#### 6.1 Project Tab
+- **Project Name**: VL53L0X_Distance_Sensor
+- **Project Location**: Choose your directory
+- **Toolchain/IDE**: STM32CubeIDE
+
+#### 6.2 Code Generator Tab
+- **STM32Cube MCU Package**: Latest version
+- **Generated files**:
+  - ✅ Generate peripheral initialization as a pair of '.c/.h' files per peripheral
+  - ✅ Keep User Code when re-generating
+  - ✅ Delete previously generated files when not re-generated
+
+### 7. Additional Settings
+
+#### 7.1 NVIC Settings
+- **Pinout & Configuration → System Core → NVIC**
+- **EXTI line[15:10] interrupts**: Enabled (for user button)
+- Priority: 0
+
+#### 7.2 GPIO Settings Check
+Verify these pins are configured:
+- **PA2**: USART2_TX
+- **PA3**: USART2_RX  
+- **PA5**: GPIO_Output (LD2)
+- **PB8**: I2C1_SCL
+- **PB9**: I2C1_SDA
+- **PC13**: GPIO_EXTI13 (B1)
+
+---
+
+## Code Generation and Integration
+
+### 8. Generate Code
+1. Click **"GENERATE CODE"**
+2. Open project in STM32CubeIDE when prompted
+
+### 9. Project Settings in STM32CubeIDE
+
+#### 9.1 Printf Support
+1. **Right-click project → Properties**
+2. **C/C++ Build → Settings → Tool Settings**
+3. **MCU GCC Linker → Libraries**
+4. **Libraries (-l)**: Add `c`, `m`, `nosys`
+5. **MCU C Compiler → Miscellaneous**
+6. **Other flags**: Add `-u _printf_float` (if using float with printf)
+
+#### 9.2 Optimization
+- **C/C++ Build → Settings → MCU GCC Compiler → Optimization**
+- **Optimization Level**: Optimize for debug (-Og) or Optimize (-O1)
+
+### 10. Code Integration
+1. Replace generated `main.c` with the provided VL53L0X code
+2. Ensure all USER CODE sections are properly placed
+3. Verify includes and function declarations
+
+---
+
+## Hardware Testing Checklist
+
+### Before First Run:
+- [ ] VL53L0X connected to 3.3V (NOT 5V)
+- [ ] Ground connection secure
+- [ ] I2C pins connected: PB8 (SCL), PB9 (SDA)
+- [ ] Pull-up resistors present on I2C lines (4.7kΩ)
+- [ ] USB cable connected for serial output
+
+### Expected Serial Output:
+```
+VL53L0X Distance Measurement Test
+System Clock: 64MHz
+I2C1: PB8-SCL, PB9-SDA
+
+=== I2C Bus Scanner ===
+Scanning I2C bus...
+Device found at address: 0x52 (7-bit: 0x29)
+Total devices found: 1
+======================
+
+=== VL53L0X Device Detection ===
+Testing address 0x52 (7-bit: 0x29)...
+Device responds at 0x52
+Device ID: 0xEE
+✓ VL53L0X found at address 0x52!
+
+Using VL53L0X at address: 0x52
+
+VL53L0X found! Model ID: 0xEE
+VL53L0X simple initialization complete!
+Raw distance reading: 245 mm
+Distance: 245 mm
+```
+
+---
+
+## Troubleshooting
+
+### No I2C Devices Found:
+1. Check 3.3V power supply
+2. Verify ground connection
+3. Confirm PB8/PB9 connections
+4. Add/check 4.7kΩ pull-up resistors on SCL/SDA
+5. Test with different VL53L0X module
+
+### Device Found but Wrong ID:
+1. Verify VL53L0X module (not VL53L1X or other sensor)
+2. Check I2C timing and clock speed
+3. Ensure stable power supply
+
+### Measurement Timeout:
+1. Confirm device initialization was successful
+2. Check for I2C communication errors
+3. Verify sensor is not covered or obstructed
+4. Try different measurement timing settings
+
+### Build Errors:
+1. Ensure printf support is enabled
+2. Check that all USER CODE sections are preserved
+3. Verify library linking (c, m, nosys)
+4. Update STM32CubeIDE and HAL libraries
+
+---
+
+## Performance Notes
+
+- **Measurement Range**: 30mm - 2000mm (typical)
+- **Accuracy**: ±3% (typical conditions)
+- **Measurement Rate**: ~10Hz with current settings
+- **I2C Speed**: 100kHz (can be increased to 400kHz if needed)
+- **System Clock**: 64MHz optimized for balance of performance and power
 
 <img width="800" height="600" alt="LCD-SPI" src="https://github.com/user-attachments/assets/beee2466-55d7-44cf-956a-0a860e1a189a" />
 <br>
