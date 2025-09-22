@@ -16,11 +16,11 @@
  - [완료] 14.ILI9341 - 터치/SDCard 미구현
  - [완료] 15.CDS_sensorx
  - [완료] 16.I2C-EEPROM
- - [] 17.MPU6050
- - [] 18.Encoder
- - [] 19.RTC
- - [] 20.BLDC Motor
- - [] 21.Step Motor
+ - [완료] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
+ - [완료] 18.Rotary_Encoder
+ - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
+ - [] 20.VL53L0X - 정상 동작 안됨
+ - [] 21.RTC
 
 ## NUCLEO_F411RE
  - [] 01.LED_Blink
