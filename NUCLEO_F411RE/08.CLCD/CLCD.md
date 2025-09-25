@@ -6,10 +6,11 @@
 <img width="644" height="586" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/db1a88ee-2017-40cf-9e1f-c797634801df" />
 <br>
 
-<img width="800" height="600" alt="I2C_001" src="https://github.com/user-attachments/assets/6ad1eefb-17c6-4073-8355-276e65266cdb" />
+<img width="800" height="600" alt="001" src="https://github.com/user-attachments/assets/75eacee3-af95-49e1-a4d9-4180ba6e8df2" />
 <br>
-<img width="800" height="600" alt="I2C_002" src="https://github.com/user-attachments/assets/4da3d974-64f7-48d9-8080-a8792f981041" />
+<img width="800" height="600" alt="002" src="https://github.com/user-attachments/assets/679b058f-489f-49ed-b68f-4714bffa6ab8" />
 <br>
+
 <img width="800" height="600" alt="I2C_003" src="https://github.com/user-attachments/assets/06a7ed9a-ca43-4011-9b45-76428a27ada8" />
 <br>
 
