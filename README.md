@@ -23,15 +23,15 @@
  - [] 21.RTC
 
 ## NUCLEO_F411RE
- - [] 01.LED_Blink
- - [] 02.USART_Print
- - [] 03.EXTI
- - [] 04.TM_TimeBase
- - [] 05.ADC
+ - [완료] 01.LED_Blink
+ - [완료] 02.USART_Print
+ - [완료] 03.EXTI
+ - [완료] 04.TM_TimeBase
+ - [완료] 05.ADC
  - [] 06.HC-SR04
- - [] 07.Buzzer
- - [] 08.CLCD
- - [] 09.ServoMotor
+ - [완료] 07.Buzzer
+ - [완료] 08.CLCD
+ - [완료] 09.ServoMotor
  - [] 10.CDS_sensor
  - [] 11.LCD-SPI
  - [] 12.DHT11
