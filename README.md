@@ -32,15 +32,15 @@
  - [완료] 07.Buzzer
  - [완료] 08.CLCD
  - [완료] 09.ServoMotor
- - [] 10.CDS_sensor
+ - [] 10.GM009605_LCD 
  - [] 11.LCD-SPI
  - [] 12.DHT11
  - [] 13.JoyStick
- - [] 14.ILI9341
- - [] 15.CDS
+ - [] 14.ILI9341 - 터치/SDCard 미구현
+ - [] 15.CDS_sensorx
  - [] 16.I2C-EEPROM
- - [] 17.MPU6050
- - [] 18.Encoder
- - [] 19.RTC
- - [] 20.BLDC Motor
- - [] 21.Step Motor
+ - [] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
+ - [] 18.Rotary_Encoder
+ - [] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
+ - [] 20.VL53L0X - 정상 동작 안됨
+ - [] 21.RTC
