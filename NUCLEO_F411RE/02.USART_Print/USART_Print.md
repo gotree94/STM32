@@ -2,24 +2,17 @@
 
    * 터미널 통신 프로그램 설치 : [https://github.com/TeraTermProject/teraterm/releases?authuser=0]
 
+<img width="600" height="400" alt="001" src="https://github.com/user-attachments/assets/27a8e2d9-03ab-4a6e-bd36-b6942ac06c9d" />
+<br>
+<img width="492" height="558" alt="002" src="https://github.com/user-attachments/assets/8dfd9e93-c51e-445f-a859-70bbd210f7f2" />
+<br>
+<img width="486" height="129" alt="003" src="https://github.com/user-attachments/assets/dbd3e3ae-8790-43de-ad4f-0452210bef4f" />
+<br>
+<img width="600" height="400" alt="004" src="https://github.com/user-attachments/assets/05a4f6fb-26f9-4245-bb91-1f55d52fc2af" />
+<br>
+<img width="600" height="400" alt="005" src="https://github.com/user-attachments/assets/f4f75e6b-6a31-4e27-a9f9-a76060fb105a" />
+<br>
 
-<img width="995" height="550" alt="USART_Print_008" src="https://github.com/user-attachments/assets/dcb67c8e-7796-4dee-9f22-f0b0637c0a7e" />
-
-
-<img width="492" height="558" alt="USART_Print_001" src="https://github.com/user-attachments/assets/d34b82d1-3857-4a56-8ef8-f7c648daaab7" />
-<br>
-<img width="1433" height="908" alt="USART_Print_002" src="https://github.com/user-attachments/assets/bdee0660-b056-4837-b4da-2f156bdc31ff" />
-<br>
-<img width="1433" height="908" alt="USART_Print_003" src="https://github.com/user-attachments/assets/3136549e-c240-4625-bcbe-558c9b17aede" />
-<br>
-<img width="1137" height="545" alt="USART_Print_004" src="https://github.com/user-attachments/assets/356b2b6a-f610-47f8-8711-b5e8af35d6ca" />
-<br>
-<img width="1137" height="545" alt="USART_Print_005" src="https://github.com/user-attachments/assets/10aa62af-c7d3-48a6-98d3-5948047a0ddf" />
-<br>
-<img width="1137" height="545" alt="USART_Print_006" src="https://github.com/user-attachments/assets/a400b2dd-8cf2-4094-b7e6-4633bdb62cd3" />
-<br>
-<img width="1137" height="545" alt="USART_Print_007" src="https://github.com/user-attachments/assets/2124890a-c43d-4be2-8c53-bc3875f66168" />
-<br>
 
 ```c
 /* Private includes ----------------------------------------------------------*/
