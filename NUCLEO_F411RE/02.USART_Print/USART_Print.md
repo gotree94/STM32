@@ -2,11 +2,13 @@
 
    * 터미널 통신 프로그램 설치 : [https://github.com/TeraTermProject/teraterm/releases?authuser=0]
 
+<img width="600" height="400" alt="000" src="https://github.com/user-attachments/assets/bc1ca6e3-715a-421b-84e7-5c1f8cb6c19b" />
+<br>
 <img width="600" height="400" alt="001" src="https://github.com/user-attachments/assets/27a8e2d9-03ab-4a6e-bd36-b6942ac06c9d" />
 <br>
-<img width="492" height="558" alt="002" src="https://github.com/user-attachments/assets/8dfd9e93-c51e-445f-a859-70bbd210f7f2" />
+<img width="300" height="400" alt="002" src="https://github.com/user-attachments/assets/8dfd9e93-c51e-445f-a859-70bbd210f7f2" />
 <br>
-<img width="486" height="129" alt="003" src="https://github.com/user-attachments/assets/dbd3e3ae-8790-43de-ad4f-0452210bef4f" />
+<img width="300" height="100" alt="003" src="https://github.com/user-attachments/assets/dbd3e3ae-8790-43de-ad4f-0452210bef4f" />
 <br>
 <img width="600" height="400" alt="004" src="https://github.com/user-attachments/assets/05a4f6fb-26f9-4245-bb91-1f55d52fc2af" />
 <br>
