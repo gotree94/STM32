@@ -1,149 +1,274 @@
-# GitHub Markdown Sample
+# I2C CLCD
 
-## 1. 제목 (Heading)
-# 제목1 (H1)
-## 제목2 (H2)
-### 제목3 (H3)
-#### 제목4 (H4)
-##### 제목5 (H5)
-###### 제목6 (H6)
+  * PB8 - SCL
+  * PB9 - SDA
 
----
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5a174c00-4edc-4481-a59f-00297ecf229d" />
+<br><br>
 
-## 2. 텍스트 강조
-*이탤릭*    _이탤릭_  
-**굵게**    __굵게__  
-***굵게+이탤릭***   ___굵게+이탤릭___  
-~~취소선~~  
-<u>밑줄</u>  
-
----
-
-## 3. 목록
-- 항목 1
-  - 하위 항목 1
-    - 하위 항목 2
-* 별표도 가능
-+ 플러스도 가능
-
-1. 첫 번째
-2. 두 번째
-3. 세 번째
-
----
-
-## 4. 체크박스 (Task List)
-- [ ] 할 일 1
-- [x] 완료된 일
-
----
-
-## 5. 링크 & 이미지
-[GitHub](https://github.com)  
-![샘플 이미지](https://via.placeholder.com/150)  
-[![이미지+링크](https://via.placeholder.com/100)](https://github.com)
-
----
-
-## 6. 인용구
-> 인용 1
->> 인용 안의 인용
-
----
-
-## 7. 코드
-인라인 코드: `printf("Hello");`
+<img width="800" height="600" alt="I2C_001" src="https://github.com/user-attachments/assets/6ad1eefb-17c6-4073-8355-276e65266cdb" />
+<br>
+<img width="800" height="600" alt="I2C_002" src="https://github.com/user-attachments/assets/4da3d974-64f7-48d9-8080-a8792f981041" />
+<br>
+<img width="800" height="600" alt="I2C_003" src="https://github.com/user-attachments/assets/06a7ed9a-ca43-4011-9b45-76428a27ada8" />
+<br>
 
 ```c
+/* USER CODE BEGIN Includes */
 #include <stdio.h>
-int main() {
-    printf("Hello World\n");
-}
+/* USER CODE END Includes */
 ```
 
----
+```c
+/* USER CODE BEGIN PFP */
+void I2C_ScanAddresses(void);
+/* USER CODE END PFP */
+```
 
-## 8. 수평선
----  
-***  
-___  
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
 
----
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
 
-## 9. 표 (Table)
-| 이름   | 나이 | 비고         |
-|--------|-----:|:-------------|
-| 홍길동 |   20 | 왼쪽 정렬    |
-| 이몽룡 |   30 | 오른쪽 정렬  |
-| 성춘향 |   25 | 가운데 정렬  |
+  return ch;
+}
 
----
+void I2C_ScanAddresses(void) {
+    HAL_StatusTypeDef result;
+    uint8_t i;
 
-## 10. 이모지
-:smile: :+1: :fire:
 
----
+    printf("Scanning I2C addresses...\r\n");
 
-## 11. 접기/펼치기 (Details)
-<details>
-<summary>펼치기/접기 제목</summary>
 
-내용을 여기에 작성합니다.
+    for (i = 1; i < 128; i++) {
+        /*
+         * HAL_I2C_IsDeviceReady: If a device at the specified address exists return HAL_OK.
+         * Since I2C devices must have an 8-bit address, the 7-bit address is shifted left by 1 bit.
+         */
+        result = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i << 1), 1, 10);
+        if (result == HAL_OK) {
+            printf("I2C device found at address 0x%02X\r\n", i);
+        }
+    }
 
-</details>
 
----
+    printf("Scan complete.\r\n");
+}
 
-## 12. 각주 (Footnote)
-이것은 각주 예시입니다[^1].
+/* USER CODE END 0 */
+```
 
-[^1]: 각주 내용
+```c
+  /* USER CODE BEGIN 2 */
+  I2C_ScanAddresses();
+  /* USER CODE END 2 */
+```
 
----
-
-## 13. 수학 수식 (MathJax)
-인라인: $E = mc^2$  
-
-블록:
-$$
-\int_0^\infty e^{-x} dx = 1
-$$
-
----
-
-## 14. 강조 구문 (Highlight)
-==하이라이트==
-
----
-
-## 15. HTML 태그
-<b>굵게</b>  
-<i>이탤릭</i>  
-<sub>아래첨자</sub>  
-<sup>위첨자</sup>  
-<br> 줄바꿈
-
----
-
-## 16. 체크리스트 + 이슈 연결
-- [ ] #12  
-- [x] #34  
 
 ---
-
-## 17. 사용자/리포지토리/커밋 참조
-@username  
-#123  
-owner/repo  
-
+CLCD "Hello World!"
 ---
 
-## 18. Mermaid 다이어그램
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+<img width="800" height="600" alt="CLCD" src="https://github.com/user-attachments/assets/a590d783-9ded-40ba-b23d-ce6f93a5b430" />
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define delay_ms HAL_Delay
+
+#define ADDRESS   0x3F << 1
+//#define ADDRESS   0x27 << 1
+
+#define RS1_EN1   0x05
+#define RS1_EN0   0x01
+#define RS0_EN1   0x04
+#define RS0_EN0   0x00
+#define BackLight 0x08
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+int delay = 0;
+int value = 0;
+/* USER CODE END PV */
+```
+
+```c
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_I2C1_Init(void);
+/* USER CODE BEGIN PFP */
+void I2C_ScanAddresses(void);
+
+void delay_us(int us);
+void LCD_DATA(uint8_t data);
+void LCD_CMD(uint8_t cmd);
+void LCD_CMD_4bit(uint8_t cmd);
+void LCD_INIT(void);
+void LCD_XY(char x, char y);
+void LCD_CLEAR(void);
+void LCD_PUTS(char *str);
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+void I2C_ScanAddresses(void) {
+    HAL_StatusTypeDef result;
+    uint8_t i;
+
+    printf("Scanning I2C addresses...\r\n");
+
+    for (i = 1; i < 128; i++) {
+        /*
+         * HAL_I2C_IsDeviceReady: If a device at the specified address exists return HAL_OK.
+         * Since I2C devices must have an 8-bit address, the 7-bit address is shifted left by 1 bit.
+         */
+        result = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i << 1), 1, 10);
+        if (result == HAL_OK) {
+            printf("I2C device found at address 0x%02X\r\n", i);
+        }
+    }
+
+    printf("Scan complete.\r\n");
+}
+
+void delay_us(int us){
+	value = 3;
+	delay = us * value;
+	for(int i=0;i < delay;i++);
+}
+
+void LCD_DATA(uint8_t data) {
+	uint8_t temp=(data & 0xF0)|RS1_EN1|BackLight;
+
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	temp=(data & 0xF0)|RS1_EN0|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	delay_us(4);
+
+	temp=((data << 4) & 0xF0)|RS1_EN1|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	temp = ((data << 4) & 0xF0)|RS1_EN0|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	delay_us(50);
+}
+
+void LCD_CMD(uint8_t cmd) {
+	uint8_t temp=(cmd & 0xF0)|RS0_EN1|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	temp=(cmd & 0xF0)|RS0_EN0|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	delay_us(4);
+
+	temp=((cmd << 4) & 0xF0)|RS0_EN1|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	temp=((cmd << 4) & 0xF0)|RS0_EN0|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	delay_us(50);
+}
+
+void LCD_CMD_4bit(uint8_t cmd) {
+	uint8_t temp=((cmd << 4) & 0xF0)|RS0_EN1|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	temp=((cmd << 4) & 0xF0)|RS0_EN0|BackLight;
+	while(HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000)!=HAL_OK);
+	delay_us(50);
+}
+
+void LCD_INIT(void) {
+
+	delay_ms(100);
+
+	LCD_CMD_4bit(0x03); delay_ms(5);
+	LCD_CMD_4bit(0x03); delay_us(100);
+	LCD_CMD_4bit(0x03); delay_us(100);
+	LCD_CMD_4bit(0x02); delay_us(100);
+	LCD_CMD(0x28);  // 4 bits, 2 line, 5x8 font
+	LCD_CMD(0x08);  // display off, cursor off, blink off
+	LCD_CMD(0x01);  // clear display
+	delay_ms(3);
+	LCD_CMD(0x06);  // cursor movint direction
+	LCD_CMD(0x0C);  // display on, cursor off, blink off
+}
+
+void LCD_XY(char x, char y) {
+	if      (y == 0) LCD_CMD(0x80 + x);
+	else if (y == 1) LCD_CMD(0xC0 + x);
+	else if (y == 2) LCD_CMD(0x94 + x);
+	else if (y == 3) LCD_CMD(0xD4 + x);
+}
+
+void LCD_CLEAR(void) {
+	LCD_CMD(0x01);
+	delay_ms(2);
+}
+
+void LCD_PUTS(char *str) {
+	while (*str) LCD_DATA(*str++);
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  I2C_ScanAddresses();
+
+  LCD_INIT();
+  LCD_XY(0, 0) ; LCD_PUTS((char *)"LCD Display test");
+  LCD_XY(0, 1) ; LCD_PUTS((char *)"Hello World.....");
+
+  /* USER CODE END 2 */
 ```
 
