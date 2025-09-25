@@ -1,149 +1,195 @@
-# GitHub Markdown Sample
+# 피에조 부저로 마리오 음악을 연주
 
-## 1. 제목 (Heading)
-# 제목1 (H1)
-## 제목2 (H2)
-### 제목3 (H3)
-#### 제목4 (H4)
-##### 제목5 (H5)
-###### 제목6 (H6)
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/774d7903-5392-4df3-b8da-f16d6996ea9c" />
 
----
+### 타이머 설정 (TIM1):
+   * Timers → TIM1 → Clock Source: Internal Clock
+   * Channel1 → PWM Generation CH1
+   * Configuration → Parameter Settings:
+      * Prescaler: 64MHz ÷ 64 (1MHz 클록)
+      * Counter Period: 1000 (초기값, 코드에서 동적 변경)
+      * Pulse: 500 (50% duty cycle)
 
-## 2. 텍스트 강조
-*이탤릭*    _이탤릭_  
-**굵게**    __굵게__  
-***굵게+이탤릭***   ___굵게+이탤릭___  
-~~취소선~~  
-<u>밑줄</u>  
+<img width="800" height="600" alt="piezo_002" src="https://github.com/user-attachments/assets/6cd1ec46-4fc0-4612-98e3-4301c19f623a" />
+<br>
+<img width="800" height="600" alt="piezo_001" src="https://github.com/user-attachments/assets/d07acb56-dbe3-4881-80dd-251518bbb7a4" />
+<br>
 
----
-
-## 3. 목록
-- 항목 1
-  - 하위 항목 1
-    - 하위 항목 2
-* 별표도 가능
-+ 플러스도 가능
-
-1. 첫 번째
-2. 두 번째
-3. 세 번째
-
----
-
-## 4. 체크박스 (Task List)
-- [ ] 할 일 1
-- [x] 완료된 일
-
----
-
-## 5. 링크 & 이미지
-[GitHub](https://github.com)  
-![샘플 이미지](https://via.placeholder.com/150)  
-[![이미지+링크](https://via.placeholder.com/100)](https://github.com)
-
----
-
-## 6. 인용구
-> 인용 1
->> 인용 안의 인용
-
----
-
-## 7. 코드
-인라인 코드: `printf("Hello");`
 
 ```c
-#include <stdio.h>
-int main() {
-    printf("Hello World\n");
+/* USER CODE BEGIN PD */
+// 음표 주파수 정의 (Hz)
+#define NOTE_C4  262
+#define NOTE_CS4 277
+#define NOTE_D4  294
+#define NOTE_DS4 311
+#define NOTE_E4  330
+#define NOTE_F4  349
+#define NOTE_FS4 370
+#define NOTE_G4  392
+#define NOTE_GS4 415
+#define NOTE_A4  440
+#define NOTE_AS4 466
+#define NOTE_B4  494
+#define NOTE_C5  523
+#define NOTE_CS5 554
+#define NOTE_D5  587
+#define NOTE_DS5 622
+#define NOTE_E5  659
+#define NOTE_F5  698
+#define NOTE_FS5 740
+#define NOTE_G5  784
+#define NOTE_GS5 831
+#define NOTE_A5  880
+#define NOTE_AS5 932
+#define NOTE_B5  988
+#define NOTE_C6  1047
+#define NOTE_CS6 1109
+#define NOTE_D6  1175
+#define NOTE_DS6 1245
+#define NOTE_E6  1319
+#define NOTE_F6  1397
+#define NOTE_FS6 1480
+#define NOTE_G6  1568
+#define NOTE_GS6 1661
+#define NOTE_A6  1760
+#define NOTE_AS6 1865
+#define NOTE_B6  1976
+#define NOTE_C7  2093
+#define NOTE_CS7 2217
+#define NOTE_D7  2349
+#define NOTE_DS7 2489
+#define NOTE_E7  2637
+#define NOTE_F7  2794
+#define NOTE_FS7 2960
+#define NOTE_G7  3136
+#define NOTE_GS7 3322
+#define NOTE_A7  3520
+#define NOTE_AS7 3729
+#define NOTE_B7  3951
+
+#define REST 0
+
+// 음표 길이 정의 (밀리초)
+#define WHOLE     1400      // 원래 2000
+#define HALF      700       // 원래 1000
+#define QUARTER   350       // 원래 500
+#define EIGHTH    175       // 원래 250
+#define SIXTEENTH 90        // 원래 125
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+typedef struct {
+    uint16_t frequency;
+    uint16_t duration;
+} Note;
+
+const Note mario_theme[] = {
+    // 첫 번째 구간
+    {NOTE_E7, EIGHTH}, {NOTE_E7, EIGHTH}, {REST, EIGHTH}, {NOTE_E7, EIGHTH},
+    {REST, EIGHTH}, {NOTE_C7, EIGHTH}, {NOTE_E7, EIGHTH}, {REST, EIGHTH},
+    {NOTE_G7, QUARTER}, {REST, QUARTER}, {NOTE_G6, QUARTER}, {REST, QUARTER},
+
+    // 두 번째 구간
+    {NOTE_C7, QUARTER}, {REST, EIGHTH}, {NOTE_G6, EIGHTH}, {REST, EIGHTH},
+    {NOTE_E6, QUARTER}, {REST, EIGHTH}, {NOTE_A6, EIGHTH}, {REST, EIGHTH},
+    {NOTE_B6, EIGHTH}, {REST, EIGHTH}, {NOTE_AS6, EIGHTH}, {NOTE_A6, QUARTER},
+
+    // 세 번째 구간
+    {NOTE_G6, EIGHTH}, {NOTE_E7, EIGHTH}, {NOTE_G7, EIGHTH}, {NOTE_A7, QUARTER},
+    {NOTE_F7, EIGHTH}, {NOTE_G7, EIGHTH}, {REST, EIGHTH}, {NOTE_E7, EIGHTH},
+    {REST, EIGHTH}, {NOTE_C7, EIGHTH}, {NOTE_D7, EIGHTH}, {NOTE_B6, QUARTER},
+
+    // 반복 구간
+    {NOTE_C7, QUARTER}, {REST, EIGHTH}, {NOTE_G6, EIGHTH}, {REST, EIGHTH},
+    {NOTE_E6, QUARTER}, {REST, EIGHTH}, {NOTE_A6, EIGHTH}, {REST, EIGHTH},
+    {NOTE_B6, EIGHTH}, {REST, EIGHTH}, {NOTE_AS6, EIGHTH}, {NOTE_A6, QUARTER},
+
+    {NOTE_G6, EIGHTH}, {NOTE_E7, EIGHTH}, {NOTE_G7, EIGHTH}, {NOTE_A7, QUARTER},
+    {NOTE_F7, EIGHTH}, {NOTE_G7, EIGHTH}, {REST, EIGHTH}, {NOTE_E7, EIGHTH},
+    {REST, EIGHTH}, {NOTE_C7, EIGHTH}, {NOTE_D7, EIGHTH}, {NOTE_B6, QUARTER},
+
+    // 마무리
+    {REST, QUARTER}, {NOTE_G7, EIGHTH}, {NOTE_FS7, EIGHTH}, {NOTE_F7, EIGHTH},
+    {NOTE_DS7, QUARTER}, {NOTE_E7, EIGHTH}, {REST, EIGHTH}, {NOTE_GS6, EIGHTH},
+    {NOTE_A6, EIGHTH}, {NOTE_C7, EIGHTH}, {REST, EIGHTH}, {NOTE_A6, EIGHTH},
+    {NOTE_C7, EIGHTH}, {NOTE_D7, EIGHTH}
+};
+
+const int mario_theme_length = sizeof(mario_theme) / sizeof(mario_theme[0]);
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void play_tone(uint16_t frequency, uint16_t duration);
+void play_mario_theme(void);
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+/**
+ * @brief 특정 주파수와 지속시간으로 톤 재생
+ * @param frequency: 재생할 주파수 (Hz), 0이면 무음
+ * @param duration: 재생 시간 (밀리초)
+ */
+void play_tone(uint16_t frequency, uint16_t duration) {
+    if (frequency == 0) {
+        // 무음 처리
+        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+    } else {
+        // 주파수에 따른 ARR 값 계산
+        // APB2 클록이 72MHz이고, Prescaler가 72-1이면 1MHz
+        // ARR = 1000000 / frequency - 1
+        uint32_t arr_value = 1000000 / frequency - 1;
+
+        // 타이머 설정 업데이트
+        __HAL_TIM_SET_AUTORELOAD(&htim1, arr_value);
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, arr_value / 2); // 50% duty cycle
+
+        // PWM 시작
+        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    }
+
+    // 지정된 시간만큼 대기
+    HAL_Delay(duration);
+
+    // 톤 정지
+    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+
+    // 음표 사이의 짧은 간격 (더 빠른 연주를 위해 단축)
+    HAL_Delay(30);
 }
+
+/**
+ * @brief 마리오 테마 음악 재생
+ */
+void play_mario_theme(void) {
+    for (int i = 0; i < mario_theme_length; i++) {
+        play_tone(mario_theme[i].frequency, mario_theme[i].duration);
+    }
+}
+
+/* USER CODE END 0 */
 ```
 
----
+```c
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	// 마리오 테마 음악 재생
+	play_mario_theme();
 
-## 8. 수평선
----  
-***  
-___  
+	// 음악 종료 후 5초 대기
+	HAL_Delay(1);
+    /* USER CODE END WHILE */
 
----
-
-## 9. 표 (Table)
-| 이름   | 나이 | 비고         |
-|--------|-----:|:-------------|
-| 홍길동 |   20 | 왼쪽 정렬    |
-| 이몽룡 |   30 | 오른쪽 정렬  |
-| 성춘향 |   25 | 가운데 정렬  |
-
----
-
-## 10. 이모지
-:smile: :+1: :fire:
-
----
-
-## 11. 접기/펼치기 (Details)
-<details>
-<summary>펼치기/접기 제목</summary>
-
-내용을 여기에 작성합니다.
-
-</details>
-
----
-
-## 12. 각주 (Footnote)
-이것은 각주 예시입니다[^1].
-
-[^1]: 각주 내용
-
----
-
-## 13. 수학 수식 (MathJax)
-인라인: $E = mc^2$  
-
-블록:
-$$
-\int_0^\infty e^{-x} dx = 1
-$$
-
----
-
-## 14. 강조 구문 (Highlight)
-==하이라이트==
-
----
-
-## 15. HTML 태그
-<b>굵게</b>  
-<i>이탤릭</i>  
-<sub>아래첨자</sub>  
-<sup>위첨자</sup>  
-<br> 줄바꿈
-
----
-
-## 16. 체크리스트 + 이슈 연결
-- [ ] #12  
-- [x] #34  
-
----
-
-## 17. 사용자/리포지토리/커밋 참조
-@username  
-#123  
-owner/repo  
-
----
-
-## 18. Mermaid 다이어그램
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
 ```
+
 
