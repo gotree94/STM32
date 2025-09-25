@@ -1,8 +1,5 @@
 ## 1. LED_Blink
 
-<img src="https://github.com/gotree94/STM32/blob/main/NUCLEO_F103RB/1.LED_Blink/LED_Blinks.gif?raw=true" width="400">
-<br>
-
 <img width="520" height="350" alt="LED_Blinks_001" src="https://github.com/user-attachments/assets/3aa18d2c-5bc8-4d24-ae1f-898272f96bf9" />
 <br>
 <img width="1359" height="805" alt="LED_Blinks_002" src="https://github.com/user-attachments/assets/d2634652-6e5b-46be-bbb8-027a9d0f3c9b" />
