@@ -6,7 +6,7 @@
    * Timers → TIM1 → Clock Source: Internal Clock
    * Channel1 → PWM Generation CH1
    * Configuration → Parameter Settings:
-      * Prescaler: 64MHz ÷ 64 (1MHz 클록)
+      * Prescaler: 84MHz ÷ 84 (1MHz 클록)
       * Counter Period: 1000 (초기값, 코드에서 동적 변경)
       * Pulse: 500 (50% duty cycle)
 
