@@ -1,7 +1,7 @@
 # SG90 Servo 제어를 위한 Timer 설정 (STM32 예제)
 
 
-<img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/b5f1c9b3-cb48-4f3d-bd88-d9da0acc4075" />
+<img width="600" height="500" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/b5f1c9b3-cb48-4f3d-bd88-d9da0acc4075" />
 <br><br>
 
 <img width="800" height="608" alt="SERVO_003" src="https://github.com/user-attachments/assets/a6ca154d-6616-407b-9e77-ab1566bb1a80" />
@@ -403,12 +403,4 @@ void display_servo_status(uint8_t pan, uint8_t tilt)
     
     /* USER CODE END WHILE */
 ```
-
-
-
-
-
-
-
-
 
