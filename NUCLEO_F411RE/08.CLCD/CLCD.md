@@ -3,7 +3,7 @@
   * PB8 - SCL
   * PB9 - SDA
 
-<img width="500" height="400" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/db1a88ee-2017-40cf-9e1f-c797634801df" />
+<img width="644" height="586" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/db1a88ee-2017-40cf-9e1f-c797634801df" />
 
 <br><br>
 
