@@ -4,8 +4,7 @@
   * PB9 - SDA
 
 <img width="644" height="586" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/db1a88ee-2017-40cf-9e1f-c797634801df" />
-
-<br><br>
+<br>
 
 <img width="800" height="600" alt="I2C_001" src="https://github.com/user-attachments/assets/6ad1eefb-17c6-4073-8355-276e65266cdb" />
 <br>
