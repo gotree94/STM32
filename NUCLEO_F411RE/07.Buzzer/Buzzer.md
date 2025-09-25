@@ -11,9 +11,11 @@
       * Counter Period: 1000 (초기값, 코드에서 동적 변경)
       * Pulse: 500 (50% duty cycle)
 
-<img width="800" height="600" alt="piezo_002" src="https://github.com/user-attachments/assets/6cd1ec46-4fc0-4612-98e3-4301c19f623a" />
+<img width="600" height="400" alt="001" src="https://github.com/user-attachments/assets/b252a2bc-b7f6-4fdd-aff2-7f11e7522374" />
 <br>
-<img width="800" height="600" alt="piezo_001" src="https://github.com/user-attachments/assets/d07acb56-dbe3-4881-80dd-251518bbb7a4" />
+<img width="600" height="400" alt="002" src="https://github.com/user-attachments/assets/43647f31-33f9-47a0-bd2f-d6f4d321bfdd" />
+<br>
+<img width="600" height="400" alt="003" src="https://github.com/user-attachments/assets/871e538e-b7c5-46f4-afb9-ddcba386a868" />
 <br>
 
 
