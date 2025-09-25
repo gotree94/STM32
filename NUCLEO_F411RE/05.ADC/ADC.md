@@ -1,149 +1,94 @@
-# GitHub Markdown Sample
+# ADC_TemperatureSensor
 
-## 1. 제목 (Heading)
-# 제목1 (H1)
-## 제목2 (H2)
-### 제목3 (H3)
-#### 제목4 (H4)
-##### 제목5 (H5)
-###### 제목6 (H6)
+<img width="300" height="400" alt="001" src="https://github.com/user-attachments/assets/7fbd13f5-1f60-40b9-911c-26835c6fc8a5" />
+<br>
+<img width="600" height="400" alt="002" src="https://github.com/user-attachments/assets/e655889c-7f55-4b13-8cb3-71ce6b86b7d9" />
+<br>
+<img width="600" height="400" alt="003" src="https://github.com/user-attachments/assets/e15a2b0b-f199-40f9-ad7b-54a21c836b61" />
+<br>
+<img width="600" height="400" alt="005" src="https://github.com/user-attachments/assets/20440010-d87a-4c48-8727-4b7ab530b8ea" />
+<br>
+<img width="600" height="400" alt="004" src="https://github.com/user-attachments/assets/d8725743-9ef4-4ccc-842c-0cc914bd09ac" />
+<br>
 
----
-
-## 2. 텍스트 강조
-*이탤릭*    _이탤릭_  
-**굵게**    __굵게__  
-***굵게+이탤릭***   ___굵게+이탤릭___  
-~~취소선~~  
-<u>밑줄</u>  
-
----
-
-## 3. 목록
-- 항목 1
-  - 하위 항목 1
-    - 하위 항목 2
-* 별표도 가능
-+ 플러스도 가능
-
-1. 첫 번째
-2. 두 번째
-3. 세 번째
-
----
-
-## 4. 체크박스 (Task List)
-- [ ] 할 일 1
-- [x] 완료된 일
-
----
-
-## 5. 링크 & 이미지
-[GitHub](https://github.com)  
-![샘플 이미지](https://via.placeholder.com/150)  
-[![이미지+링크](https://via.placeholder.com/100)](https://github.com)
-
----
-
-## 6. 인용구
-> 인용 1
->> 인용 안의 인용
-
----
-
-## 7. 코드
-인라인 코드: `printf("Hello");`
 
 ```c
+/* USER CODE BEGIN PV */
+const float AVG_SLOPE = 4.3E-03;
+const float V25 = 1.43;
+const float ADC_TO_VOLT = 3.3 / 4096;
+/* USER CODE END PV */
+```
+
+
+```c
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 #include <stdio.h>
-int main() {
-    printf("Hello World\n");
+/* USER CODE END Includes */
+```
+
+
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+
+  return ch;
 }
 ```
 
----
+```c
+  /* USER CODE BEGIN 2 */
+  uint16_t adc1;
 
-## 8. 수평선
----  
-***  
-___  
+  float vSense;
+  float temp;
 
----
+  if(HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
+  {
+	  Error_Handler();
+  }
 
-## 9. 표 (Table)
-| 이름   | 나이 | 비고         |
-|--------|-----:|:-------------|
-| 홍길동 |   20 | 왼쪽 정렬    |
-| 이몽룡 |   30 | 오른쪽 정렬  |
-| 성춘향 |   25 | 가운데 정렬  |
+  if(HAL_ADC_Start(&hadc1) != HAL_OK)
+  {
+	  Error_Handler();
+  }
+  /* USER CODE END 2 */
 
----
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  HAL_ADC_PollForConversion(&hadc1, 100);
+	  adc1 = HAL_ADC_GetValue(&hadc1);
+	  //printf("ADC1_temperature : %d \n",adc1);
 
-## 10. 이모지
-:smile: :+1: :fire:
+	  vSense = adc1 * ADC_TO_VOLT;
+	  temp = (V25 - vSense) / AVG_SLOPE + 25.0;
+	  printf("temperature : %d, %f \n",adc1, temp);
 
----
+	  HAL_Delay(100);
+    /* USER CODE END WHILE */
 
-## 11. 접기/펼치기 (Details)
-<details>
-<summary>펼치기/접기 제목</summary>
-
-내용을 여기에 작성합니다.
-
-</details>
-
----
-
-## 12. 각주 (Footnote)
-이것은 각주 예시입니다[^1].
-
-[^1]: 각주 내용
-
----
-
-## 13. 수학 수식 (MathJax)
-인라인: $E = mc^2$  
-
-블록:
-$$
-\int_0^\infty e^{-x} dx = 1
-$$
-
----
-
-## 14. 강조 구문 (Highlight)
-==하이라이트==
-
----
-
-## 15. HTML 태그
-<b>굵게</b>  
-<i>이탤릭</i>  
-<sub>아래첨자</sub>  
-<sup>위첨자</sup>  
-<br> 줄바꿈
-
----
-
-## 16. 체크리스트 + 이슈 연결
-- [ ] #12  
-- [x] #34  
-
----
-
-## 17. 사용자/리포지토리/커밋 참조
-@username  
-#123  
-owner/repo  
-
----
-
-## 18. Mermaid 다이어그램
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+    /* USER CODE BEGIN 3 */
+  }
 ```
-
