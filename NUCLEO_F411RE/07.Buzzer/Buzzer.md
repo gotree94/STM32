@@ -1,6 +1,7 @@
 # 피에조 부저로 마리오 음악을 연주
 
-<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/774d7903-5392-4df3-b8da-f16d6996ea9c" />
+<img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/f6893893-42d3-4151-a112-3ba60cd69a29" />
+
 
 ### 타이머 설정 (TIM1):
    * Timers → TIM1 → Clock Source: Internal Clock
