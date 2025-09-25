@@ -2,12 +2,13 @@
 
 
 <img width="600" height="500" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/b5f1c9b3-cb48-4f3d-bd88-d9da0acc4075" />
-<br><br>
+<br>
 
-<img width="800" height="608" alt="SERVO_003" src="https://github.com/user-attachments/assets/a6ca154d-6616-407b-9e77-ab1566bb1a80" />
+<img width="600" height="400" alt="001" src="https://github.com/user-attachments/assets/b6b29520-72e8-491d-a845-d856c5d2a63b" />
 <br>
-<img width="800" height="608" alt="SERVO_004" src="https://github.com/user-attachments/assets/f20ec8df-36e9-42e1-8671-6223fc108338" />
+<img width="600" height="400" alt="002" src="https://github.com/user-attachments/assets/3c36db92-b9ad-4bf6-bd6e-6d9d6d6574cf" />
 <br>
+
 
 
 ## 1. 기본 조건
