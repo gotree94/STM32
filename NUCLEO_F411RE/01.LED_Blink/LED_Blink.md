@@ -2,8 +2,6 @@
 
 <img width="520" height="350" alt="LED_Blinks_001" src="https://github.com/user-attachments/assets/3aa18d2c-5bc8-4d24-ae1f-898272f96bf9" />
 <br>
-<img width="1359" height="805" alt="LED_Blinks_002" src="https://github.com/user-attachments/assets/d2634652-6e5b-46be-bbb8-027a9d0f3c9b" />
-<br>
 <img width="402" height="51" alt="LED_Blinks_004" src="https://github.com/user-attachments/assets/6cf1078d-0d6a-4d3f-88b3-b3e46151b983" />
 <br>
 <img width="1359" height="838" alt="007" src="https://github.com/user-attachments/assets/38c66e79-7a7f-43f4-89af-6c443d12fb36" />
