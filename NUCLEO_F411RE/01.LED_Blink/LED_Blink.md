@@ -41,14 +41,6 @@
 <br>
 <img width="486" height="129" alt="LED_Blinks_006" src="https://github.com/user-attachments/assets/4d967a98-f423-4f2f-ac96-e863f1115848" />
 <br>
-<img width="1433" height="908" alt="LED_Blinks_007" src="https://github.com/user-attachments/assets/3df11327-4bef-41f6-8e77-d99d4d80d467" />
-<br>
-<img width="1433" height="908" alt="LED_Blinks_008" src="https://github.com/user-attachments/assets/d3133bc5-09d9-4b51-baec-290a8c229c6f" />
-<br>
-<img width="1433" height="908" alt="LED_Blinks_009" src="https://github.com/user-attachments/assets/401ce922-6baf-4321-a3eb-87b8bffff721" />
-<br>
-<img width="1433" height="908" alt="LED_Blinks_010" src="https://github.com/user-attachments/assets/f4b312b8-fa49-4413-bb46-4125ad84b26b" />
-<br>
 <img width="242" height="297" alt="LED_Blinks_011" src="https://github.com/user-attachments/assets/7bf0e956-97db-48b5-9856-d4a119fc7538" />
 <br>
 <img width="486" height="165" alt="LED_Blinks_012" src="https://github.com/user-attachments/assets/ca3e7a4a-8acc-4cfd-9905-e01ccbeb556c" />
