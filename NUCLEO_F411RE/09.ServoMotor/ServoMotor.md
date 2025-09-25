@@ -53,7 +53,7 @@ $$\frac{2 \, \text{ms}}{20 \, \mu\text{s}} = 100 \quad \Rightarrow \quad \text{C
 ---
 
 ## 5. 요약
-- Prescaler = **1279**, Period = **999** → 정확히 **50 Hz (20 ms)** PWM 생성  
+- Prescaler = **1679**, Period = **999** → 정확히 **50 Hz (20 ms)** PWM 생성  
 - CCR 값 50 ~ 100 사이로 설정하여 SG90 서보 각도 (0°~180°) 제어 가능  
 
 ---
