@@ -4,6 +4,8 @@
 <img width="600" height="500" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/b5f1c9b3-cb48-4f3d-bd88-d9da0acc4075" />
 <br>
 
+<img width="659" height="438" alt="003" src="https://github.com/user-attachments/assets/34996037-3221-4a01-8c17-528f218a28fa" />
+<br>
 
 <img width="600" height="400" alt="002" src="https://github.com/user-attachments/assets/93c73614-6956-43b9-b1ec-452932fcc5d7" />
 <br>
