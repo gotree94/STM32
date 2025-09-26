@@ -2,11 +2,12 @@
 
    * PA0 - DATA
 
-<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/8e00380d-6d85-49b3-b845-88558092ffc0" />
+<img width="800" height="600" alt="007" src="https://github.com/user-attachments/assets/db34e5f6-5f22-4705-b146-8d8b9d0c90b9" />
 <br>
 
-<img width="995" height="550" alt="DHT11_001" src="https://github.com/user-attachments/assets/a487c821-8c1c-4ec8-a241-ed420251dc1e" />
+<img width="600" height="400" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/8f2bce7e-090f-4600-891d-ed3656c49bd4" />
 <br>
+
 
 <img width="1592" height="935" alt="DHT11_002" src="https://github.com/user-attachments/assets/cccbea1d-c0d8-4c90-9eba-7ab735dfb138" />
 <br>
