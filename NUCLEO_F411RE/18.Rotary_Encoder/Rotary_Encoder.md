@@ -1,6 +1,6 @@
 # Rotary_Encoder
 
-# STM32F103 로터리 인코더 CubeMX 설정 가이드
+# STM32F411 로터리 인코더 CubeMX 설정 가이드
 
 ## 1. 프로젝트 생성
 
