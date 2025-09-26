@@ -8,7 +8,7 @@
 #ifndef INC_ILI9341_H_
 #define INC_ILI9341_H_
 
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -122,3 +122,4 @@ void ILI9341_DrawString(uint16_t x, uint16_t y, char* str, uint16_t color, uint1
 //#endif
 
 #endif /* INC_ILI9341_H_ */
+
