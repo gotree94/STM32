@@ -1,12 +1,12 @@
 # DHT11 : 온도 습도 센서
 
    * PA0 - DATA
-   * 
+
+<img width="659" height="438" alt="001" src="https://github.com/user-attachments/assets/76e6ebc7-e043-4079-9fb6-d45c23d8e00a" />
+
 <img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/bfc2b219-e041-4731-8637-28916b6bb6f1" />
 
-
 <img width="800" height="600" alt="007" src="https://github.com/user-attachments/assets/333cfa3d-aed2-4a82-8376-20237697436b" />
-
 
 
 ```c
