@@ -5,7 +5,7 @@
 ## 1. 프로젝트 생성
 
 ### MCU 선택
-- **Part Number**: STM32F411C8Tx (또는 사용하는 모델)
+- **Part Number**: STM32F411 (또는 사용하는 모델)
 - **Package**: LQFP48
 
 ### 프로젝트 설정
