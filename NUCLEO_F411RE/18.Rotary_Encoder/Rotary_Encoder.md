@@ -5,7 +5,7 @@
 ## 1. 프로젝트 생성
 
 ### MCU 선택
-- **Part Number**: STM32F103C8Tx (또는 사용하는 모델)
+- **Part Number**: STM32F411C8Tx (또는 사용하는 모델)
 - **Package**: LQFP48
 
 ### 프로젝트 설정
@@ -172,7 +172,7 @@
 
 ### 로터리 인코더 연결
 ```
-로터리 인코더    STM32F103
+로터리 인코더    STM32F411
 CLK      →      PA0
 DT       →      PA1  
 SW       →      (선택사항)
@@ -182,7 +182,7 @@ GND      →      GND
 
 ### UART 연결 (디버깅용)
 ```
-STM32F103    UART-USB 컨버터
+STM32F411    UART-USB 컨버터
 PA2 (TX) →   RX
 PA3 (RX) →   TX
 GND      →   GND
@@ -706,7 +706,7 @@ void LCD_DrawString(uint8_t x, uint8_t y, const char* str, uint16_t color, uint1
   LCD_Fill(BLACK);
 
   LCD_DrawString(10, 30, "Hello World!", WHITE, BLACK);
-  LCD_DrawString(10, 45, "STM32F103", GREEN, BLACK);
+  LCD_DrawString(10, 45, "STM32F411", GREEN, BLACK);
   LCD_DrawString(10, 60, "ST7735S LCD", CYAN, BLACK);
   LCD_DrawString(10, 75, "160x80", YELLOW, BLACK);
 
