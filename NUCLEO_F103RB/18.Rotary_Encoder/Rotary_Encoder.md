@@ -207,3 +207,157 @@ GND      →   GND
 ---
 
 이 가이드를 따라 설정하면 최적화된 로터리 인코더 코드가 정상적으로 동작할 것입니다.
+
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PV */
+// 인코더 관련 변수 (그레이 코드 방식)
+volatile int32_t encoder_count = 0;
+volatile uint8_t encoder_last_encoded = 0;
+
+// 디바운스를 위한 변수
+volatile uint32_t last_interrupt_time = 0;
+#define DEBOUNCE_DELAY 5  // ms 단위
+
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void Encoder_Init(void);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
+
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+
+/**
+ * @brief printf 함수를 UART로 리다이렉트
+ */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/**
+* @brief Retargets the C library printf function to the USART.
+* @param None
+* @retval None
+*/
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit(&huart2, (uint8_t*)"\r", 1, 0xFFFF);
+  HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+/**
+ * @brief 로터리 인코더 초기화 (그레이 코드 방식)
+ */
+void Encoder_Init(void)
+{
+  // 초기 상태 읽기
+  uint8_t clk = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+  uint8_t dt = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+  encoder_last_encoded = (clk << 1) | dt;
+  encoder_count = 0;
+}
+
+/**
+ * @brief GPIO 외부 인터럽트 콜백 함수 (그레이 코드 방식)
+ * 안정적인 로터리 인코더 감지
+ */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  uint32_t current_time = HAL_GetTick();
+
+  // 디바운스 처리
+  if (current_time - last_interrupt_time < DEBOUNCE_DELAY) {
+    return;
+  }
+  last_interrupt_time = current_time;
+
+  // 인코더 핀들 처리 (PA0, PA1)
+  if (GPIO_Pin == GPIO_PIN_0 || GPIO_Pin == GPIO_PIN_1)
+  {
+    // 현재 상태 읽기
+    uint8_t clk = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+    uint8_t dt = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+    uint8_t encoded = (clk << 1) | dt;  // 2비트 상태 생성
+
+    uint8_t sum = (encoder_last_encoded << 2) | encoded;  // 이전 상태와 현재 상태 결합
+
+    // 회전 방향 결정 (그레이 코드 기반)
+    if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) {
+      encoder_count++;  // 시계방향
+    }
+    if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
+      encoder_count--;  // 반시계방향
+    }
+
+    encoder_last_encoded = encoded;
+  }
+}
+
+/* USER CODE END 0 */
+```
+
+```c
+	/* USER CODE BEGIN 2 */
+	// 로터리 인코더 초기화
+	Encoder_Init();
+
+	// 타이머 시작 (시간 측정용)
+	HAL_TIM_Base_Start(&htim2);
+
+	printf("=============================\r\n");
+	printf("STM32F103 로터리 인코더 테스트 시작\r\n");
+	printf("시스템 클록: %lu Hz\r\n", SystemCoreClock);
+	printf("그레이 코드 기반 안정적 감지 방식 적용\r\n");
+	printf("인코더 카운트 변화를 모니터링합니다...\r\n");
+	printf("=============================\r\n");
+
+	/* USER CODE END 2 */
+```
+
+```c
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	    // 인코더 값 변화 감지 및 출력
+	    if (encoder_count != last_encoder_count) {
+	      printf("인코더 카운트: %ld", encoder_count);
+
+	      if (encoder_count > last_encoder_count) {
+	        printf(" (시계방향)\r\n");
+	      } else {
+	        printf(" (반시계방향)\r\n");
+	      }
+
+	      last_encoder_count = encoder_count;
+	    }
+
+	    HAL_Delay(1);  // CPU 부하 감소
+	    /* USER CODE END WHILE */
+```
+
+
+
+
+
+
