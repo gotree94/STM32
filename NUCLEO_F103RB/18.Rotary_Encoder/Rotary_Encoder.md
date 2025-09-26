@@ -318,6 +318,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 ```
 
 ```c
+  /* USER CODE BEGIN 1 */
+	int32_t last_encoder_count = 0;
+  /* USER CODE END 1 */
+```
+
+```c
 	/* USER CODE BEGIN 2 */
 	// 로터리 인코더 초기화
 	Encoder_Init();
