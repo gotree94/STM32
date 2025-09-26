@@ -113,9 +113,9 @@
 2. **Clock Source**: Internal Clock
 
 **파라미터 설정**:
-- **Prescaler**: 83999 (84MHz/84000 = 1kHz)
+- **Prescaler**: 8399 (84MHz/8400 = 10kHz)
 - **Counter Mode**: Up
-- **Counter Period**: 999 (1kHz/1000 = 1Hz)
+- **Counter Period**: 9999 (10kHz/10000 = 1Hz)
 - **Auto-reload preload**: Disable
 
 ---
