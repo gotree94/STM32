@@ -6,6 +6,9 @@
 <img width="600" height="400" alt="K24C256" src="https://github.com/user-attachments/assets/19e7704c-dd37-47b5-a35d-39d4bba37158" />
 <br>
 
+<img width="659" height="726" alt="004" src="https://github.com/user-attachments/assets/89b0993e-788f-4db9-8765-6b853d1892e0" />
+
+
 <img width="800" height="600" alt="002" src="https://github.com/user-attachments/assets/c6f0c1b0-6da2-4eed-a8c5-5b893f68aa7a" />
 
 <img width="800" height="600" alt="003" src="https://github.com/user-attachments/assets/1936e553-2e32-4516-91d0-bbeff48fc863" />
