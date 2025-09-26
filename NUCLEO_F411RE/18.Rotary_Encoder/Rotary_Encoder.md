@@ -1,6 +1,6 @@
 # Rotary_Encoder
 
-# STM32F103 로터리 인코더 CubeMX 설정 가이드
+# STM32F411 로터리 인코더 CubeMX 설정 가이드
 
 <img width="659" height="438" alt="006" src="https://github.com/user-attachments/assets/b9280e56-3d12-4fc6-b924-737ba614eb72" />
 
