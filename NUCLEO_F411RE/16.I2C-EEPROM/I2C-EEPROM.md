@@ -271,7 +271,7 @@ void EEPROM_Test(void)
   /* USER CODE BEGIN 2 */
   printf("\n\n");
   printf("========================================\n");
-  printf("  STM32F103 I2C EEPROM K24C256 Test    \n");
+  printf("  STM32F411 I2C EEPROM K24C256 Test    \n");
   printf("  System Clock: 64MHz                  \n");
   printf("  I2C Speed: 100kHz                    \n");
   printf("========================================\n");
