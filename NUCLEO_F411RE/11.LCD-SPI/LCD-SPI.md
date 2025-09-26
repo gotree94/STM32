@@ -6,7 +6,7 @@
 <img width="600" height="400" alt="Sheild-002" src="https://github.com/user-attachments/assets/29bdd8e8-3e94-45da-87f4-426694f32622" />
 <br>
 
-<img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
+<img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/a9bba607-0560-4a0e-ad48-b1431897aaa6" />
 <br>
 
 ```
