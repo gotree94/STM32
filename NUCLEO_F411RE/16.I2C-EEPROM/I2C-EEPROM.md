@@ -185,7 +185,7 @@ void EEPROM_Test(void)
   printf("=== EEPROM Test ===\n");
 
   // 테스트 데이터 준비
-  char write_data[] = "Hello, STM32F103 with K24C256 EEPROM!";
+  char write_data[] = "Hello, STM32F411 with K24C256 EEPROM!";
   uint8_t read_data[100] = {0};
   uint16_t data_len = strlen(write_data);
 
