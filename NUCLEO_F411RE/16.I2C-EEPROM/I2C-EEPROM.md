@@ -1,6 +1,6 @@
 # I2C-EEPROM
 
-<img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
+<img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/c52a6b6f-af50-488d-952e-0c90d9d6e6a9" />
 <br>
 
 <img width="600" height="400" alt="K24C256" src="https://github.com/user-attachments/assets/19e7704c-dd37-47b5-a35d-39d4bba37158" />
