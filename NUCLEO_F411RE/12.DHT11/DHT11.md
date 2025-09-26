@@ -59,30 +59,20 @@ uint8_t DHT11_ReadData(DHT11_Data *data);
 ```c
 /* USER CODE BEGIN 0 */
 #ifdef __GNUC__
-/* With GCC, small printf (option LD Linker->Libraries->Small printf
-   set to 'Yes') calls __io_putchar() */
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 #else
 #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
 
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
 PUTCHAR_PROTOTYPE
 {
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the USART1 and Loop until the end of transmission */
   if (ch == '\n')
     HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
   HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
-
   return ch;
 }
 
-// DHT11 함수 구현
+// DHT11 함수 구현 (수정된 버전)
 void DHT11_SetPinOutput(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     GPIO_InitStruct.Pin = DHT11_PIN;
@@ -96,7 +86,7 @@ void DHT11_SetPinInput(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     GPIO_InitStruct.Pin = DHT11_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // 내부 풀업 저항 사용
     HAL_GPIO_Init(DHT11_PORT, &GPIO_InitStruct);
 }
 
@@ -113,56 +103,79 @@ void DHT11_DelayUs(uint32_t us) {
     while (__HAL_TIM_GET_COUNTER(&htim2) < us);
 }
 
+// 수정된 DHT11_Start() 함수
 uint8_t DHT11_Start(void) {
-    uint8_t response = 0;
+    uint32_t timeout;
 
-    // 출력 모드로 설정
+    // 1. 출력 모드로 설정하고 HIGH로 초기화
     DHT11_SetPinOutput();
+    DHT11_SetPin(GPIO_PIN_SET);
+    HAL_Delay(1);  // 안정화 시간
 
-    // 시작 신호 전송 (18ms LOW)
+    // 2. 시작 신호 전송 (최소 18ms LOW)
     DHT11_SetPin(GPIO_PIN_RESET);
-    HAL_Delay(20);  // 18ms -> 20ms로 변경 (더 안정적)
+    HAL_Delay(20);  // 20ms LOW
 
-    // HIGH로 변경 후 20-40us 대기
+    // 3. 20-40us HIGH 신호
     DHT11_SetPin(GPIO_PIN_SET);
     DHT11_DelayUs(30);
 
-    // 입력 모드로 변경
+    // 4. 입력 모드로 변경
     DHT11_SetPinInput();
 
-    // DHT11 응답 확인 (80us LOW + 80us HIGH)
-    DHT11_DelayUs(40);
-
-    if (!(DHT11_ReadPin())) {
-        DHT11_DelayUs(80);
-        if (DHT11_ReadPin()) {
-            response = 1;
-        } else {
-            response = 0;
-        }
+    // 5. DHT11 응답 대기 (80us LOW)
+    timeout = 1000;  // 타임아웃 증가
+    while (DHT11_ReadPin() && timeout--) {
+        DHT11_DelayUs(1);
     }
-
-    // HIGH가 끝날 때까지 대기
-    while (DHT11_ReadPin());
-
-    return response;
-}
-
-uint8_t DHT11_ReadBit(void) {
-    // LOW 신호가 끝날 때까지 대기 (50us)
-    while (!(DHT11_ReadPin()));
-
-    // HIGH 신호 시작 후 30us 대기
-    DHT11_DelayUs(30);
-
-    // 여전히 HIGH면 1, LOW면 0
-    if (DHT11_ReadPin()) {
-        // HIGH가 끝날 때까지 대기
-        while (DHT11_ReadPin());
-        return 1;
-    } else {
+    if (timeout == 0) {
+        sprintf(uart_buffer, "DHT11 Start: No LOW response\r\n");
+        HAL_UART_Transmit(&huart2, (uint8_t*)uart_buffer, strlen(uart_buffer), HAL_MAX_DELAY);
         return 0;
     }
+
+    // 6. 80us HIGH 대기
+    timeout = 1000;
+    while (!(DHT11_ReadPin()) && timeout--) {
+        DHT11_DelayUs(1);
+    }
+    if (timeout == 0) {
+        sprintf(uart_buffer, "DHT11 Start: No HIGH response\r\n");
+        HAL_UART_Transmit(&huart2, (uint8_t*)uart_buffer, strlen(uart_buffer), HAL_MAX_DELAY);
+        return 0;
+    }
+
+    // 7. HIGH가 끝날 때까지 대기
+    timeout = 1000;
+    while (DHT11_ReadPin() && timeout--) {
+        DHT11_DelayUs(1);
+    }
+
+    return 1;  // 성공
+}
+
+// 수정된 DHT11_ReadBit() 함수
+uint8_t DHT11_ReadBit(void) {
+    uint32_t timeout;
+
+    // 1. LOW 신호가 끝날 때까지 대기 (약 50us)
+    timeout = 1000;
+    while (!(DHT11_ReadPin()) && timeout--) {
+        DHT11_DelayUs(1);
+    }
+    if (timeout == 0) return 0;
+
+    // 2. HIGH 신호 지속 시간 측정
+    DHT11_DelayUs(30);  // 30us 후에 확인
+    uint8_t bit = DHT11_ReadPin();
+
+    // 3. HIGH가 끝날 때까지 대기
+    timeout = 1000;
+    while (DHT11_ReadPin() && timeout--) {
+        DHT11_DelayUs(1);
+    }
+
+    return bit;
 }
 
 uint8_t DHT11_ReadByte(void) {
@@ -174,6 +187,7 @@ uint8_t DHT11_ReadByte(void) {
 }
 
 uint8_t DHT11_ReadData(DHT11_Data *data) {
+    // DHT11 시작 신호 전송
     if (!DHT11_Start()) {
         return 0; // 시작 신호 실패
     }
@@ -185,6 +199,11 @@ uint8_t DHT11_ReadData(DHT11_Data *data) {
     data->temp_decimal = DHT11_ReadByte();
     data->checksum = DHT11_ReadByte();
 
+    // 디버그 출력
+    sprintf(uart_buffer, "Raw data: %d, %d, %d, %d, %d\r\n",
+            data->humidity, data->hum_decimal, data->temperature, data->temp_decimal, data->checksum);
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_buffer, strlen(uart_buffer), HAL_MAX_DELAY);
+
     // 체크섬 확인
     uint8_t calculated_checksum = data->humidity + data->hum_decimal +
                                  data->temperature + data->temp_decimal;
@@ -192,6 +211,9 @@ uint8_t DHT11_ReadData(DHT11_Data *data) {
     if (calculated_checksum == data->checksum) {
         return 1; // 성공
     } else {
+        sprintf(uart_buffer, "Checksum error: calc=%d, recv=%d\r\n",
+                calculated_checksum, data->checksum);
+        HAL_UART_Transmit(&huart2, (uint8_t*)uart_buffer, strlen(uart_buffer), HAL_MAX_DELAY);
         return 0; // 체크섬 오류
     }
 }
@@ -200,6 +222,11 @@ uint8_t DHT11_ReadData(DHT11_Data *data) {
 
 ```c
   /* USER CODE BEGIN 2 */
+  // DHT11 핀 초기 설정
+  DHT11_SetPinOutput();
+  DHT11_SetPin(GPIO_PIN_SET);  // 초기에 HIGH로 설정
+  HAL_Delay(1000);  // DHT11 안정화 시간
+
 
   // 타이머 시작 (마이크로초 단위 지연용)
   HAL_TIM_Base_Start(&htim2);
@@ -212,7 +239,7 @@ uint8_t DHT11_ReadData(DHT11_Data *data) {
 ```
 
 ```c
-	    /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 
 	    if (DHT11_ReadData(&dht11_data)) {
 	      // 데이터 읽기 성공
@@ -229,5 +256,5 @@ uint8_t DHT11_ReadData(DHT11_Data *data) {
 	    HAL_Delay(2000);
 
 	  }
-	  /* USER CODE END 3 */
+  /* USER CODE END 3 */
 ```
