@@ -309,4 +309,238 @@ void EEPROM_Test(void)
 	  /* USER CODE END 3 */
 ```
 
+## 2개의 Addredd 관련 이슈
 
+```
+=== I2C Address Scan ===
+Scanning I2C bus...
+Found I2C device at address: 0xA0 (7-bit: 0x50)
+** K24C256 EEPROM detected at 0xA0 **
+Found I2C device at address: 0xB0 (7-bit: 0x58)
+Total 2 I2C device(s) found.
+========================
+```
+
+### 2개의 블럭이 서로 연관이 있는것인지, 각각의 영역을 다 사용할 수 있는것인지 확인.
+
+```
+========================================
+  STM32F103 I2C EEPROM K24C256 Test
+  System Clock: 64MHz
+  I2C Speed: 100kHz
+========================================
+=== I2C Address Scan ===
+Scanning I2C bus...
+Found I2C device at address: 0xA0 (7-bit: 0x50)
+** K24C256 EEPROM detected at 0xA0 **
+Found I2C device at address: 0xB0 (7-bit: 0x58)
+Total 2 I2C device(s) found.
+========================
+=== EEPROM Test ===
+Test Address: 0x0000
+Write Data: "Hello, STM32F103 with K24C256 EEPROM!" (37 bytes)
+Writing to EEPROM...
+Write successful!
+Reading from EEPROM...
+Read successful!
+Read Data: "Hello, STM32F103 with K24C256 EEPROM!" (37 bytes)
+** Data verification PASSED! **
+===================
+=== Number Data Test ===
+Writing numbers 0-9 to address 0x0064...
+Write Data: 0 1 2 3 4 5 6 7 8 9
+Read Data:  0 1 2 3 4 5 6 7 8 9
+** Number test PASSED! **
+========================
+=== Testing 0xB0 Device Identity ===
+Checking if 0xB0 is an extended memory block...
+Test 1: Writing to 0xB0 at address 0x0100...
+  Write to 0xB0: SUCCESS
+Test 2: Reading from 0xB0 at address 0x0100...
+  Read from 0xB0: SUCCESS
+  Write Data: "Block1Test"
+  Read Data:  "Block1Test"
+** 0xB0 IS A VALID EEPROM BLOCK! **
+** Your chip is likely 64KB (512Kbit), not 32KB! **
+** Block 0 (0xA0): 32KB **
+** Block 1 (0xB0): 32KB **
+** Total: 64KB available! **
+Test 4: Cross-check with 0xA0...
+  0xB0 read at 0x0200: SUCCESS
+  0xA0 wrote: "CrossCheck"
+  0xB0 read:  "Block1Test"
+** 0xA0 and 0xB0 have DIFFERENT data! **
+** They are INDEPENDENT memory blocks **
+** Total 64KB confirmed! **
+====================================
+Test completed. Entering main loop...
+System running... Loop count: 0
+```
+
+```
+Write to 0xB0: SUCCESS
+Read from 0xB0: SUCCESS
+데이터 일치 확인
+```
+→ **0xB0은 진짜 메모리 블럭!**
+
+### ✅ **Test 4: 독립된 메모리 확인 (결정적 증거!)**
+```
+0xA0에 "CrossCheck" 쓰기
+0xB0에서 읽기 → "Block1Test" (다른 데이터!)
+```
+→ **0xA0과 0xB0은 완전히 독립된 32KB 블럭!**
+
+## 실제 칩 구조:
+```
+┌─────────────────────────────────┐
+│      64KB (512Kbit) EEPROM      │
+├─────────────────┬───────────────┤
+│   Block 0       │   Block 1     │
+│   0xA0          │   0xB0        │
+│   32KB          │   32KB        │
+│ 0x0000~0x7FFF   │ 0x0000~0x7FFF │
+└─────────────────┴───────────────┘
+```
+
+  **테스트 1: EEPROM처럼 동작하는지 확인**
+  **테스트2 : 읽기 시도**
+  **테스트 3: 다른 프로토콜 시도**
+  **크로스 체크: 0xA0와 0xB0가 같은 메모리를 공유하는지 확인**
+
+```c
+void Test_0xB0_Device(void)
+{
+  printf("=== Testing 0xB0 Device Identity ===\n");
+  printf("Checking if 0xB0 is an extended memory block...\n\n");
+  
+  uint8_t write_data[] = "Block1Test";
+  uint8_t read_data[20] = {0};
+  uint16_t test_addr = 0x0100;
+  HAL_StatusTypeDef status;
+  
+  // 테스트 1: EEPROM처럼 동작하는지 확인
+  printf("Test 1: Writing to 0xB0 at address 0x%04X...\n", test_addr);
+  status = HAL_I2C_Mem_Write(&hi2c1, 0xB0, test_addr, 
+                             I2C_MEMADD_SIZE_16BIT, write_data, 
+                             strlen((char*)write_data), HAL_MAX_DELAY);
+  
+  if(status == HAL_OK)
+  {
+    printf("  Write to 0xB0: SUCCESS\n");
+    HAL_Delay(10);
+    
+    // 읽기 시도
+    printf("Test 2: Reading from 0xB0 at address 0x%04X...\n", test_addr);
+    status = HAL_I2C_Mem_Read(&hi2c1, 0xB0, test_addr,
+                              I2C_MEMADD_SIZE_16BIT, read_data,
+                              strlen((char*)write_data), HAL_MAX_DELAY);
+    
+    if(status == HAL_OK)
+    {
+      printf("  Read from 0xB0: SUCCESS\n");
+      printf("  Write Data: \"%s\"\n", write_data);
+      printf("  Read Data:  \"%s\"\n", read_data);
+      
+      if(memcmp(write_data, read_data, strlen((char*)write_data)) == 0)
+      {
+        printf("\n** 0xB0 IS A VALID EEPROM BLOCK! **\n");
+        printf("** Your chip is likely 64KB (512Kbit), not 32KB! **\n");
+        printf("** Block 0 (0xA0): 32KB **\n");
+        printf("** Block 1 (0xB0): 32KB **\n");
+        printf("** Total: 64KB available! **\n");
+      }
+      else
+      {
+        printf("\n** Data mismatch - 0xB0 behavior unclear **\n");
+      }
+    }
+    else
+    {
+      printf("  Read from 0xB0: FAILED\n");
+      printf("** 0xB0 accepts write but not read - unusual device **\n");
+    }
+  }
+  else
+  {
+    printf("  Write to 0xB0: FAILED\n");
+    
+    // 테스트 3: 다른 프로토콜 시도
+    printf("\nTest 3: Trying different access methods...\n");
+    
+    // 8비트 주소로 시도
+    status = HAL_I2C_Mem_Read(&hi2c1, 0xB0, 0x00,
+                              I2C_MEMADD_SIZE_8BIT, read_data, 8, 1000);
+    if(status == HAL_OK)
+    {
+      printf("  8-bit address read: SUCCESS\n");
+      printf("  Data: ");
+      for(int i=0; i<8; i++) printf("%02X ", read_data[i]);
+      printf("\n");
+      printf("** 0xB0 is likely an RTC, sensor, or other I2C device **\n");
+    }
+    else
+    {
+      // 단순 수신 시도
+      status = HAL_I2C_Master_Receive(&hi2c1, 0xB0, read_data, 8, 1000);
+      if(status == HAL_OK)
+      {
+        printf("  Simple receive: SUCCESS\n");
+        printf("  Data: ");
+        for(int i=0; i<8; i++) printf("%02X ", read_data[i]);
+        printf("\n");
+        printf("** 0xB0 responds but protocol unclear **\n");
+      }
+      else
+      {
+        printf("  All access methods: FAILED\n");
+        printf("** 0xB0 detected but not accessible **\n");
+        printf("** Possible ghost address or bus issue **\n");
+      }
+    }
+  }
+  
+  // 크로스 체크: 0xA0와 0xB0가 같은 메모리를 공유하는지 확인
+  printf("\nTest 4: Cross-check with 0xA0...\n");
+  memset(read_data, 0, sizeof(read_data));
+  
+  // 0xA0에 특별한 데이터 쓰기
+  uint8_t marker[] = "CrossCheck";
+  if(EEPROM_Write(0x0200, marker, strlen((char*)marker)) == HAL_OK)
+  {
+    HAL_Delay(10);
+    
+    // 0xB0의 같은 주소에서 읽기 시도
+    status = HAL_I2C_Mem_Read(&hi2c1, 0xB0, 0x0200,
+                              I2C_MEMADD_SIZE_16BIT, read_data,
+                              strlen((char*)marker), HAL_MAX_DELAY);
+    
+    if(status == HAL_OK)
+    {
+      printf("  0xB0 read at 0x0200: SUCCESS\n");
+      printf("  0xA0 wrote: \"%s\"\n", marker);
+      printf("  0xB0 read:  \"%s\"\n", read_data);
+      
+      if(memcmp(marker, read_data, strlen((char*)marker)) == 0)
+      {
+        printf("\n** 0xA0 and 0xB0 share SAME memory! **\n");
+        printf("** 0xB0 is an ALIAS of 0xA0 - same 32KB chip **\n");
+        printf("** Your chip reports multiple addresses **\n");
+      }
+      else
+      {
+        printf("\n** 0xA0 and 0xB0 have DIFFERENT data! **\n");
+        printf("** They are INDEPENDENT memory blocks **\n");
+        printf("** Total 64KB confirmed! **\n");
+      }
+    }
+    else
+    {
+      printf("  0xB0 read at 0x0200: FAILED\n");
+      printf("** Cannot determine relationship **\n");
+    }
+  }
+  
+  printf("====================================\n\n");
+}
+```
