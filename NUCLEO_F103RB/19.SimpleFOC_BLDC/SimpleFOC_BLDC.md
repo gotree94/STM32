@@ -818,4 +818,408 @@ void LCD_DrawString(uint8_t x, uint8_t y, const char* str, uint16_t color, uint1
   }
   /* USER CODE END 3 */
 ```
+---
+# 추가 프로젝트
+   * 아래의 핀들을 풀업으로 별도 제어하지 않는 코드
+      * PA6	DRV_nSP (Sleep)	GPIO Input No Pull	HIGH (Active Low)
+      * PA7	DRV_nRT (Reset)	GPIO Output Push Pull	HIGH (Active Low)
+      * PA12 DRV_nFT (Fault)	GPIO Input Pull-up	HIGH (Active Low)
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+```
+
+```c
+/* USER CODE BEGIN PTD */
+typedef enum {
+    MOTOR_STOP = 0,
+    MOTOR_FORWARD = 1,
+    MOTOR_REVERSE = -1
+} MotorDirection_t;
+
+typedef struct {
+    MotorDirection_t direction;
+    float target_velocity;
+    float speed_percentage;
+    uint8_t is_running;
+} MotorControl_t;
+/* USER CODE END PTD */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define MAX_SPEED_RPM           2000.0f
+#define MIN_SPEED_PERCENTAGE    30.0f
+#define MAX_SPEED_PERCENTAGE    80.0f
+#define SPEED_STEP              5.0f
+#define UART_BUFFER_SIZE        10
+
+// PWM Configuration
+#define PWM_FREQUENCY           20000   // 20kHz PWM frequency
+#define PWM_PERIOD              3200    // 64MHz / 20kHz = 3200
+
+// UART Command Codes
+#define CMD_FORWARD             'a'
+#define CMD_STOP                's'
+#define CMD_REVERSE             'd'
+#define CMD_SPEED_UP            'w'
+#define CMD_SPEED_DOWN          'x'
+
+// DRV8313 Control (Enable만 제어)
+#define DRV8313_ENABLE()        HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_SET)
+#define DRV8313_DISABLE()       HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_RESET)
+
+/* USER CODE END PD */
+
+```
+
+```c
+/* USER CODE BEGIN PV */
+// Motor Control Structure
+MotorControl_t motor_ctrl = {
+    .direction = MOTOR_STOP,
+    .target_velocity = 0.0f,
+    .speed_percentage = MIN_SPEED_PERCENTAGE,
+    .is_running = 0
+};
+
+// UART Communication
+uint8_t uart_rx_buffer[UART_BUFFER_SIZE];
+uint8_t uart_rx_index = 0;
+uint8_t uart_command_ready = 0;
+
+// Motor Control Variables (Open Loop)
+float electrical_angle = 0.0f;
+uint8_t pole_pairs = 7;  // HDD BLDC motor typical pole pairs
+
+// PWM values for three phases
+uint32_t pwm_a = 0, pwm_b = 0, pwm_c = 0;
+
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void Motor_Init(void);
+void Motor_UpdatePWM(void);
+void Motor_SetVelocity(float velocity);
+void UART_ProcessCommand(void);
+void UART_SendStatus(void);
+float Calculate_Speed_RPM(void);
+void Generate_Sine_PWM(float angle_deg, float magnitude);
+
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  */
+PUTCHAR_PROTOTYPE
+{
+  if (ch == '\n')
+    HAL_UART_Transmit(&huart2, (uint8_t*)"\r", 1, 0xFFFF);
+  HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
+  return ch;
+}
+
+/**
+  * @brief  Motor initialization
+  */
+void Motor_Init(void)
+{
+    printf("Initializing Motor Control System...\n");
+    
+    // DRV8313 Enable (nSP, nRT는 하드웨어 풀업으로 자동 처리)
+    DRV8313_ENABLE();
+    HAL_Delay(50);
+    
+    // Start PWM generation for all three phases
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);  // IN1 - Phase A
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);  // IN2 - Phase B
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);  // IN3 - Phase C
+
+    // Start control loop timer (1kHz)
+    HAL_TIM_Base_Start_IT(&htim3);
+
+    // Set initial PWM to 0 (motor stopped)
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+
+    printf("Motor Control System Initialized\n");
+    printf("Commands: 'a'=Forward, 's'=Stop, 'd'=Reverse\n");
+    printf("Speed Control: 'w'=Speed Up, 'x'=Speed Down\n");
+    printf("Speed Range: %.0f%% - %.0f%%\n", MIN_SPEED_PERCENTAGE, MAX_SPEED_PERCENTAGE);
+}
+
+/**
+  * @brief  Calculate target speed in RPM
+  */
+float Calculate_Speed_RPM(void)
+{
+    return (motor_ctrl.speed_percentage / 100.0f) * MAX_SPEED_RPM * motor_ctrl.direction;
+}
+
+/**
+  * @brief  Set motor velocity
+  */
+void Motor_SetVelocity(float velocity)
+{
+    motor_ctrl.target_velocity = velocity;
+
+    if (fabs(velocity) < 0.1f) {
+        motor_ctrl.is_running = 0;
+        motor_ctrl.direction = MOTOR_STOP;
+        electrical_angle = 0.0f;  // 각도 리셋
+    } else {
+        motor_ctrl.is_running = 1;
+        motor_ctrl.direction = (velocity > 0) ? MOTOR_FORWARD : MOTOR_REVERSE;
+    }
+}
+
+/**
+  * @brief  Generate Sine Wave PWM for BLDC (저전류 최적화 버전)
+  */
+void Generate_Sine_PWM(float angle_deg, float magnitude)
+{
+    // degree를 radian으로 변환
+    float angle_rad = angle_deg * M_PI / 180.0f;
+    
+    // 전류 제한을 위한 보수적 magnitude 설정
+    float target_rpm = fabs(motor_ctrl.target_velocity);
+    float adaptive_magnitude;
+    
+    if (target_rpm < 800.0f) {
+        // 저속: 적당한 토크 (0.4배)
+        adaptive_magnitude = magnitude * 0.4f;
+    } else if (target_rpm < 1500.0f) {
+        // 중속: 효율 우선 (0.35배)
+        adaptive_magnitude = magnitude * 0.35f;
+    } else {
+        // 고속: 최소 전류로 회전 유지 (0.3배)
+        adaptive_magnitude = magnitude * 0.3f;
+    }
+    
+    float offset = 0.5f;  // 50% 오프셋
+    float sin_a = offset + adaptive_magnitude * sinf(angle_rad);
+    float sin_b = offset + adaptive_magnitude * sinf(angle_rad - 2.094f);  // -120°
+    float sin_c = offset + adaptive_magnitude * sinf(angle_rad + 2.094f);  // +120°
+    
+    pwm_a = (uint32_t)(sin_a * PWM_PERIOD);
+    pwm_b = (uint32_t)(sin_b * PWM_PERIOD);
+    pwm_c = (uint32_t)(sin_c * PWM_PERIOD);
+    
+    // 범위 제한
+    if (pwm_a > PWM_PERIOD) pwm_a = PWM_PERIOD;
+    if (pwm_b > PWM_PERIOD) pwm_b = PWM_PERIOD;
+    if (pwm_c > PWM_PERIOD) pwm_c = PWM_PERIOD;
+    if (pwm_a < 0) pwm_a = 0;
+    if (pwm_b < 0) pwm_b = 0;
+    if (pwm_c < 0) pwm_c = 0;
+}
+
+/**
+  * @brief  Update motor PWM signals (1kHz 호출)
+  */
+void Motor_UpdatePWM(void)
+{
+    if (motor_ctrl.is_running) {
+        // 전압 크기 계산
+        float voltage_magnitude = fabs(motor_ctrl.target_velocity) / MAX_SPEED_RPM;
+        voltage_magnitude = (voltage_magnitude > 1.0f) ? 1.0f : voltage_magnitude;
+
+        // 고속 최적화 각도 업데이트
+        float angle_increment = motor_ctrl.target_velocity * 360.0f / (60.0f * 1000.0f);
+        
+        // 고속에서 각도 증가량 보정
+        if (fabs(motor_ctrl.target_velocity) > 2000.0f) {
+            angle_increment *= 1.05f;  // 5% 보정
+        }
+        
+        electrical_angle += angle_increment;
+        
+        // 각도 정규화
+        if (electrical_angle >= 360.0f) electrical_angle -= 360.0f;
+        if (electrical_angle < 0) electrical_angle += 360.0f;
+
+        // 사인파 PWM 생성
+        Generate_Sine_PWM(electrical_angle, voltage_magnitude);
+
+        // PWM 듀티 업데이트
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_a);
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_b);
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_c);
+        
+        // 디버깅 출력 (2초마다)
+        static uint32_t last_debug = 0;
+        if (HAL_GetTick() - last_debug > 2000) {
+            printf("PWM: A=%lu, B=%lu, C=%lu\n", pwm_a, pwm_b, pwm_c);
+            printf("Target: %.0f RPM, Angle: %.1f°, Inc: %.3f°\n",
+                   motor_ctrl.target_velocity, electrical_angle, angle_increment);
+            last_debug = HAL_GetTick();
+        }
+    } else {
+        // 모터 정지 - 모든 PWM을 0으로
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+    }
+}
+
+/**
+  * @brief  UART 명령 처리
+  */
+void UART_ProcessCommand(void)
+{
+    printf("Processing command: 0x%02X (%c)\n", uart_rx_buffer[0], uart_rx_buffer[0]);
+
+    uint8_t cmd = uart_rx_buffer[0];
+
+    switch (cmd) {
+        case CMD_FORWARD:
+            printf("FORWARD command\n");
+            motor_ctrl.direction = MOTOR_FORWARD;
+            Motor_SetVelocity(Calculate_Speed_RPM());
+            printf("Motor: FORWARD, Speed: %.0f%% (%.1f RPM)\n",
+                   motor_ctrl.speed_percentage, motor_ctrl.target_velocity);
+            break;
+
+        case CMD_STOP:
+            printf("STOP command\n");
+            Motor_SetVelocity(0.0f);
+            printf("Motor: STOPPED\n");
+            break;
+
+        case CMD_REVERSE:
+            printf("REVERSE command\n");
+            motor_ctrl.direction = MOTOR_REVERSE;
+            Motor_SetVelocity(Calculate_Speed_RPM());
+            printf("Motor: REVERSE, Speed: %.0f%% (%.1f RPM)\n",
+                   motor_ctrl.speed_percentage, fabs(motor_ctrl.target_velocity));
+            break;
+
+        case CMD_SPEED_UP:
+            printf("SPEED UP command\n");
+            if (motor_ctrl.speed_percentage < MAX_SPEED_PERCENTAGE) {
+                motor_ctrl.speed_percentage += SPEED_STEP;
+                if (motor_ctrl.speed_percentage > MAX_SPEED_PERCENTAGE) {
+                    motor_ctrl.speed_percentage = MAX_SPEED_PERCENTAGE;
+                }
+                printf("Speed: %.0f%%\n", motor_ctrl.speed_percentage);
+                if (motor_ctrl.is_running) {
+                    Motor_SetVelocity(Calculate_Speed_RPM());
+                }
+            }
+            break;
+
+        case CMD_SPEED_DOWN:
+            printf("SPEED DOWN command\n");
+            if (motor_ctrl.speed_percentage > MIN_SPEED_PERCENTAGE) {
+                motor_ctrl.speed_percentage -= SPEED_STEP;
+                if (motor_ctrl.speed_percentage < MIN_SPEED_PERCENTAGE) {
+                    motor_ctrl.speed_percentage = MIN_SPEED_PERCENTAGE;
+                }
+                printf("Speed: %.0f%%\n", motor_ctrl.speed_percentage);
+                if (motor_ctrl.is_running) {
+                    Motor_SetVelocity(Calculate_Speed_RPM());
+                }
+            }
+            break;
+
+        default:
+            printf("Unknown command: 0x%02X\n", cmd);
+            break;
+    }
+
+    uart_rx_index = 0;
+    uart_command_ready = 0;
+}
+
+/**
+  * @brief  UART 수신 완료 콜백
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART2) {
+    uint8_t received_byte = uart_rx_buffer[0];
+    printf("RX: 0x%02X (%c)\n", received_byte,
+           (received_byte >= 32 && received_byte <= 126) ? received_byte : '?');
+
+    uart_rx_index = 1;
+    uart_command_ready = 1;
+
+    // 다음 바이트 수신 준비
+    HAL_UART_Receive_IT(&huart2, &uart_rx_buffer[0], 1);
+  }
+}
+
+/**
+  * @brief  모터 상태 전송 (2초마다)
+  */
+void UART_SendStatus(void)
+{
+    static uint32_t last_status_time = 0;
+    uint32_t current_time = HAL_GetTick();
+
+    if (current_time - last_status_time >= 2000) {
+        const char* dir_str = (motor_ctrl.direction == MOTOR_FORWARD) ? "FWD" :
+                             (motor_ctrl.direction == MOTOR_REVERSE) ? "REV" : "STOP";
+
+        printf("Status: %s | Speed: %.0f%% | Target: %.1f RPM\n",
+               dir_str, motor_ctrl.speed_percentage, motor_ctrl.target_velocity);
+
+        last_status_time = current_time;
+    }
+}
+
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+
+  printf("\n=== Simplified Sensorless BLDC Motor Control ===\n");
+
+  // Initialize motor control system
+  Motor_Init();
+
+  // Start UART receive interrupt
+  HAL_UART_Receive_IT(&huart2, &uart_rx_buffer[0], 1);
+
+  printf("Ready for commands!\n\n");
+
+  /* USER CODE END 2 */
+
+```
+
+```c
+    /* USER CODE BEGIN 3 */
+
+    // Process UART commands
+    if (uart_command_ready) {
+        UART_ProcessCommand();
+    }
+
+    // Send periodic status
+    UART_SendStatus();
+
+    // Small delay to prevent excessive CPU usage
+    HAL_Delay(10);
+  }
+  /* USER CODE END 3 */
+```
+
+
+
 
