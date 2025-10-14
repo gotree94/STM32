@@ -2,6 +2,12 @@
 
 # 센서리스 BLDC 모터 제어 시스템 - CubeMX 설정 가이드
 
+https://docs.simplefoc.com/simplefocmini
+https://github.com/simplefoc/SimpleFOCMini
+http://olddocs.simplefoc.com/v2.3.2/examples
+
+<img width="1286" height="726" alt="simplefoc" src="https://github.com/user-attachments/assets/05d07ec9-3a52-4d6c-b681-d4fd5bd6fdd1" />
+
 ## STM32F103 NUCLEO + DRV8313 최종 설정
 
 ### 1. 클럭 설정 (Clock Configuration)
