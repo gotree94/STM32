@@ -819,7 +819,7 @@ void LCD_DrawString(uint8_t x, uint8_t y, const char* str, uint16_t color, uint1
   /* USER CODE END 3 */
 ```
 ---
-# 추가 프로젝트
+# 추가 프로젝트 (확인중)
    * 아래의 핀들을 풀업으로 별도 제어하지 않는 코드
       * PA6	DRV_nSP (Sleep)	GPIO Input No Pull	HIGH (Active Low)
       * PA7	DRV_nRT (Reset)	GPIO Output Push Pull	HIGH (Active Low)
