@@ -407,6 +407,8 @@ Read from 0xB0: SUCCESS
   * 테스트2 : 읽기 시도
   * 테스트 3: 다른 프로토콜 시도
   * 크로스 체크: 0xA0와 0xB0가 같은 메모리를 공유하는지 확인
+  * 0xA0에 특별한 데이터 쓰기
+  * 0xB0의 같은 주소에서 읽기 시도
 
 ```c
 void Test_0xB0_Device(void)
