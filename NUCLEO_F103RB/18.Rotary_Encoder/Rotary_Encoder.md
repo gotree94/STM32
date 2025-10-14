@@ -23,7 +23,7 @@
 
 ### RCC (Reset and Clock Control)
 1. **Pinout & Configuration** → **System Core** → **RCC**
-2. **High Speed Clock (HSE)**: BYPASS 또는 Crystal/Ceramic Resonator
+2. **High Speed Clock (HSE)**: Disable
 3. **Low Speed Clock (LSE)**: Disable
 
 ### Clock Configuration 탭
