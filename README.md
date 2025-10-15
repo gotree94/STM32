@@ -21,6 +21,7 @@
  - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
  - [] 20.VL53L0X - 정상 동작 안됨
  - [] 21.RTC
+ - [완료] 22.I2C_EEPROM_GPIO
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
