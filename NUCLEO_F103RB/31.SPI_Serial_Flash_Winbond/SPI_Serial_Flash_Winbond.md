@@ -1,5 +1,9 @@
 # SPI_Serial_Flash_Winbond
 
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5071fc8b-00bf-4fcf-9c83-39f2225a3e25" />
+
+
+
 **1.SPI1 설정:**
 ```
 - Mode: Full-Duplex Master
