@@ -1,149 +1,33 @@
 # SPI_Serial_Flash_Winbond
 
-## 1. 제목 (Heading)
-# 제목1 (H1)
-## 제목2 (H2)
-### 제목3 (H3)
-#### 제목4 (H4)
-##### 제목5 (H5)
-###### 제목6 (H6)
-
----
-
-## 2. 텍스트 강조
-*이탤릭*    _이탤릭_  
-**굵게**    __굵게__  
-***굵게+이탤릭***   ___굵게+이탤릭___  
-~~취소선~~  
-<u>밑줄</u>  
-
----
-
-## 3. 목록
-- 항목 1
-  - 하위 항목 1
-    - 하위 항목 2
-* 별표도 가능
-+ 플러스도 가능
-
-1. 첫 번째
-2. 두 번째
-3. 세 번째
-
----
-
-## 4. 체크박스 (Task List)
-- [ ] 할 일 1
-- [x] 완료된 일
-
----
-
-## 5. 링크 & 이미지
-[GitHub](https://github.com)  
-![샘플 이미지](https://via.placeholder.com/150)  
-[![이미지+링크](https://via.placeholder.com/100)](https://github.com)
-
----
-
-## 6. 인용구
-> 인용 1
->> 인용 안의 인용
-
----
-
-## 7. 코드
-인라인 코드: `printf("Hello");`
-
-```c
-#include <stdio.h>
-int main() {
-    printf("Hello World\n");
-}
+**1.SPI1 설정:**
+- Mode: Full-Duplex Master
+- Hardware NSS Signal: Disable (CS를 GPIO로 수동 제어)
+- Data Size: 8 Bits
+- First Bit: MSB First
+- Prescaler: 2 (64MHz / 2 = 32MHz) 또는 4 (16MHz)
+  * W25Q는 최대 80-104MHz 지원하지만, 안정성을 위해 32MHz 이하 권장
+- Clock Polarity (CPOL): Low
+- Clock Phase (CPHA): 1 Edge
+- CRC Calculation: Disabled
 ```
 
----
-
-## 8. 수평선
----  
-***  
-___  
-
----
-
-## 9. 표 (Table)
-| 이름   | 나이 | 비고         |
-|--------|-----:|:-------------|
-| 홍길동 |   20 | 왼쪽 정렬    |
-| 이몽룡 |   30 | 오른쪽 정렬  |
-| 성춘향 |   25 | 가운데 정렬  |
-
----
-
-## 10. 이모지
-:smile: :+1: :fire:
-
----
-
-## 11. 접기/펼치기 (Details)
-<details>
-<summary>펼치기/접기 제목</summary>
-
-내용을 여기에 작성합니다.
-
-</details>
-
----
-
-## 12. 각주 (Footnote)
-이것은 각주 예시입니다[^1].
-
-[^1]: 각주 내용
-
----
-
-## 13. 수학 수식 (MathJax)
-인라인: $E = mc^2$  
-
-블록:
-$$
-\int_0^\infty e^{-x} dx = 1
-$$
-
----
-
-## 14. 강조 구문 (Highlight)
-==하이라이트==
-
----
-
-## 15. HTML 태그
-<b>굵게</b>  
-<i>이탤릭</i>  
-<sub>아래첨자</sub>  
-<sup>위첨자</sup>  
-<br> 줄바꿈
-
----
-
-## 16. 체크리스트 + 이슈 연결
-- [ ] #12  
-- [x] #34  
-
----
-
-## 17. 사용자/리포지토리/커밋 참조
-@username  
-#123  
-owner/repo  
-
----
-
-## 18. Mermaid 다이어그램
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+**2. GPIO 설정:**
+```
+CS 핀 (예: PA4):
+- GPIO Output Level: High
+- GPIO mode: Output Push Pull
+- GPIO Pull-up/Pull-down: No pull-up and no pull-down
+- Maximum output speed: High
 ```
 
+**3. 핀 연결:**
+```
+STM32F103     →     W25Q32/64
+---------------------------------
+PA5 (SPI1_SCK) →    CLK
+PA6 (SPI1_MISO) →   D0 (DO)
+PA7 (SPI1_MOSI) →   D1 (DI)
+PA4 (GPIO)      →   CS
+3.3V            →   VCC
+GND             →   GND
