@@ -23,7 +23,8 @@
  - [] 21.RTC
  - [완료] 22.I2C_EEPROM_GPIO
  - [] 23.Waveshare_1.3inch_oled
- - [] 24.StepMotor
+ - [] 24.StepMotor(NEMA-17) - L298N
+ - [] 25.StepMotor(28BYJ-48) - ULN2003
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
@@ -49,4 +50,7 @@
  - [] 21.RTC
  - [] 22.I2C_EEPROM_GPIO
  - [] 23.Waveshare_1.3inch_oled
- - [] 24.StepMotor
+ - [] 24.StepMotor(NEMA-17) - L298N
+ - [] 25.StepMotor(28BYJ-48) - ULN2003
+
+
