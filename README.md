@@ -47,3 +47,6 @@
  - [] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
  - [] 20.VL53L0X - 정상 동작 안됨
  - [] 21.RTC
+ - [] 22.I2C_EEPROM_GPIO
+ - [] 23.Waveshare_1.3inch_oled
+ - [] 24.StepMotor
