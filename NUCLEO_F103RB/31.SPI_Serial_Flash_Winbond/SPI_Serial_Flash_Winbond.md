@@ -37,3 +37,45 @@ PA4 (GPIO)      →   CS
 3.3V            →   VCC
 GND             →   GND
 ```
+
+```
+W25Q Flash Driver Initialized
+
+=== W25Q Flash Test ===
+Device ID Read Success!
+Manufacturer ID: 0xEF
+Device ID: 0x15
+Manufacturer: Winbond
+Device: W25Q32 (4MB)
+JEDEC ID: 0xEF4016
+
+--- Write/Read Test ---
+Erasing sector at 0x000000...
+Sector erase success!
+Writing 256 bytes to 0x000000...
+Write success!
+Reading 256 bytes from 0x000000...
+Read success!
+Data verification SUCCESS! All 256 bytes match.
+
+=== Test Complete ===
+
+W25Q Flash Driver Initialized
+
+=== W25Q Flash Test ===
+Device ID Read Success!
+Manufacturer ID: 0xEF
+Device ID: 0x16
+Manufacturer: Winbond
+Device: W25Q64 (8MB)
+JEDEC ID: 0xEF4017
+
+--- Write/Read Test ---
+Erasing sector at 0x000000...
+Sector erase success!
+Writing 256 bytes to 0x000000...
+Write success!
+Reading 256 bytes from 0x000000...
+Read success!
+Data verification SUCCESS! All 256 bytes match.
+```
