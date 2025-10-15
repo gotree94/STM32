@@ -31,7 +31,7 @@
  - [] 28.USB HOST
  - [] 29.GY-GPS6MV2
  - [] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
- - [] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
+ - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
