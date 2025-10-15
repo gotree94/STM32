@@ -25,6 +25,12 @@
  - [] 23.Waveshare_1.3inch_oled
  - [] 24.StepMotor(NEMA-17) - L298N
  - [] 25.StepMotor(28BYJ-48) - ULN2003
+ - [] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
+   - NS-SD04_ReferenceManual_KR.pdf
+ - [] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
+ - [] 28.USB HOST
+ - [] 29.GY-GPS6MV2
+ - [] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
@@ -52,5 +58,11 @@
  - [] 23.Waveshare_1.3inch_oled
  - [] 24.StepMotor(NEMA-17) - L298N
  - [] 25.StepMotor(28BYJ-48) - ULN2003
+ - [] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
+   - NS-SD04_ReferenceManual_KR.pdf
+ - [] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
+ - [] 28.USB HOST
+ - [] 29.GY-GPS6MV2
+ - [] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
 
 
