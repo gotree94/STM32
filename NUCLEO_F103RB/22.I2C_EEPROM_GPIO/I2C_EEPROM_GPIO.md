@@ -1,12 +1,16 @@
 # I2C_EEPROM_GPIO
 
 <img width="400" height="600" alt="NUCLEO-F103RB" src="https://github.com/user-attachments/assets/e7b74c47-b97c-47a9-a429-cc13ede19b19" />
+<br>
 
 <img width="500" height="400" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5e81782c-f759-483b-a4d6-4e9f04f81b83" />
+<br>
 
 <img width="600" height="400" alt="001" src="https://github.com/user-attachments/assets/60b80dbb-c295-423e-aefa-c25769cb0abd" />
+<br>
 
 <img width="500" height="500" alt="I2C_EEPROM_GPIO" src="https://github.com/user-attachments/assets/85258be0-4e69-4cd0-b272-7e0f1bb8a939" />
+<br>
 
 
 ```c
