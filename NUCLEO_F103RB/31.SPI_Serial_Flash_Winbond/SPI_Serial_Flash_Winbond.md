@@ -1,6 +1,7 @@
 # SPI_Serial_Flash_Winbond
 
 **1.SPI1 설정:**
+```
 - Mode: Full-Duplex Master
 - Hardware NSS Signal: Disable (CS를 GPIO로 수동 제어)
 - Data Size: 8 Bits
@@ -31,3 +32,4 @@ PA7 (SPI1_MOSI) →   D1 (DI)
 PA4 (GPIO)      →   CS
 3.3V            →   VCC
 GND             →   GND
+```
