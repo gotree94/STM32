@@ -2,7 +2,17 @@
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5071fc8b-00bf-4fcf-9c83-39f2225a3e25" />
 
+<img width="600" height="400" alt="001" src="https://github.com/user-attachments/assets/2c0552de-487b-451e-a2b7-e0efed450a78" />
+<br>
 
+<img width="600" height="400" alt="002" src="https://github.com/user-attachments/assets/e65767ed-97c8-4544-916e-910f0f119e21" />
+<br>
+
+<img width="600" height="400" alt="004" src="https://github.com/user-attachments/assets/791c9b84-691c-42c1-b08d-a79cf01dc44b" />
+<br>
+
+<img width="600" height="400" alt="005" src="https://github.com/user-attachments/assets/d09167a9-746b-468c-81f9-2ab818f92f8c" />
+<br>
 
 **1.SPI1 설정:**
 ```
