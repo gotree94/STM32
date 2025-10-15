@@ -4,7 +4,8 @@
 ## 1. BT06 DM2147
 <img width="442" height="173" alt="BT06_DM2147" src="https://github.com/user-attachments/assets/9b92e6a3-71bf-4c2b-843f-63ae17afe8d0" />
 
-
+- 블루투스 2.1 버전 모듈입니다.
+- HC-06 을 대체할 수 있습니다.
  
 ---
 
@@ -12,8 +13,7 @@
 
 <img width="357" height="150" alt="HC-06" src="https://github.com/user-attachments/assets/8068f470-c33a-4a62-8abf-83f56e78a098" />
 
-- 블루투스 2.1 버전 모듈입니다.
-- HC-06 을 대체할 수 있습니다.
+
 - 블루투스 V2.0 프로토콜 기반의 CSR 블루투스 칩 사용
 - 동작전압 3.3V
 - UART : 1200,2400,4800,9600,19200,38400,57600,115200 bps
