@@ -16,7 +16,10 @@
 
 ---
 
-## 2. BT06 DM2147
+## 2. HC-06
+
+<img width="357" height="150" alt="HC-06" src="https://github.com/user-attachments/assets/8068f470-c33a-4a62-8abf-83f56e78a098" />
+
 
 - 항목 1
   - 하위 항목 1
