@@ -34,7 +34,10 @@
 ---
 
 
-## 3. BT06 DM2147
+## 3. CSR_BC41C
+
+<img width="395" height="260" alt="CSR_BC41C" src="https://github.com/user-attachments/assets/6faec10a-d41e-4233-a3dd-c0738e9bebb3" />
+
 
 - 항목 1
   - 하위 항목 1
