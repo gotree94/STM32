@@ -1,7 +1,7 @@
 # BLUETOOTH Module
 
 ---
-## 1. BT06 DM2147
+## 1. BT06 DM2147 (5V 입력일때 LED 동작)
 <img width="442" height="173" alt="BT06_DM2147" src="https://github.com/user-attachments/assets/9b92e6a3-71bf-4c2b-843f-63ae17afe8d0" />
 
 - 블루투스 2.1 버전 모듈입니다.
@@ -72,7 +72,7 @@ OK
 
 ---
 
-## 2. HC-06
+## 2. HC-06  (5V 입력일때 LED 동작)
 
 <img width="357" height="150" alt="HC-06" src="https://github.com/user-attachments/assets/8068f470-c33a-4a62-8abf-83f56e78a098" />
 
