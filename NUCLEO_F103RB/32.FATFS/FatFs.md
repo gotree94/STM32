@@ -15,16 +15,16 @@ GND              → GND
 
 ### 2. STM32CubeMX 설정
 
-   * SPI 설정
-       1. Connectivity → SPI1 선택
-       2. Mode: Full-Duplex Master
-       3. Hardware NSS Signal: Disable
-       4. Parameter Settings:
-   * Prescaler: 128 (초기 통신용, 나중에 속도 증가 가능)
-   * Clock Polarity: Low
-   * Clock Phase: 1 Edge
-   * Data Size: 8 Bits
-   * First Bit: MSB First
+- SPI 설정
+  - 1. Connectivity → SPI1 선택
+  - 2. Mode: Full-Duplex Master
+  - 3. Hardware NSS Signal: Disable
+  - 4. Parameter Settings:
+    - Prescaler: 128 (초기 통신용, 나중에 속도 증가 가능)
+    - Clock Polarity: Low
+    - Clock Phase: 1 Edge
+    - Data Size: 8 Bits
+    - First Bit: MSB First
 
    * FatFs 미들웨어 활성화
      1. Middleware → FATFS 선택
