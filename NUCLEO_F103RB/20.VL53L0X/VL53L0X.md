@@ -1,7 +1,6 @@
-# VL53L0X
+# VL53L0X (VL53L0X 거리 센서와 I2C 주소 스캐너)
 
 ## STM32CubeMX 설정 가이드
-### VL53L0X 거리 센서와 I2C 주소 스캐너
 
 <img width="200" height="100" alt="1002" src="https://github.com/user-attachments/assets/2ce67ecd-f487-4eb1-b083-e5823e572a55" />
 <br>
