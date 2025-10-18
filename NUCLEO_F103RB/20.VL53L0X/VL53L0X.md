@@ -3,6 +3,10 @@
 # STM32CubeMX 설정 가이드
 ## VL53L0X 거리 센서와 I2C 주소 스캐너
 
+<img width="600" height="800" alt="400" src="https://github.com/user-attachments/assets/3e7c9608-096b-460e-b5f0-a5862f3dd39d" />
+
+
+
 ### 필요한 하드웨어
 - STM32F103 NUCLEO 보드
 - VL53L0X ToF 거리 센서 모듈
