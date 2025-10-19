@@ -1,4 +1,4 @@
-# Waveshare 1.3" OLED (SH1106 컨트롤러 기반)
+# Waveshare 1.3" OLED (SH1106/SSD1306 컨트롤러 기반)
 
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/1d9ceb52-875a-458b-834b-cf41825aa8c2" />
