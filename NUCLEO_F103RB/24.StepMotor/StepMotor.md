@@ -80,6 +80,8 @@ int currentStep = 0;
 /* USER CODE END PFP */
 ```
 
+---
+### halfStepSequence
 ```c
 /* USER CODE BEGIN 0 */
 /**
@@ -155,6 +157,70 @@ void StepMotor_RotateDegrees(float degrees, int direction)
 }
 /* USER CODE END 0 */
 ```
+
+---
+### fullStepSequence
+
+```c
+/**
+  * @brief  한 스텝 실행 (Full Step Mode)
+  * @param  step: 스텝 번호 (0~3)
+  */
+void StepMotor_Step(int step)
+{
+    step = step % 4;  // 0~3 범위로 제한 (Full Step Mode)
+    
+    HAL_GPIO_WritePin(MOTOR_PORT, MOTOR_IN1_PIN, 
+                      fullStepSequence[step][0] ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(MOTOR_PORT, MOTOR_IN2_PIN, 
+                      fullStepSequence[step][1] ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(MOTOR_PORT, MOTOR_IN3_PIN, 
+                      fullStepSequence[step][2] ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(MOTOR_PORT, MOTOR_IN4_PIN, 
+                      fullStepSequence[step][3] ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+/**
+  * @brief  지정된 스텝 수만큼 회전
+  * @param  steps: 회전할 스텝 수
+  * @param  direction: 회전 방향 (1: 정방향, 0: 역방향)
+  */
+void StepMotor_Rotate(int steps, int direction)
+{
+    for (int i = 0; i < steps; i++)
+    {
+        if (direction == 1)
+        {
+            currentStep++;
+            if (currentStep >= 4) currentStep = 0;  // Full Step은 0~3
+        }
+        else
+        {
+            currentStep--;
+            if (currentStep < 0) currentStep = 3;  // Full Step은 0~3
+        }
+        
+        StepMotor_Step(currentStep);
+        HAL_Delay(STEP_DELAY);
+    }
+    
+    // 회전 완료 후 모든 코일 OFF (전력 절약 및 발열 방지)
+    HAL_GPIO_WritePin(MOTOR_PORT, MOTOR_IN1_PIN | MOTOR_IN2_PIN | 
+                      MOTOR_IN3_PIN | MOTOR_IN4_PIN, GPIO_PIN_RESET);
+}
+
+/**
+  * @brief  각도만큼 회전
+  * @param  degrees: 회전할 각도
+  * @param  direction: 회전 방향 (1: 정방향, 0: 역방향)
+  */
+void StepMotor_RotateDegrees(float degrees, int direction)
+{
+    int steps = (int)((degrees / 360.0) * STEPS_PER_REVOLUTION);
+    StepMotor_Rotate(steps, direction);
+}
+```
+
 
 ```c
   /* USER CODE BEGIN 2 */
