@@ -1,5 +1,8 @@
 # STM32F103 + 28BYJ-48 스텝모터 제어 프로그램
 
+<img width="421" height="322" alt="005" src="https://github.com/user-attachments/assets/a247809b-1f83-4a2b-807d-85373012917b" />
+<br>
+
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/c908088b-cb5d-40cd-8302-1b04dc17bfd1" />
 
 ```
