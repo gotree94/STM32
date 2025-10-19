@@ -22,7 +22,7 @@
  - [완료] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
  - [] 21.RTC
  - [완료] 22.I2C_EEPROM_GPIO
- - [] 23.Waveshare_1.3inch_oled
+ - [완료] 23.Waveshare_1.3inch_oled
  - [] 24.StepMotor(NEMA-17) - L298N
  - [완료] 25.StepMotor(28BYJ-48) - ULN2003
  - [] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
