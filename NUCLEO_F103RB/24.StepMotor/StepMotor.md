@@ -3,7 +3,7 @@
 <img width="300" height="200" alt="005" src="https://github.com/user-attachments/assets/a247809b-1f83-4a2b-807d-85373012917b" />
 <br>
 
-<img width="500" height="350" alt="F103RB-pin" src="https://github.com/user-attachments/assets/c908088b-cb5d-40cd-8302-1b04dc17bfd1" />
+<img width="500" height="450" alt="F103RB-pin" src="https://github.com/user-attachments/assets/c908088b-cb5d-40cd-8302-1b04dc17bfd1" />
 
 ```
 STM32F103    용도         ULN2003    28BYJ-48
