@@ -33,6 +33,7 @@
  - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
  - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
  - [] 32.FATFS
+ - [] 33.TRCT5000 : 적외선 라인센서 모듈
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
