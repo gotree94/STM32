@@ -9,7 +9,7 @@
  - [완료] 07.Buzzer
  - [완료] 08.CLCD
  - [완료] 09.ServoMotor
- - [] 10.GM009605_LCD 
+ - [완료] 10.GM009605_LCD 
  - [완료] 11.LCD-SPI
  - [완료] 12.DHT11
  - [완료] 13.JoyStick
