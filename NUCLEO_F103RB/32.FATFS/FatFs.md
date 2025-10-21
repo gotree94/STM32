@@ -37,6 +37,10 @@ SD_FATFS/
                 └── ffconf.h        ✅ (수정됨)
 ```
 
+<img width="240" height="819" alt="004" src="https://github.com/user-attachments/assets/424900c3-1df0-4c2d-b67d-c28a1877be82" />
+
+
+
 ### 3. 하드웨어 연결
    * SD 카드를 SPI 모드로 연결합니다:
    * SD Card Pin  →  STM32F103 Pin
