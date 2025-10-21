@@ -895,7 +895,7 @@ FRESULT SD_AppendFile(const char* filename, const char* data)
     if (fres == FR_OK) {
         /* Move to end of file */
         f_lseek(&File, f_size(&File));
-        
+
         UINT bw;
         fres = f_write(&File, data, strlen(data), &bw);
         totalBytesWritten += bw;
@@ -944,17 +944,17 @@ FRESULT SD_ListFiles(const char* path)
 {
     DIR dir;
     FILINFO fno;
-    
+
     printf("\n[SD] Listing files in: %s\n", path);
     printf("-------------------------------------\n");
-    
+
     fres = f_opendir(&dir, path);
     if (fres == FR_OK) {
         int count = 0;
         while (1) {
             fres = f_readdir(&dir, &fno);
             if (fres != FR_OK || fno.fname[0] == 0) break;
-            
+
             if (fno.fattrib & AM_DIR) {
                 printf("  [DIR]  %s\n", fno.fname);
             } else {
@@ -976,7 +976,7 @@ FRESULT SD_LogData(const char* filename, const char* data)
 {
     char logEntry[256];
     uint32_t timestamp = HAL_GetTick() / 1000;  // seconds
-    
+
     snprintf(logEntry, sizeof(logEntry), "[%06lu] %s\n", timestamp, data);
     return SD_AppendFile(filename, logEntry);
 }
@@ -1008,13 +1008,13 @@ void SD_GetInfo(void)
 {
     FATFS *fs;
     DWORD fre_clust;
-    
+
     printf("\n=== SD Card Information ===\n");
-    
+
     if (f_getfree("", &fre_clust, &fs) == FR_OK) {
         DWORD tot_sect = (fs->n_fatent - 2) * fs->csize;
         DWORD fre_sect = fre_clust * fs->csize;
-        
+
         printf("Type: FAT%d\n", fs->fs_type);
         printf("Sector Size: 512 bytes\n");
         printf("Cluster Size: %d sectors\n", fs->csize);
@@ -1044,27 +1044,27 @@ void SD_ShowStatistics(void)
 void SD_Demo_BasicOperations(void)
 {
     printf("\n>>> Demo 1: Basic File Operations <<<\n\n");
-    
+
     // 1. 파일 생성 및 쓰기
     SD_WriteFile("demo1.txt", "Hello from NUCLEO-F103RB!\n");
-    
+
     // 2. 파일 읽기
     SD_ReadFile("demo1.txt", buffer, sizeof(buffer));
     printf("Content: %s\n", buffer);
-    
+
     // 3. 파일에 데이터 추가
     SD_AppendFile("demo1.txt", "This is an appended line.\n");
-    
+
     // 4. 다시 읽기
     SD_ReadFile("demo1.txt", buffer, sizeof(buffer));
     printf("Updated content:\n%s\n", buffer);
-    
+
     // 5. 디렉토리 생성
     SD_CreateDirectory("logs");
-    
+
     // 6. 디렉토리 안에 파일 생성
     SD_WriteFile("logs/test.txt", "File inside logs directory\n");
-    
+
     // 7. 파일 목록 표시
     SD_ListFiles("/");
     SD_ListFiles("/logs");
@@ -1076,21 +1076,21 @@ void SD_Demo_BasicOperations(void)
 void SD_Demo_DataLogging(void)
 {
     printf("\n>>> Demo 2: Data Logging <<<\n\n");
-    
+
     // 로그 파일 생성
     SD_WriteFile("system.log", "=== System Log Started ===\n");
-    
+
     // 주기적 로깅 시뮬레이션
     for(int i = 0; i < 5; i++) {
         char logData[128];
-        snprintf(logData, sizeof(logData), 
-                 "Temperature: %d°C, Humidity: %d%%", 
+        snprintf(logData, sizeof(logData),
+                 "Temperature: %d°C, Humidity: %d%%",
                  20 + i, 50 + i*2);
-        
+
         SD_LogData("system.log", logData);
         HAL_Delay(100);
     }
-    
+
     // 로그 파일 읽기
     SD_ReadFile("system.log", buffer, sizeof(buffer));
     printf("\nLog contents:\n%s\n", buffer);
@@ -1102,22 +1102,22 @@ void SD_Demo_DataLogging(void)
 void SD_Demo_CSVLogging(void)
 {
     printf("\n>>> Demo 3: CSV Data Logging <<<\n\n");
-    
+
     // CSV 파일 생성 (헤더)
     SD_CreateCSV("data.csv", "Time,Temperature,Humidity,Pressure");
-    
+
     // 데이터 추가
     for(int i = 0; i < 10; i++) {
         char csvData[128];
         uint32_t time = HAL_GetTick() / 1000;
-        snprintf(csvData, sizeof(csvData), 
-                 "%lu,%d,%d,%d", 
+        snprintf(csvData, sizeof(csvData),
+                 "%lu,%d,%d,%d",
                  time, 20+i, 50+i, 1013+i);
-        
+
         SD_AppendCSV("data.csv", csvData);
         HAL_Delay(50);
     }
-    
+
     printf("[SD] Created data.csv with 10 entries\n");
     printf("      You can open this file in Excel!\n\n");
 }
@@ -1155,69 +1155,69 @@ int main(void)
   MX_FATFS_Init();
 
   /* USER CODE BEGIN 2 */
-  
+
   printf("\n\n");
   printf("========================================\n");
   printf("  NUCLEO-F103RB SD Card FATFS Demo\n");
   printf("  System Clock: 64MHz\n");
   printf("  SPI Speed: 8MHz\n");
   printf("========================================\n\n");
-  
+
   // SD 카드 초기화 대기
   HAL_Delay(500);
-  
+
   // SD 카드 초기화
   printf("Initializing SD Card...\n");
   uint8_t init_result = SD_SPI_Init();
-  
+
   if (init_result != 0) {
       printf("❌ SD Card initialization FAILED!\n");
       printf("   Check connections and try again.\n\n");
       LED_Blink(10, 100);  // 빠른 깜빡임
       while(1) { HAL_Delay(1000); }
   }
-  
+
   printf("✓ SD Card initialized (Type: 0x%02X)\n\n", SD_SPI_GetCardInfo());
-  
+
   // FATFS 마운트
   printf("Mounting filesystem...\n");
   fres = f_mount(&FatFs, "", 1);
-  
+
   if (fres != FR_OK) {
       printf("❌ Mount FAILED! Error: %d\n", fres);
       printf("   Format SD card as FAT32 and try again.\n\n");
       LED_Blink(10, 100);
       while(1) { HAL_Delay(1000); }
   }
-  
+
   printf("✓ Filesystem mounted successfully!\n");
   LED_Blink(3, 200);  // 성공 신호
-  
+
   // SD 카드 정보 표시
   SD_GetInfo();
-  
+
   // 데모 실행
   SD_Demo_BasicOperations();
   HAL_Delay(500);
-  
+
   SD_Demo_DataLogging();
   HAL_Delay(500);
-  
+
   SD_Demo_CSVLogging();
   HAL_Delay(500);
-  
+
   // 통계 표시
   SD_ShowStatistics();
-  
+
   // 최종 파일 목록
   printf("=== Final File List ===\n");
   SD_ListFiles("/");
-  
+
   printf("\n========================================\n");
   printf("  All demos completed successfully!\n");
   printf("  Remove SD card and check files on PC\n");
   printf("========================================\n\n");
-  
+
   // 성공 - 느린 깜빡임
   while (1) {
       HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
@@ -1354,6 +1354,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
 }
 #endif /* USE_FULL_ASSERT */
+
 ```
 
 ---
