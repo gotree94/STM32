@@ -523,54 +523,35 @@ uint8_t SD_SPI_GetCardInfo(void)
 ```
 
 
-## user_disk_io.c
+### user_disk_io.c
 
 ```c
+/* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    user_diskio.c (수정 버전 2)
-  * @brief   FATFS user diskio - 초기화 문제 수정
+ ******************************************************************************
+  * @file    user_diskio.c (Clean Version - No Debug Messages)
+  * @brief   FATFS user diskio - Production version
   ******************************************************************************
   */
-
-/* USER CODE BEGIN HEADER */
-#include <string.h>
-#include <stdio.h>
-/* USER CODE END HEADER */
+ /* USER CODE END Header */
 
 #ifdef USE_OBSOLETE_USER_CODE_SECTION_0
 /* USER CODE BEGIN 0 */
 /* USER CODE END 0 */
 #endif
 
-/* USER CODE BEGIN HEADER_1 */
-#include "sd_spi_driver.h"
-/* USER CODE END HEADER_1 */
-
+/* USER CODE BEGIN DECL */
+#include <string.h>
 #include "ff_gen_drv.h"
+#include "sd_spi_driver.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN PV */
+/* Private variables */
 static volatile DSTATUS Stat = STA_NOINIT;
-static uint8_t CardInitialized = 0;  // ← 초기화 상태 플래그 추가
-/* USER CODE END PV */
+static uint8_t CardInitialized = 0;
 
-/* Private function prototypes -----------------------------------------------*/
+/* USER CODE END DECL */
+
+/* Private function prototypes */
 DSTATUS USER_initialize (BYTE pdrv);
 DSTATUS USER_status (BYTE pdrv);
 DRESULT USER_read (BYTE pdrv, BYTE *buff, DWORD sector, UINT count);
@@ -586,7 +567,7 @@ Diskio_drvTypeDef  USER_Driver =
   USER_initialize,
   USER_status,
   USER_read,
-#if  _USE_WRITE == 1
+#if  _USE_WRITE
   USER_write,
 #endif
 #if  _USE_IOCTL == 1
@@ -594,163 +575,100 @@ Diskio_drvTypeDef  USER_Driver =
 #endif
 };
 
-/* Private functions ---------------------------------------------------------*/
+/* Private functions */
 
 /**
   * @brief  Initializes a Drive
-  * @param  pdrv: Physical drive number (0..)
-  * @retval DSTATUS: Operation status
   */
-DSTATUS USER_initialize (
-	BYTE pdrv           /* Physical drive nmuber to identify the drive */
-)
+DSTATUS USER_initialize (BYTE pdrv)
 {
   /* USER CODE BEGIN INIT */
-    printf("[DISKIO] USER_initialize called (pdrv=%d)\n", pdrv);
-    
     Stat = STA_NOINIT;
-    
+
     if (pdrv != 0) {
-        printf("[DISKIO] Invalid drive number\n");
         return STA_NOINIT;
     }
-    
-    // 이미 초기화되었으면 다시 초기화하지 않음
+
     if (CardInitialized) {
-        printf("[DISKIO] Card already initialized\n");
-        Stat = 0;  // 정상 상태
+        Stat = 0;
         return Stat;
     }
-    
-    // SD 카드 초기화
-    printf("[DISKIO] Calling SD_SPI_Init...\n");
+
     if (SD_SPI_Init() == 0) {
-        printf("[DISKIO] SD_SPI_Init SUCCESS\n");
-        Stat = 0;  // STA_NOINIT 플래그 제거
+        Stat = 0;
         CardInitialized = 1;
     } else {
-        printf("[DISKIO] SD_SPI_Init FAILED\n");
         Stat = STA_NOINIT;
         CardInitialized = 0;
     }
-    
-    printf("[DISKIO] Initialize complete - Status: 0x%02X\n", Stat);
+
     return Stat;
   /* USER CODE END INIT */
 }
 
 /**
   * @brief  Gets Disk Status
-  * @param  pdrv: Physical drive number (0..)
-  * @retval DSTATUS: Operation status
   */
-DSTATUS USER_status (
-	BYTE pdrv       /* Physical drive number to identify the drive */
-)
+DSTATUS USER_status (BYTE pdrv)
 {
   /* USER CODE BEGIN STATUS */
     if (pdrv != 0) {
         return STA_NOINIT;
     }
-    
-    // 카드가 초기화되었고 유효한 타입이면 정상
+
     if (CardInitialized && SD_SPI_GetCardInfo() != 0) {
-        Stat = 0;  // 정상
+        Stat = 0;
     } else {
         Stat = STA_NOINIT;
     }
-    
+
     return Stat;
   /* USER CODE END STATUS */
 }
 
 /**
   * @brief  Reads Sector(s)
-  * @param  pdrv: Physical drive number (0..)
-  * @param  *buff: Data buffer to store read data
-  * @param  sector: Sector address (LBA)
-  * @param  count: Number of sectors to read (1..128)
-  * @retval DRESULT: Operation result
   */
-DRESULT USER_read (
-	BYTE pdrv,      /* Physical drive nmuber to identify the drive */
-	BYTE *buff,     /* Data buffer to store read data */
-	DWORD sector,   /* Sector address in LBA */
-	UINT count      /* Number of sectors to read */
-)
+DRESULT USER_read (BYTE pdrv, BYTE *buff, DWORD sector, UINT count)
 {
   /* USER CODE BEGIN READ */
-    if (pdrv != 0 || !count) {
-        printf("[DISKIO] Read: Invalid parameters\n");
-        return RES_PARERR;
-    }
-    
-    if (Stat & STA_NOINIT) {
-        printf("[DISKIO] Read: Drive not ready\n");
-        return RES_NOTRDY;
-    }
-    
-    printf("[DISKIO] Reading sector %lu, count %u\n", sector, count);
-    
+    if (pdrv != 0 || !count) return RES_PARERR;
+    if (Stat & STA_NOINIT) return RES_NOTRDY;
+
     if (count == 1) {
         if (SD_SPI_ReadBlock(buff, sector) == 0) {
-            printf("[DISKIO] Read SUCCESS\n");
             return RES_OK;
         }
     } else {
         if (SD_SPI_ReadMultiBlock(buff, sector, count) == 0) {
-            printf("[DISKIO] Multi-read SUCCESS\n");
             return RES_OK;
         }
     }
-    
-    printf("[DISKIO] Read FAILED\n");
+
     return RES_ERROR;
   /* USER CODE END READ */
 }
 
 /**
   * @brief  Writes Sector(s)
-  * @param  pdrv: Physical drive number (0..)
-  * @param  *buff: Data to be written
-  * @param  sector: Sector address (LBA)
-  * @param  count: Number of sectors to write (1..128)
-  * @retval DRESULT: Operation result
   */
 #if _USE_WRITE == 1
-DRESULT USER_write (
-	BYTE pdrv,          /* Physical drive nmuber to identify the drive */
-	const BYTE *buff,   /* Data to be written */
-	DWORD sector,       /* Sector address in LBA */
-	UINT count          /* Number of sectors to write */
-)
+DRESULT USER_write (BYTE pdrv, const BYTE *buff, DWORD sector, UINT count)
 {
   /* USER CODE BEGIN WRITE */
-    if (pdrv != 0 || !count) {
-        printf("[DISKIO] Write: Invalid parameters\n");
-        return RES_PARERR;
-    }
-    
-    if (Stat & STA_NOINIT) {
-        printf("[DISKIO] Write: Drive not ready\n");
-        return RES_NOTRDY;
-    }
-    
-    printf("[DISKIO] Writing sector %lu, count %u\n", sector, count);
-    
+    if (pdrv != 0 || !count) return RES_PARERR;
+    if (Stat & STA_NOINIT) return RES_NOTRDY;
+
     if (count == 1) {
         if (SD_SPI_WriteBlock(buff, sector) == 0) {
-            printf("[DISKIO] Write SUCCESS\n");
             return RES_OK;
         }
     } else {
         if (SD_SPI_WriteMultiBlock(buff, sector, count) == 0) {
-            printf("[DISKIO] Multi-write SUCCESS\n");
             return RES_OK;
         }
     }
-    
-    printf("[DISKIO] Write FAILED\n");
+
     return RES_ERROR;
   /* USER CODE END WRITE */
 }
@@ -758,63 +676,48 @@ DRESULT USER_write (
 
 /**
   * @brief  I/O control operation
-  * @param  pdrv: Physical drive number (0..)
-  * @param  cmd: Control code
-  * @param  *buff: Buffer to send/receive control data
-  * @retval DRESULT: Operation result
   */
 #if _USE_IOCTL == 1
-DRESULT USER_ioctl (
-	BYTE pdrv,      /* Physical drive nmuber (0..) */
-	BYTE cmd,       /* Control code */
-	void *buff      /* Buffer to send/receive control data */
-)
+DRESULT USER_ioctl (BYTE pdrv, BYTE cmd, void *buff)
 {
   /* USER CODE BEGIN IOCTL */
     DRESULT res = RES_ERROR;
-    
+
     if (pdrv != 0) return RES_PARERR;
-    
     if (Stat & STA_NOINIT) return RES_NOTRDY;
-    
+
     switch (cmd) {
         case CTRL_SYNC:
-            printf("[DISKIO] IOCTL: CTRL_SYNC\n");
             res = RES_OK;
             break;
-            
+
         case GET_SECTOR_COUNT:
-            printf("[DISKIO] IOCTL: GET_SECTOR_COUNT\n");
-            *(DWORD*)buff = 0;  // FATFS will determine this
+            *(DWORD*)buff = 0;
             res = RES_OK;
             break;
-            
+
         case GET_SECTOR_SIZE:
-            printf("[DISKIO] IOCTL: GET_SECTOR_SIZE\n");
             *(WORD*)buff = 512;
             res = RES_OK;
             break;
-            
+
         case GET_BLOCK_SIZE:
-            printf("[DISKIO] IOCTL: GET_BLOCK_SIZE\n");
             *(DWORD*)buff = 1;
             res = RES_OK;
             break;
-            
+
         default:
-            printf("[DISKIO] IOCTL: Unknown command %d\n", cmd);
             res = RES_PARERR;
     }
-    
+
     return res;
   /* USER CODE END IOCTL */
 }
 #endif
 
-/* USER CODE BEGIN DSTATUS */
+/* USER CODE BEGIN AFTER */
 __weak DWORD get_fattime(void)
 {
-    /* Return fixed time: 2025-01-01 00:00:00 */
     return ((DWORD)(2025 - 1980) << 25)
          | ((DWORD)1 << 21)
          | ((DWORD)1 << 16)
@@ -822,9 +725,633 @@ __weak DWORD get_fattime(void)
          | ((DWORD)0 << 5)
          | ((DWORD)0 >> 1);
 }
-/* USER CODE END DSTATUS */
+/* USER CODE END AFTER */
+
 ```
 
+### 4. main.c
+
+```c
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : SD Card FATFS Final Version
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "fatfs.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <string.h>
+#include <stdio.h>
+#include "sd_spi_driver.h"
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define SD_DEBUG 0  // 1=디버그 출력 활성화, 0=비활성화
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+SPI_HandleTypeDef hspi1;
+UART_HandleTypeDef huart2;
+
+/* USER CODE BEGIN PV */
+FATFS FatFs;
+FIL File;
+FRESULT fres;
+UINT bytesWritten, bytesRead;
+char buffer[512];
+
+// 통계 정보
+uint32_t totalFilesCreated = 0;
+uint32_t totalBytesWritten = 0;
+uint32_t totalBytesRead = 0;
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_SPI1_Init(void);
+
+/* USER CODE BEGIN PFP */
+// SD Card 기본 함수
+FRESULT SD_WriteFile(const char* filename, const char* data);
+FRESULT SD_ReadFile(const char* filename, char* buffer, uint32_t bufsize);
+FRESULT SD_AppendFile(const char* filename, const char* data);
+FRESULT SD_DeleteFile(const char* filename);
+FRESULT SD_CreateDirectory(const char* dirname);
+FRESULT SD_ListFiles(const char* path);
+
+// 데이터 로깅 함수
+FRESULT SD_LogData(const char* filename, const char* data);
+FRESULT SD_CreateCSV(const char* filename, const char* header);
+FRESULT SD_AppendCSV(const char* filename, const char* data);
+
+// 유틸리티 함수
+void SD_GetInfo(void);
+void SD_ShowStatistics(void);
+void LED_Blink(uint32_t count, uint32_t delay_ms);
+
+// 데모 함수
+void SD_Demo_BasicOperations(void);
+void SD_Demo_DataLogging(void);
+void SD_Demo_CSVLogging(void);
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/**
+  * @brief  printf 리다이렉트
+  */
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+    if (ch == '\n')
+        HAL_UART_Transmit(&huart2, (uint8_t*)"\r", 1, 0xFFFF);
+    HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
+    return ch;
+}
+
+/**
+  * @brief  LED 깜빡이기
+  */
+void LED_Blink(uint32_t count, uint32_t delay_ms)
+{
+    for(uint32_t i = 0; i < count; i++) {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(delay_ms);
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(delay_ms);
+    }
+}
+
+/**
+  * @brief  파일 쓰기 (새로 생성 또는 덮어쓰기)
+  */
+FRESULT SD_WriteFile(const char* filename, const char* data)
+{
+    fres = f_open(&File, filename, FA_WRITE | FA_CREATE_ALWAYS);
+    if (fres == FR_OK) {
+        UINT bw;
+        fres = f_write(&File, data, strlen(data), &bw);
+        totalBytesWritten += bw;
+        totalFilesCreated++;
+        f_close(&File);
+        printf("[SD] Created: %s (%u bytes)\n", filename, bw);
+    } else {
+        printf("[SD] Error creating file: %d\n", fres);
+    }
+    return fres;
+}
+
+/**
+  * @brief  파일 읽기
+  */
+FRESULT SD_ReadFile(const char* filename, char* buffer, uint32_t bufsize)
+{
+    fres = f_open(&File, filename, FA_READ);
+    if (fres == FR_OK) {
+        UINT br;
+        fres = f_read(&File, buffer, bufsize - 1, &br);
+        buffer[br] = '\0';  // Null terminator
+        totalBytesRead += br;
+        f_close(&File);
+        printf("[SD] Read: %s (%u bytes)\n", filename, br);
+    } else {
+        printf("[SD] Error reading file: %d\n", fres);
+    }
+    return fres;
+}
+
+/**
+  * @brief  파일에 데이터 추가 (append)
+  */
+FRESULT SD_AppendFile(const char* filename, const char* data)
+{
+    fres = f_open(&File, filename, FA_WRITE | FA_OPEN_APPEND);
+    if (fres == FR_OK) {
+        UINT bw;
+        fres = f_write(&File, data, strlen(data), &bw);
+        totalBytesWritten += bw;
+        f_close(&File);
+        printf("[SD] Appended to: %s (%u bytes)\n", filename, bw);
+    } else {
+        printf("[SD] Error appending: %d\n", fres);
+    }
+    return fres;
+}
+
+/**
+  * @brief  파일 삭제
+  */
+FRESULT SD_DeleteFile(const char* filename)
+{
+    fres = f_unlink(filename);
+    if (fres == FR_OK) {
+        printf("[SD] Deleted: %s\n", filename);
+    } else {
+        printf("[SD] Error deleting file: %d\n", fres);
+    }
+    return fres;
+}
+
+/**
+  * @brief  디렉토리 생성
+  */
+FRESULT SD_CreateDirectory(const char* dirname)
+{
+    fres = f_mkdir(dirname);
+    if (fres == FR_OK) {
+        printf("[SD] Created directory: %s\n", dirname);
+    } else if (fres == FR_EXIST) {
+        printf("[SD] Directory already exists: %s\n", dirname);
+    } else {
+        printf("[SD] Error creating directory: %d\n", fres);
+    }
+    return fres;
+}
+
+/**
+  * @brief  파일/디렉토리 목록 표시
+  */
+FRESULT SD_ListFiles(const char* path)
+{
+    DIR dir;
+    FILINFO fno;
+    
+    printf("\n[SD] Listing files in: %s\n", path);
+    printf("-------------------------------------\n");
+    
+    fres = f_opendir(&dir, path);
+    if (fres == FR_OK) {
+        int count = 0;
+        while (1) {
+            fres = f_readdir(&dir, &fno);
+            if (fres != FR_OK || fno.fname[0] == 0) break;
+            
+            if (fno.fattrib & AM_DIR) {
+                printf("  [DIR]  %s\n", fno.fname);
+            } else {
+                printf("  [FILE] %s (%lu bytes)\n", fno.fname, fno.fsize);
+            }
+            count++;
+        }
+        printf("-------------------------------------\n");
+        printf("Total: %d items\n\n", count);
+        f_closedir(&dir);
+    }
+    return fres;
+}
+
+/**
+  * @brief  데이터 로깅 (타임스탬프 포함)
+  */
+FRESULT SD_LogData(const char* filename, const char* data)
+{
+    char logEntry[256];
+    uint32_t timestamp = HAL_GetTick() / 1000;  // seconds
+    
+    snprintf(logEntry, sizeof(logEntry), "[%06lu] %s\n", timestamp, data);
+    return SD_AppendFile(filename, logEntry);
+}
+
+/**
+  * @brief  CSV 파일 생성 (헤더 포함)
+  */
+FRESULT SD_CreateCSV(const char* filename, const char* header)
+{
+    char csvHeader[256];
+    snprintf(csvHeader, sizeof(csvHeader), "%s\n", header);
+    return SD_WriteFile(filename, csvHeader);
+}
+
+/**
+  * @brief  CSV 파일에 데이터 추가
+  */
+FRESULT SD_AppendCSV(const char* filename, const char* data)
+{
+    char csvLine[256];
+    snprintf(csvLine, sizeof(csvLine), "%s\n", data);
+    return SD_AppendFile(filename, csvLine);
+}
+
+/**
+  * @brief  SD 카드 정보 표시
+  */
+void SD_GetInfo(void)
+{
+    FATFS *fs;
+    DWORD fre_clust;
+    
+    printf("\n=== SD Card Information ===\n");
+    
+    if (f_getfree("", &fre_clust, &fs) == FR_OK) {
+        DWORD tot_sect = (fs->n_fatent - 2) * fs->csize;
+        DWORD fre_sect = fre_clust * fs->csize;
+        
+        printf("Type: FAT%d\n", fs->fs_type);
+        printf("Sector Size: 512 bytes\n");
+        printf("Cluster Size: %d sectors\n", fs->csize);
+        printf("Total Size: %lu MB\n", tot_sect / 2048);
+        printf("Used: %lu MB\n", (tot_sect - fre_sect) / 2048);
+        printf("Free: %lu MB\n", fre_sect / 2048);
+        printf("Card Type: 0x%02X\n", SD_SPI_GetCardInfo());
+    }
+    printf("===========================\n\n");
+}
+
+/**
+  * @brief  통계 정보 표시
+  */
+void SD_ShowStatistics(void)
+{
+    printf("\n=== Session Statistics ===\n");
+    printf("Files Created: %lu\n", totalFilesCreated);
+    printf("Bytes Written: %lu\n", totalBytesWritten);
+    printf("Bytes Read: %lu\n", totalBytesRead);
+    printf("==========================\n\n");
+}
+
+/**
+  * @brief  데모 1: 기본 파일 작업
+  */
+void SD_Demo_BasicOperations(void)
+{
+    printf("\n>>> Demo 1: Basic File Operations <<<\n\n");
+    
+    // 1. 파일 생성 및 쓰기
+    SD_WriteFile("demo1.txt", "Hello from NUCLEO-F103RB!\n");
+    
+    // 2. 파일 읽기
+    SD_ReadFile("demo1.txt", buffer, sizeof(buffer));
+    printf("Content: %s\n", buffer);
+    
+    // 3. 파일에 데이터 추가
+    SD_AppendFile("demo1.txt", "This is an appended line.\n");
+    
+    // 4. 다시 읽기
+    SD_ReadFile("demo1.txt", buffer, sizeof(buffer));
+    printf("Updated content:\n%s\n", buffer);
+    
+    // 5. 디렉토리 생성
+    SD_CreateDirectory("logs");
+    
+    // 6. 디렉토리 안에 파일 생성
+    SD_WriteFile("logs/test.txt", "File inside logs directory\n");
+    
+    // 7. 파일 목록 표시
+    SD_ListFiles("/");
+    SD_ListFiles("/logs");
+}
+
+/**
+  * @brief  데모 2: 데이터 로깅
+  */
+void SD_Demo_DataLogging(void)
+{
+    printf("\n>>> Demo 2: Data Logging <<<\n\n");
+    
+    // 로그 파일 생성
+    SD_WriteFile("system.log", "=== System Log Started ===\n");
+    
+    // 주기적 로깅 시뮬레이션
+    for(int i = 0; i < 5; i++) {
+        char logData[128];
+        snprintf(logData, sizeof(logData), 
+                 "Temperature: %d°C, Humidity: %d%%", 
+                 20 + i, 50 + i*2);
+        
+        SD_LogData("system.log", logData);
+        HAL_Delay(100);
+    }
+    
+    // 로그 파일 읽기
+    SD_ReadFile("system.log", buffer, sizeof(buffer));
+    printf("\nLog contents:\n%s\n", buffer);
+}
+
+/**
+  * @brief  데모 3: CSV 데이터 로깅
+  */
+void SD_Demo_CSVLogging(void)
+{
+    printf("\n>>> Demo 3: CSV Data Logging <<<\n\n");
+    
+    // CSV 파일 생성 (헤더)
+    SD_CreateCSV("data.csv", "Time,Temperature,Humidity,Pressure");
+    
+    // 데이터 추가
+    for(int i = 0; i < 10; i++) {
+        char csvData[128];
+        uint32_t time = HAL_GetTick() / 1000;
+        snprintf(csvData, sizeof(csvData), 
+                 "%lu,%d,%d,%d", 
+                 time, 20+i, 50+i, 1013+i);
+        
+        SD_AppendCSV("data.csv", csvData);
+        HAL_Delay(50);
+    }
+    
+    printf("[SD] Created data.csv with 10 entries\n");
+    printf("      You can open this file in Excel!\n\n");
+}
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART2_UART_Init();
+  MX_SPI1_Init();
+  MX_FATFS_Init();
+
+  /* USER CODE BEGIN 2 */
+  
+  printf("\n\n");
+  printf("========================================\n");
+  printf("  NUCLEO-F103RB SD Card FATFS Demo\n");
+  printf("  System Clock: 64MHz\n");
+  printf("  SPI Speed: 8MHz\n");
+  printf("========================================\n\n");
+  
+  // SD 카드 초기화 대기
+  HAL_Delay(500);
+  
+  // SD 카드 초기화
+  printf("Initializing SD Card...\n");
+  uint8_t init_result = SD_SPI_Init();
+  
+  if (init_result != 0) {
+      printf("❌ SD Card initialization FAILED!\n");
+      printf("   Check connections and try again.\n\n");
+      LED_Blink(10, 100);  // 빠른 깜빡임
+      while(1) { HAL_Delay(1000); }
+  }
+  
+  printf("✓ SD Card initialized (Type: 0x%02X)\n\n", SD_SPI_GetCardInfo());
+  
+  // FATFS 마운트
+  printf("Mounting filesystem...\n");
+  fres = f_mount(&FatFs, "", 1);
+  
+  if (fres != FR_OK) {
+      printf("❌ Mount FAILED! Error: %d\n", fres);
+      printf("   Format SD card as FAT32 and try again.\n\n");
+      LED_Blink(10, 100);
+      while(1) { HAL_Delay(1000); }
+  }
+  
+  printf("✓ Filesystem mounted successfully!\n");
+  LED_Blink(3, 200);  // 성공 신호
+  
+  // SD 카드 정보 표시
+  SD_GetInfo();
+  
+  // 데모 실행
+  SD_Demo_BasicOperations();
+  HAL_Delay(500);
+  
+  SD_Demo_DataLogging();
+  HAL_Delay(500);
+  
+  SD_Demo_CSVLogging();
+  HAL_Delay(500);
+  
+  // 통계 표시
+  SD_ShowStatistics();
+  
+  // 최종 파일 목록
+  printf("=== Final File List ===\n");
+  SD_ListFiles("/");
+  
+  printf("\n========================================\n");
+  printf("  All demos completed successfully!\n");
+  printf("  Remove SD card and check files on PC\n");
+  printf("========================================\n\n");
+  
+  // 성공 - 느린 깜빡임
+  while (1) {
+      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+      HAL_Delay(1000);
+  }
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  */
+static void MX_SPI1_Init(void)
+{
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief USART2 Initialization Function
+  */
+static void MX_USART2_UART_Init(void)
+{
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief GPIO Initialization Function
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1)
+  {
+  }
+}
+
+#ifdef  USE_FULL_ASSERT
+void assert_failed(uint8_t *file, uint32_t line)
+{
+}
+#endif /* USE_FULL_ASSERT */
+```
 
 ---
 
