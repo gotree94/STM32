@@ -64,7 +64,7 @@ CS   → PB6 (GPIO)
    * UART 출력: 상세 로그
    * SD 카드: 생성된 파일 확인
 
-<img width="529" height="849" alt="001" src="https://github.com/user-attachments/assets/e8964734-5bda-4d01-8458-94e3eab54530" />
+
 
 
 
