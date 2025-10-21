@@ -891,8 +891,11 @@ FRESULT SD_ReadFile(const char* filename, char* buffer, uint32_t bufsize)
   */
 FRESULT SD_AppendFile(const char* filename, const char* data)
 {
-    fres = f_open(&File, filename, FA_WRITE | FA_OPEN_APPEND);
+    fres = f_open(&File, filename, FA_WRITE | FA_OPEN_EXISTING);
     if (fres == FR_OK) {
+        /* Move to end of file */
+        f_lseek(&File, f_size(&File));
+        
         UINT bw;
         fres = f_write(&File, data, strlen(data), &bw);
         totalBytesWritten += bw;
