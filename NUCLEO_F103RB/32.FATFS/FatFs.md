@@ -106,7 +106,8 @@ CS   → PB6 (GPIO)
 ---
 
 ### 1. sd_spi_driver.h
-```
+
+```c
 /**
   ******************************************************************************
   * @file    sd_spi_driver.h
@@ -165,7 +166,8 @@ uint8_t SD_SPI_GetCardInfo(void);
 ```
 
 ### 1. sd_spi_driver.c
-```
+
+```c
 /**
   ******************************************************************************
   * @file    sd_spi_driver.c (Clean Version - No Debug Messages)
@@ -522,7 +524,8 @@ uint8_t SD_SPI_GetCardInfo(void)
 
 
 ## user_disk_io.c
-```
+
+```c
 /**
   ******************************************************************************
   * @file    user_diskio.c (수정 버전 2)
