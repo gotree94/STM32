@@ -69,9 +69,6 @@ CS   → PB6 (GPIO)
    * SD 카드: 생성된 파일 확인
 
 
-
-
-
 ### 2. STM32CubeMX 설정
 
 - SPI 설정
@@ -100,10 +97,12 @@ CS   → PB6 (GPIO)
     - MIN_SS (Minimum Sector Size): 512
     - FS_NORTC : Fixed timestamp (Dynamic은 RTC 필요)
 
-<img width="731" height="714" alt="002" src="https://github.com/user-attachments/assets/520e793c-e3f2-4294-880e-72393cecaf46" />
-
-
 <img width="1437" height="855" alt="003" src="https://github.com/user-attachments/assets/a0126452-5415-4b07-8c0b-ee94d5c214d0" />
+<br>
+
+<img width="731" height="714" alt="002" src="https://github.com/user-attachments/assets/520e793c-e3f2-4294-880e-72393cecaf46" />
+<br>
+
 
 
 
