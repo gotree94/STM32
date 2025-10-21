@@ -64,29 +64,44 @@ CS   → PB6 (GPIO)
    * UART 출력: 상세 로그
    * SD 카드: 생성된 파일 확인
 
+<img width="529" height="849" alt="001" src="https://github.com/user-attachments/assets/e8964734-5bda-4d01-8458-94e3eab54530" />
 
 
 
 ### 2. STM32CubeMX 설정
 
 - SPI 설정
-c1. Connectivity → SPI1 선택
+  - 1. Connectivity → SPI1 선택 (PA5 LD reset)
   - 2. Mode: Full-Duplex Master
   - 3. Hardware NSS Signal: Disable
   - 4. Parameter Settings:
-    - Prescaler: 128 (초기 통신용, 나중에 속도 증가 가능)
-    - Clock Polarity: Low
-    - Clock Phase: 1 Edge
+    - Prescaler: 8 (초기 통신용, 나중에 속도 증가 가능)
+    - Clock Polarity(CPOL): Low
+    - Clock Phase(CPHA): 1 Edge
     - Data Size: 8 Bits
     - First Bit: MSB First
+  - 5. PB6 : SD_CS Gpio_output
+    - GPIO output level : High
+    - GPIO mode : Output Push Pull
+    - GPIO Pull-up/Pull-down : Pull-up
+    - Maximum output speed : Medium
+    - User Label : SD_CS
 - FatFs 미들웨어 활성화
   - 1. Middleware → FATFS 선택
   - 2. Mode: User-defined
   - 3. Configuration:
-    - USE_LFN (Long File Name): Enabled with dynamic allocation
-    - MAX_SS (Maximum Sector Size): 512
+    - CODE_PAGE : Multilingual Latin 1 (OEM)
+    - USE_LFN (Long File Name): Enabled with static working buffer on the BSS
+    - MAX_SS (Maximum Sector Size): 4096
+    - MIN_SS (Minimum Sector Size): 512
+    - FS_NORTC : Fixed timestamp (Dynamic은 RTC 필요)
 
-- GPIO 설정
-  - 1. PA4를 GPIO_Output으로 설정 (CS Pin)
-  - 2. User Label: SD_CS
+<img width="731" height="714" alt="002" src="https://github.com/user-attachments/assets/520e793c-e3f2-4294-880e-72393cecaf46" />
+
+
+<img width="1437" height="855" alt="003" src="https://github.com/user-attachments/assets/a0126452-5415-4b07-8c0b-ee94d5c214d0" />
+
+
+
+
 
