@@ -1372,3 +1372,1007 @@ void assert_failed(uint8_t *file, uint32_t line)
 
 <img width="564" height="129" alt="008" src="https://github.com/user-attachments/assets/82fb31f3-5007-4f38-abe7-1909b3a9f8d0" />
 <br>
+
+### main.c - 디버깅 버전
+
+```c
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "fatfs.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <string.h>
+#include <stdio.h>
+#include "sd_spi_driver.h"  // ← 이 줄 추가!
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+SPI_HandleTypeDef hspi1;
+
+UART_HandleTypeDef huart2;
+
+/* USER CODE BEGIN PV */
+FATFS FatFs;
+FIL File;
+FRESULT fres;
+UINT bytesWritten, bytesRead;
+char buffer[1024];
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_SPI1_Init(void);
+/* USER CODE BEGIN PFP */
+void SD_Test_Write(void);
+void SD_Test_Read(void);
+void SD_Test_ListFiles(void);
+void SD_Test_Advanced(void);
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  if (ch == '\n')
+    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+/**
+  * @brief  Test writing to SD card
+  */
+void SD_Test_Write(void)
+{
+    fres = f_open(&File, "test.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+
+    if (fres == FR_OK) {
+        sprintf(buffer, "Hello from NUCLEO-F103RB!\r\n");
+        sprintf(buffer + strlen(buffer), "SD Card Test with FATFS\r\n");
+        sprintf(buffer + strlen(buffer), "System Clock: 64MHz\r\n");
+        sprintf(buffer + strlen(buffer), "SPI Speed: 8MHz\r\n");
+
+        fres = f_write(&File, buffer, strlen(buffer), &bytesWritten);
+
+        if (fres == FR_OK && bytesWritten > 0) {
+            /* Write successful */
+        }
+
+        f_close(&File);
+    }
+}
+
+/**
+  * @brief  Test reading from SD card
+  */
+void SD_Test_Read(void)
+{
+    fres = f_open(&File, "test.txt", FA_READ);
+
+    if (fres == FR_OK) {
+        memset(buffer, 0, sizeof(buffer));
+
+        fres = f_read(&File, buffer, sizeof(buffer) - 1, &bytesRead);
+
+        if (fres == FR_OK && bytesRead > 0) {
+            /* Read successful */
+            /* buffer now contains file content */
+            /* You can display it on LCD or send via UART */
+        }
+
+        f_close(&File);
+    }
+}
+
+/**
+  * @brief  List all files in root directory
+  */
+void SD_Test_ListFiles(void)
+{
+    DIR dir;
+    FILINFO fno;
+
+    fres = f_opendir(&dir, "/");
+
+    if (fres == FR_OK) {
+        while (1) {
+            fres = f_readdir(&dir, &fno);
+
+            if (fres != FR_OK || fno.fname[0] == 0) break;
+
+            if (fno.fattrib & AM_DIR) {
+                /* Directory */
+                sprintf(buffer, "DIR: %s\r\n", fno.fname);
+            } else {
+                /* File */
+                sprintf(buffer, "FILE: %s (%lu bytes)\r\n", fno.fname, fno.fsize);
+            }
+
+            /* Display buffer content via UART or LCD */
+        }
+
+        f_closedir(&dir);
+    }
+}
+
+/**
+  * @brief  Advanced SD card operations
+  */
+void SD_Test_Advanced(void)
+{
+    /* Create multiple files */
+    for (int i = 0; i < 3; i++) {
+        char filename[20];
+        sprintf(filename, "file%d.txt", i);
+
+        fres = f_open(&File, filename, FA_WRITE | FA_CREATE_ALWAYS);
+
+        if (fres == FR_OK) {
+            sprintf(buffer, "This is test file number %d\r\n", i);
+            f_write(&File, buffer, strlen(buffer), &bytesWritten);
+            f_close(&File);
+        }
+    }
+
+    /* Create a directory */
+    f_mkdir("data");
+
+    /* Create file in directory */
+    fres = f_open(&File, "data/info.txt", FA_WRITE | FA_CREATE_ALWAYS);
+
+    if (fres == FR_OK) {
+        sprintf(buffer, "File inside data directory\r\n");
+        f_write(&File, buffer, strlen(buffer), &bytesWritten);
+        f_close(&File);
+    }
+
+    /* Append to existing file */
+    fres = f_open(&File, "test.txt", FA_WRITE | FA_OPEN_EXISTING);
+
+    if (fres == FR_OK) {
+        f_lseek(&File, f_size(&File)); /* Move to end */
+        sprintf(buffer, "Appended line\r\n");
+        f_write(&File, buffer, strlen(buffer), &bytesWritten);
+        f_close(&File);
+    }
+
+    /* Get free space */
+    DWORD fre_clust, fre_sect;
+    FATFS* fs;
+
+    f_getfree("", &fre_clust, &fs);
+    fre_sect = fre_clust * fs->csize;
+
+    uint32_t totalKB = fre_sect / 2;
+    sprintf(buffer, "Free space: %lu KB\r\n", totalKB);
+}
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART2_UART_Init();
+  MX_SPI1_Init();
+  MX_FATFS_Init();
+  /* USER CODE BEGIN 2 */
+//  /* Wait for SD card stabilization */
+//   HAL_Delay(500);
+//
+//   /* Mount SD card */
+//   fres = f_mount(&FatFs, "", 1);
+//
+//   if (fres == FR_OK) {
+//       /* SD Card mounted successfully */
+//	   printf("/* SD Card mounted successfully */\n");
+//       /* Test 1: Write file */
+//       SD_Test_Write();
+//       printf("/* Test 1: Write file */\n");
+//       /* Test 2: Read file */
+//       SD_Test_Read();
+//       printf("/* Test 2: Read file */\n");
+//       /* Test 3: List files */
+//       SD_Test_ListFiles();
+//       printf("/* Test 3: List files */\n");
+//       /* Test 4: Advanced operations */
+//       SD_Test_Advanced();
+//       printf("/* Test 4: Advanced operations */\n");
+//       /* Success indicator - Toggle LED slowly */
+//       while (1) {
+//    	   printf("/* Success indicator - Toggle LED slowly */\n");
+//           //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); /* LED on NUCLEO */
+//           HAL_Delay(1000);
+//       }
+//
+//   } else {
+//       /* Mount failed - Blink LED fast */
+//       while (1) {
+//    	   printf("/* Mount failed - Blink LED fast */\n");
+//           //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//           HAL_Delay(100);
+//       }
+//   }
+/////////////////////////////////////////////////////////////////////////////////
+//  /* 1. SPI 통신 테스트 */
+//  printf("=== SD Card Debug Start ===\n");
+//
+//  /* SPI 동작 확인 */
+//  printf("Step 1: Testing SPI communication...\n");
+//  uint8_t test_data = 0xAA;
+//  uint8_t rx_data = 0;
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS Low
+//  HAL_SPI_TransmitReceive(&hspi1, &test_data, &rx_data, 1, 100);
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);   // CS High
+//  printf("SPI Test - TX: 0x%02X, RX: 0x%02X\n", test_data, rx_data);
+//
+//  /* 2. SD 카드 초기화 전 핀 상태 확인 */
+//  printf("\nStep 2: GPIO Pin Status\n");
+//  printf("CS Pin (PB6): %d (should be 1/HIGH)\n", HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6));
+//
+//  /* 3. SD 카드 초기화 시도 */
+//  printf("\nStep 3: Initializing SD Card...\n");
+//  HAL_Delay(500); // SD 카드 안정화 대기
+//
+//  uint8_t sd_init_result = SD_SPI_Init();
+//  printf("SD_SPI_Init() result: %d (0=Success, 1=Fail)\n", sd_init_result);
+//
+//  if (sd_init_result == 0) {
+//      printf("SD Card initialized successfully!\n");
+//      uint8_t card_type = SD_SPI_GetCardInfo();
+//      printf("Card Type: 0x%02X\n", card_type);
+//  } else {
+//      printf("SD Card initialization FAILED!\n");
+//      printf("Possible causes:\n");
+//      printf("  - SD card not inserted\n");
+//      printf("  - SD card not formatted (FAT32)\n");
+//      printf("  - Wiring problem\n");
+//      printf("  - SD card damaged\n");
+//  }
+//
+//  /* 4. FATFS 마운트 시도 */
+//  printf("\nStep 4: Mounting filesystem...\n");
+//  fres = f_mount(&FatFs, "", 1);
+//  printf("f_mount() result: %d\n", fres);
+//
+//  switch(fres) {
+//      case FR_OK:
+//          printf("Mount SUCCESS!\n");
+//          break;
+//      case FR_NO_FILESYSTEM:
+//          printf("ERROR: No filesystem (not formatted as FAT)\n");
+//          break;
+//      case FR_DISK_ERR:
+//          printf("ERROR: Disk error (hardware problem)\n");
+//          break;
+//      case FR_NOT_READY:
+//          printf("ERROR: Drive not ready (initialization failed)\n");
+//          break;
+//      case FR_INVALID_DRIVE:
+//          printf("ERROR: Invalid drive number\n");
+//          break;
+//      default:
+//          printf("ERROR: Unknown error code %d\n", fres);
+//          break;
+//  }
+//
+//  /* 5. 추가 디버깅 - Disk Status */
+//  printf("\nStep 5: Checking disk status...\n");
+//  DSTATUS disk_status = USER_status(0);
+//  printf("Disk Status: 0x%02X\n", disk_status);
+//  if (disk_status & STA_NOINIT) printf("  - Not initialized\n");
+//  if (disk_status & STA_NODISK) printf("  - No disk present\n");
+//  if (disk_status & STA_PROTECT) printf("  - Write protected\n");
+//
+//  if (fres == FR_OK) {
+//      /* SD Card mounted successfully */
+//      printf("\n=== Tests Starting ===\n");
+//
+//      /* Test 1: Write file */
+//      SD_Test_Write();
+//      printf("Test 1: Write complete\n");
+//
+//      /* Test 2: Read file */
+//      SD_Test_Read();
+//      printf("Test 2: Read complete\n");
+//
+//      /* Test 3: List files */
+//      SD_Test_ListFiles();
+//      printf("Test 3: List complete\n");
+//
+//      /* Test 4: Advanced operations */
+//      SD_Test_Advanced();
+//      printf("Test 4: Advanced complete\n");
+//
+//      /* Success indicator */
+//      printf("\n=== All tests PASSED! ===\n");
+//      while (1) {
+//          HAL_Delay(1000);
+//      }
+//
+//  } else {
+//      /* Mount failed */
+//      printf("\n=== Mount FAILED ===\n");
+//      printf("Please check:\n");
+//      printf("1. SD card is inserted\n");
+//      printf("2. SD card is formatted as FAT32\n");
+//      printf("3. All wiring is correct:\n");
+//      printf("   VCC  -> 3.3V\n");
+//      printf("   GND  -> GND\n");
+//      printf("   MISO -> PA6\n");
+//      printf("   MOSI -> PA7\n");
+//      printf("   SCK  -> PA5\n");
+//      printf("   CS   -> PB6\n");
+//
+//      while (1) {
+//          HAL_Delay(100);
+//      }
+//  }
+//////////////////////////////////////////////////////////////////
+  /**
+    ******************************************************************************
+    * @file    SPI Loopback Test
+    * @brief   PA6(MISO)와 PA7(MOSI)를 점퍼 와이어로 연결하고 테스트
+    ******************************************************************************
+    */
+
+//  printf("\n=== SPI Loopback Test ===\n");
+//  printf("Connect PA6(MISO) to PA7(MOSI) with jumper wire\n");
+//  printf("Press any key when ready...\n\n");
+//
+//  HAL_Delay(3000); // 3초 대기
+//
+//  /* 테스트 1: 단일 바이트 전송 */
+//  printf("Test 1: Single byte transmission\n");
+//  uint8_t test_patterns[] = {0x00, 0xFF, 0xAA, 0x55, 0x12, 0x34, 0x56, 0x78};
+//
+//  for(int i = 0; i < 8; i++) {
+//      uint8_t tx = test_patterns[i];
+//      uint8_t rx = 0x00;
+//
+//      HAL_SPI_TransmitReceive(&hspi1, &tx, &rx, 1, 100);
+//
+//      if(tx == rx) {
+//          printf("  [OK] TX: 0x%02X -> RX: 0x%02X ✓\n", tx, rx);
+//      } else {
+//          printf("  [FAIL] TX: 0x%02X -> RX: 0x%02X ✗\n", tx, rx);
+//      }
+//  }
+//
+//  /* 테스트 2: 다중 바이트 전송 */
+//  printf("\nTest 2: Multi-byte transmission\n");
+//  uint8_t tx_buffer[16] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+//                           0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
+//  uint8_t rx_buffer[16] = {0};
+//
+//  HAL_SPI_TransmitReceive(&hspi1, tx_buffer, rx_buffer, 16, 1000);
+//
+//  int match_count = 0;
+//  for(int i = 0; i < 16; i++) {
+//      if(tx_buffer[i] == rx_buffer[i]) {
+//          match_count++;
+//      }
+//  }
+//
+//  printf("  Matched: %d/16 bytes\n", match_count);
+//  if(match_count == 16) {
+//      printf("  [OK] All bytes matched! SPI is working correctly ✓\n");
+//  } else {
+//      printf("  [FAIL] Some bytes didn't match ✗\n");
+//      printf("  TX: ");
+//      for(int i = 0; i < 16; i++) printf("%02X ", tx_buffer[i]);
+//      printf("\n  RX: ");
+//      for(int i = 0; i < 16; i++) printf("%02X ", rx_buffer[i]);
+//      printf("\n");
+//  }
+//
+//  /* 테스트 3: 속도 변경 테스트 */
+//  printf("\nTest 3: Speed change test\n");
+//
+//  // Low speed (Prescaler 128)
+//  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+//  HAL_SPI_Init(&hspi1);
+//  uint8_t tx1 = 0xA5, rx1 = 0;
+//  HAL_SPI_TransmitReceive(&hspi1, &tx1, &rx1, 1, 100);
+//  printf("  Low speed (500kHz): TX: 0x%02X -> RX: 0x%02X %s\n",
+//         tx1, rx1, (tx1 == rx1) ? "✓" : "✗");
+//
+//  // High speed (Prescaler 8)
+//  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+//  HAL_SPI_Init(&hspi1);
+//  uint8_t tx2 = 0x5A, rx2 = 0;
+//  HAL_SPI_TransmitReceive(&hspi1, &tx2, &rx2, 1, 100);
+//  printf("  High speed (8MHz): TX: 0x%02X -> RX: 0x%02X %s\n",
+//         tx2, rx2, (tx2 == rx2) ? "✓" : "✗");
+//
+//  /* 결과 판정 */
+//  printf("\n=== Loopback Test Result ===\n");
+//  if(match_count == 16 && tx1 == rx1 && tx2 == rx2) {
+//      printf("✓ SPI hardware is working correctly!\n");
+//      printf("  Problem is likely with SD card connection or card itself.\n");
+//      printf("\nNext steps:\n");
+//      printf("  1. Remove loopback jumper wire\n");
+//      printf("  2. Check SD card insertion\n");
+//      printf("  3. Try different SD card\n");
+//      printf("  4. Check CS pin operation\n");
+//  } else {
+//      printf("✗ SPI hardware problem detected!\n");
+//      printf("\nPossible causes:\n");
+//      printf("  1. SPI not properly initialized\n");
+//      printf("  2. Clock configuration issue\n");
+//      printf("  3. GPIO alternate function not set\n");
+//      printf("  4. Check STM32CubeMX SPI1 settings\n");
+//  }
+//
+//  printf("\n=== Remove jumper and press reset to continue ===\n");
+//  while(1) {
+//      HAL_Delay(1000);
+//  }
+
+//////////////////////////////////////////////////////////////////
+  /**
+    ******************************************************************************
+    * @file    CS Pin Operation Test
+    * @brief   SD 카드 CS 핀이 제대로 동작하는지 확인
+    ******************************************************************************
+    */
+
+  /* USER CODE BEGIN 2 */
+//
+//  printf("\n=== CS Pin Operation Test ===\n");
+//
+//  /* 테스트 1: CS 핀 토글 */
+//  printf("Test 1: CS Pin Toggle\n");
+//  for(int i = 0; i < 5; i++) {
+//      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS Low
+//      HAL_Delay(100);
+//      uint8_t cs_low = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6);
+//
+//      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);   // CS High
+//      HAL_Delay(100);
+//      uint8_t cs_high = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6);
+//
+//      printf("  Cycle %d: Low=%d, High=%d %s\n", i+1, cs_low, cs_high,
+//             (cs_low == 0 && cs_high == 1) ? "✓" : "✗");
+//  }
+//
+//  /* 테스트 2: CS Low 상태에서 SPI 통신 */
+//  printf("\nTest 2: SPI with CS control\n");
+//
+//  // CS High 상태 (SD 카드 비활성)
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+//  HAL_Delay(10);
+//
+//  // 더미 클럭 전송
+//  for(int i = 0; i < 10; i++) {
+//      uint8_t dummy = 0xFF;
+//      HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+//  }
+//  printf("  Sent 10 dummy bytes (CS High)\n");
+//
+//  // CS Low로 전환
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+//  HAL_Delay(10);
+//  printf("  CS Low activated\n");
+//
+//  // CMD0 전송 시뮬레이션 (0x40, 0x00, 0x00, 0x00, 0x00, 0x95)
+//  uint8_t cmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
+//  uint8_t response[6] = {0};
+//
+//  HAL_SPI_TransmitReceive(&hspi1, cmd0, response, 6, 100);
+//
+//  printf("  CMD0 sent:\n");
+//  printf("    TX: ");
+//  for(int i = 0; i < 6; i++) printf("%02X ", cmd0[i]);
+//  printf("\n    RX: ");
+//  for(int i = 0; i < 6; i++) printf("%02X ", response[i]);
+//  printf("\n");
+//
+//  // R1 응답 읽기 시도 (최대 8바이트)
+//  printf("  Reading R1 response:\n    ");
+//  for(int i = 0; i < 8; i++) {
+//      uint8_t dummy = 0xFF, rx;
+//      HAL_SPI_TransmitReceive(&hspi1, &dummy, &rx, 1, 100);
+//      printf("%02X ", rx);
+//      if((rx & 0x80) == 0) { // Valid response
+//          printf("← Valid R1 response!\n");
+//          break;
+//      }
+//  }
+//  printf("\n");
+//
+//  // CS High
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+//  HAL_Delay(10);
+//  printf("  CS High deactivated\n");
+//
+//  /* 테스트 3: 타이밍 확인 */
+//  printf("\nTest 3: Timing verification\n");
+//
+//  // SD 카드 사양: CS가 Low가 된 후 최소 8 클럭 사이클 필요
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+//  for(int i = 0; i < 10; i++) {
+//      uint8_t dummy = 0xFF;
+//      HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+//  }
+//
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+//  uint8_t dummy = 0xFF;
+//  HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+//
+//  // CMD0 재전송
+//  uint8_t cmd0_retry[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
+//  HAL_SPI_Transmit(&hspi1, cmd0_retry, 6, 100);
+//
+//  printf("  Checking response after proper timing:\n    ");
+//  for(int i = 0; i < 10; i++) {
+//      uint8_t tx = 0xFF, rx;
+//      HAL_SPI_TransmitReceive(&hspi1, &tx, &rx, 1, 100);
+//      printf("%02X ", rx);
+//
+//      if(rx != 0xFF && (rx & 0x80) == 0) {
+//          printf("\n  ✓ Got response: 0x%02X\n", rx);
+//          if(rx == 0x01) {
+//              printf("  ✓ SD card is in IDLE state!\n");
+//          }
+//          break;
+//      }
+//
+//      if(i == 9) {
+//          printf("\n  ✗ No valid response\n");
+//      }
+//  }
+//
+//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+//
+//  printf("\n=== CS Pin Test Complete ===\n");
+///////////////////////////////////////////////////////////
+  /* USER CODE BEGIN 2 */
+
+  printf("\n=== Starting SD Card Test ===\n");
+
+  /* 1. SD 카드가 이미 초기화되었는지 확인 */
+  HAL_Delay(500);
+
+  /* 2. 직접 초기화 (f_mount 전에 한 번 더) */
+  printf("\nStep 1: Pre-initializing SD card...\n");
+  uint8_t init_result = SD_SPI_Init();
+  printf("Direct SD_SPI_Init result: %d\n", init_result);
+
+  if (init_result == 0) {
+      printf("SD card ready, card type: 0x%02X\n", SD_SPI_GetCardInfo());
+  } else {
+      printf("SD init failed!\n");
+      while(1) {
+          HAL_Delay(100);
+      }
+  }
+
+  /* 3. FATFS 마운트 */
+  printf("\nStep 2: Mounting filesystem...\n");
+  fres = f_mount(&FatFs, "", 1);
+
+  printf("f_mount result: %d\n", fres);
+
+  switch(fres) {
+      case FR_OK:
+          printf("✓ Mount SUCCESS!\n");
+          break;
+      case FR_NO_FILESYSTEM:
+          printf("✗ No filesystem - Card not formatted or wrong format\n");
+          printf("  Please format as FAT32 on PC\n");
+          break;
+      case FR_DISK_ERR:
+          printf("✗ Disk error\n");
+          break;
+      case FR_NOT_READY:
+          printf("✗ Drive not ready\n");
+          printf("  This shouldn't happen - SD init was successful!\n");
+
+          // 추가 디버깅
+          printf("\nDebug: Calling disk_initialize directly...\n");
+          DSTATUS disk_stat = disk_initialize(0);
+          printf("disk_initialize result: 0x%02X\n", disk_stat);
+
+          if (disk_stat == 0) {
+              printf("Disk initialized manually! Retrying mount...\n");
+              fres = f_mount(NULL, "", 0);  // Unmount
+              HAL_Delay(100);
+              fres = f_mount(&FatFs, "", 1);  // Remount
+              printf("Retry mount result: %d\n", fres);
+          }
+          break;
+      default:
+          printf("✗ Unknown error: %d\n", fres);
+  }
+
+  if (fres == FR_OK) {
+      printf("\n=== Filesystem Information ===\n");
+
+      FATFS *fs;
+      DWORD fre_clust;
+
+      /* Get volume information */
+      fres = f_getfree("", &fre_clust, &fs);
+
+      if (fres == FR_OK) {
+          DWORD tot_sect = (fs->n_fatent - 2) * fs->csize;
+          DWORD fre_sect = fre_clust * fs->csize;
+
+          printf("Filesystem type: FAT%d\n", fs->fs_type);
+          printf("Bytes/Sector: %d\n", 512);
+          printf("Sectors/Cluster: %d\n", fs->csize);
+          printf("Total sectors: %lu\n", tot_sect);
+          printf("Free sectors: %lu\n", fre_sect);
+          printf("Total size: %lu KB\n", tot_sect / 2);
+          printf("Free size: %lu KB\n", fre_sect / 2);
+      }
+
+      printf("\n=== File Operations Test ===\n");
+
+      /* Test 1: Write file */
+      printf("Test 1: Creating test file...\n");
+      fres = f_open(&File, "test.txt", FA_WRITE | FA_CREATE_ALWAYS);
+
+      if (fres == FR_OK) {
+          sprintf(buffer, "Hello from NUCLEO-F103RB!\r\n");
+          sprintf(buffer + strlen(buffer), "SD Card successfully mounted!\r\n");
+          sprintf(buffer + strlen(buffer), "Timestamp: 2025-01-21\r\n");
+
+          fres = f_write(&File, buffer, strlen(buffer), &bytesWritten);
+
+          if (fres == FR_OK) {
+              printf("  Written %u bytes\n", bytesWritten);
+          } else {
+              printf("  Write failed: %d\n", fres);
+          }
+
+          f_close(&File);
+          printf("  File closed\n");
+      } else {
+          printf("  Cannot create file: %d\n", fres);
+      }
+
+      /* Test 2: Read file */
+      printf("\nTest 2: Reading test file...\n");
+      fres = f_open(&File, "test.txt", FA_READ);
+
+      if (fres == FR_OK) {
+          memset(buffer, 0, sizeof(buffer));
+          fres = f_read(&File, buffer, sizeof(buffer) - 1, &bytesRead);
+
+          if (fres == FR_OK) {
+              printf("  Read %u bytes:\n", bytesRead);
+              printf("  Content: %s\n", buffer);
+          } else {
+              printf("  Read failed: %d\n", fres);
+          }
+
+          f_close(&File);
+      } else {
+          printf("  Cannot open file: %d\n", fres);
+      }
+
+      /* Test 3: List files */
+      printf("\nTest 3: Listing files...\n");
+      DIR dir;
+      FILINFO fno;
+
+      fres = f_opendir(&dir, "/");
+
+      if (fres == FR_OK) {
+          int file_count = 0;
+
+          while (1) {
+              fres = f_readdir(&dir, &fno);
+
+              if (fres != FR_OK || fno.fname[0] == 0) break;
+
+              if (fno.fattrib & AM_DIR) {
+                  printf("  [DIR]  %s\n", fno.fname);
+              } else {
+                  printf("  [FILE] %s (%lu bytes)\n", fno.fname, fno.fsize);
+              }
+              file_count++;
+          }
+
+          f_closedir(&dir);
+          printf("  Total: %d items\n", file_count);
+      } else {
+          printf("  Cannot open root directory: %d\n", fres);
+      }
+
+      printf("\n=== All Tests Complete ===\n");
+      printf("✓ SD Card is working perfectly!\n");
+
+      /* Success - Slow blink */
+      while (1) {
+          HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+          HAL_Delay(1000);
+      }
+
+  } else {
+      printf("\n=== Mount Failed ===\n");
+      printf("Please check:\n");
+      printf("1. SD card is formatted as FAT32 (not exFAT or NTFS)\n");
+      printf("2. Format with 4096 byte allocation unit size\n");
+      printf("3. Try different SD card\n");
+
+      /* Failure - Fast blink */
+      while (1) {
+          HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+          HAL_Delay(100);
+      }
+  }
+
+  /* USER CODE END 2 */
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+
+  /* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : SD_CS_Pin */
+  GPIO_InitStruct.Pin = SD_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+  HAL_GPIO_Init(SD_CS_GPIO_Port, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+
+  /* USER CODE END MX_GPIO_Init_2 */
+}
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
+
+```
+
