@@ -25,14 +25,14 @@
  - [완료] 23.Waveshare_1.3inch_oled
  - [] 24.StepMotor(NEMA-17) - L298N
  - [완료] 25.StepMotor(28BYJ-48) - ULN2003
- - [] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
+ - [완료] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
    - NS-SD04_ReferenceManual_KR.pdf
- - [] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
+ - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
  - [] 28.USB HOST
  - [] 29.GY-GPS6MV2
  - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
  - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
- - [] 32.FATFS
+ - [완료] 32.FATFS
  - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
 
 ## NUCLEO_F411RE
