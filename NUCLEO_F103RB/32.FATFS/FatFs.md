@@ -105,6 +105,16 @@ CS   → PB6 (GPIO)
 
 
 
+## 결과
 
+<img width="611" height="854" alt="005" src="https://github.com/user-attachments/assets/8263906e-a4be-43aa-a111-839459fb1209" />
+<br>
 
+<img width="607" height="193" alt="006" src="https://github.com/user-attachments/assets/35d32136-7702-42fc-afb2-cc0c298dcc67" />
+<br>
 
+<img width="585" height="143" alt="007" src="https://github.com/user-attachments/assets/ae9d08ce-bbb1-4bd8-aa5f-64b1a1efbf79" />
+<br>
+
+<img width="564" height="129" alt="008" src="https://github.com/user-attachments/assets/82fb31f3-5007-4f38-abe7-1909b3a9f8d0" />
+<br>
