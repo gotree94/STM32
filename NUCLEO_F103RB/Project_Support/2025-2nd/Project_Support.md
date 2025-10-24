@@ -13,6 +13,9 @@ npm init -y
 npm install express socket.io serialport @serialport/parser-readline
 
 node app.js
+  -> Server listening on http://localhost:3000
+  -> Port open
+
 ```
 
 성공하면 다음 메시지가 표시됩니다:
