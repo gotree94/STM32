@@ -14,7 +14,7 @@
  - [완료] 12.DHT11
  - [완료] 13.JoyStick
  - [완료] 14.2.4" TFT LCD SHIELD : ILI9341 - 터치(불능?) SD-32.FATFS 참고
- - [완료] 15.CDS_sensorx
+ - [완료] 15.CDS_sensor
  - [완료] 16.I2C-EEPROM
  - [완료] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
  - [완료] 18.Rotary_Encoder
