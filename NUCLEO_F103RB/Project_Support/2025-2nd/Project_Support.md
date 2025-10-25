@@ -13,7 +13,7 @@
 ---
 
 
-## Smart_car_Control_Dashboard.png
+## Smart car Control Dashboard
 
 <img width="1347" height="1351" alt="Smart_car_Control_Dashboard" src="https://github.com/user-attachments/assets/4974074d-67b5-43c0-9a9f-885501082ea5" />
 
