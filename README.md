@@ -24,7 +24,7 @@
  - [완료] 22.I2C_EEPROM_GPIO
  - [완료] 23.Waveshare_1.3inch_oled
  - [] 24.StepMotor(NEMA-17) - L298N
- - [완료] 25.StepMotor(28BYJ-48) - ULN2003
+ - [완료] 25.StepMotor(28BYJ-48) 5V - ULN2003
  - [완료] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
    - NS-SD04_ReferenceManual_KR.pdf
  - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
