@@ -34,6 +34,7 @@
  - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
  - [완료] 32.FATFS
  - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
+ - [완료] 34.2.4" TFT SPI 240*320
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
