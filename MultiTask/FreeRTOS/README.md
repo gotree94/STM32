@@ -1,74 +1,21 @@
-# STM32
-## NUCLEO_F103RB
-  - [완료] 01.LED_Blink
-  - [완료] 02.USART_Print
-  - [완료] 03.EXTI
-  - [완료] 04.TM_TimeBase
-  - [완료] 05.ADC
-  - [완료] 06.HC-SR04
-  - [완료] 07.Buzzer
-  - [완료] 08.CLCD
-  - [완료] 09.ServoMotor
-  - [완료] 10.GM009605_LCD
-  - [완료] 11.LCD-SPI
-  - [완료] 12.DHT11
-  - [완료] 13.JoyStick
-  - [완료] 14.ILI9341 - 2.4" TFT LCD SHIELD :  터치(불능?) SD-32.FATFS 참고
-  - [완료] 15.CDS_sensor
-  - [완료] 16.I2C-EEPROM
-  - [완료] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
-  - [완료] 18.Rotary_Encoder
-  - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
-  - [완료] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
-  - [] 21.OV7670-103
-  - [완료] 22.I2C_EEPROM_GPIO
-  - [완료] 23.Waveshare_1.3inch_oled
-  - [] 24.StepMotor(NEMA-17) - L298N
-  - [완료] 25.StepMotor(28BYJ-48) 5V - ULN2003
-  - [완료] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
-  - NS-SD04_ReferenceManual_KR.pdf
-  - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
-  - [] 28.USB HOST
-  - [] 29.GY-GPS6MV2
-  - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
-  - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
-  - [완료] 32.FATFS
-  - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
-  - [] 34.2.4" TFT SPI 240*320
-  - [] 35.RTC
+# FreeRTOS
 
-## NUCLEO_F411RE
- - [완료] 01.LED_Blink
- - [완료] 02.USART_Print
- - [완료] 03.EXTI
- - [완료] 04.TM_TimeBase
- - [완료] 05.ADC
- - [] 06.HC-SR04
- - [완료] 07.Buzzer
- - [완료] 08.CLCD
- - [완료] 09.ServoMotor
- - [] 10.GM009605_LCD 
- - [] 11.LCD-SPI
- - [] 12.DHT11
- - [] 13.JoyStick
- - [] 14.ILI9341 - 터치/SDCard 미구현
- - [] 15.CDS_sensorx
- - [] 16.I2C-EEPROM
- - [] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
- - [] 18.Rotary_Encoder
- - [] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
- - [] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
- - [] 21.RTC
- - [] 22.I2C_EEPROM_GPIO
- - [] 23.Waveshare_1.3inch_oled
- - [] 24.StepMotor(NEMA-17) - L298N
- - [] 25.StepMotor(28BYJ-48) - ULN2003
- - [] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
-   - NS-SD04_ReferenceManual_KR.pdf
- - [] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
- - [] 28.USB HOST
- - [] 29.GY-GPS6MV2
- - [] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
- - [] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
- - [] 32.FATFS
-
+<img width="1122" height="793" alt="FreeRTOS_001_1" src="https://github.com/user-attachments/assets/d5e3b4e9-1c38-435b-87d2-60694a5a93ce" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_2" src="https://github.com/user-attachments/assets/4af7fd4c-db55-4107-93df-eb6811b94a08" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_3" src="https://github.com/user-attachments/assets/9c61e490-03d6-4bd7-92ce-670d53e328aa" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_4" src="https://github.com/user-attachments/assets/cca0d098-e51d-4184-a186-2d9ca14c840a" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_5" src="https://github.com/user-attachments/assets/af7cb264-d55b-4905-bb99-fc03c7e63bd7" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_6" src="https://github.com/user-attachments/assets/83a669d4-3bf1-4e12-915e-8f1710aa2c7f" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_7" src="https://github.com/user-attachments/assets/a2a4745d-bfde-4fd7-8cbb-82bad2d8f9b8" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_8" src="https://github.com/user-attachments/assets/2c7edfab-9239-48b3-852c-01b8a3142ee6" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_9" src="https://github.com/user-attachments/assets/711cca95-d2c4-49cb-a0eb-faf3ba49ffbc" />
+<br>
+<img width="1122" height="793" alt="FreeRTOS_001_10" src="https://github.com/user-attachments/assets/60c10498-2812-4c34-a243-51b4d267320b" />
