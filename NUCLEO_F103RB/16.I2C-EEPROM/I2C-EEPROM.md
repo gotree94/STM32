@@ -1,7 +1,7 @@
 # I2C-EEPROM
 
 <img width="397" height="342" alt="I2C_EEPROM" src="https://github.com/user-attachments/assets/e3558c6c-2609-4840-b791-7248154ba2ff" />
-
+<br>
 
 <img width="600" height="600" alt="F103RB-pin" src="https://github.com/user-attachments/assets/45bb557f-9517-419d-b45c-81a92869bac0" />
 <br>
