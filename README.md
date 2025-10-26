@@ -1,40 +1,41 @@
 # STM32
 ## NUCLEO_F103RB
- - [완료] 01.LED_Blink
- - [완료] 02.USART_Print
- - [완료] 03.EXTI
- - [완료] 04.TM_TimeBase
- - [완료] 05.ADC
- - [완료] 06.HC-SR04
- - [완료] 07.Buzzer
- - [완료] 08.CLCD
- - [완료] 09.ServoMotor
- - [완료] 10.GM009605_LCD 
- - [완료] 11.LCD-SPI
- - [완료] 12.DHT11
- - [완료] 13.JoyStick
- - [완료] 14.2.4" TFT LCD SHIELD : ILI9341 - 터치(불능?) SD-32.FATFS 참고
- - [완료] 15.CDS_sensor
- - [완료] 16.I2C-EEPROM
- - [완료] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
- - [완료] 18.Rotary_Encoder
- - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
- - [완료] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
- - [] 21.RTC
- - [완료] 22.I2C_EEPROM_GPIO
- - [완료] 23.Waveshare_1.3inch_oled
- - [] 24.StepMotor(NEMA-17) - L298N
- - [완료] 25.StepMotor(28BYJ-48) 5V - ULN2003
- - [완료] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
-   - NS-SD04_ReferenceManual_KR.pdf
- - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
- - [] 28.USB HOST
- - [] 29.GY-GPS6MV2
- - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
- - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
- - [완료] 32.FATFS
- - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
- - [완료] 34.2.4" TFT SPI 240*320
+  - [완료] 01.LED_Blink
+  - [완료] 02.USART_Print
+  - [완료] 03.EXTI
+  - [완료] 04.TM_TimeBase
+  - [완료] 05.ADC
+  - [완료] 06.HC-SR04
+  - [완료] 07.Buzzer
+  - [완료] 08.CLCD
+  - [완료] 09.ServoMotor
+  - [완료] 10.GM009605_LCD
+  - [완료] 11.LCD-SPI
+  - [완료] 12.DHT11
+  - [완료] 13.JoyStick
+  - [완료] 14.ILI9341 - 2.4" TFT LCD SHIELD :  터치(불능?) SD-32.FATFS 참고
+  - [완료] 15.CDS_sensor
+  - [완료] 16.I2C-EEPROM
+  - [완료] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
+  - [완료] 18.Rotary_Encoder
+  - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
+  - [완료] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
+  - [] 21.OV7670-103
+  - [완료] 22.I2C_EEPROM_GPIO
+  - [완료] 23.Waveshare_1.3inch_oled
+  - [] 24.StepMotor(NEMA-17) - L298N
+  - [완료] 25.StepMotor(28BYJ-48) 5V - ULN2003
+  - [완료] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
+  - NS-SD04_ReferenceManual_KR.pdf
+  - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
+  - [] 28.USB HOST
+  - [] 29.GY-GPS6MV2
+  - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
+  - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
+  - [완료] 32.FATFS
+  - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
+  - [] 34.2.4" TFT SPI 240*320
+  - [] 35.RTC
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
