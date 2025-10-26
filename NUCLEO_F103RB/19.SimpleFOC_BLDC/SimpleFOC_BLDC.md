@@ -1,5 +1,7 @@
 # SimpleFOC_BLDC
 
+<img width="428" height="370" alt="122" src="https://github.com/user-attachments/assets/beff5a57-0826-4138-9d36-0e8cdaabafbd" />
+
 # 센서리스 BLDC 모터 제어 시스템 - CubeMX 설정 가이드
 
   * https://docs.simplefoc.com/simplefocmini
