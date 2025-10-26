@@ -1,8 +1,10 @@
 # SG90 Servo 제어를 위한 Timer 설정 (STM32 예제)
 
+<img width="418" height="374" alt="130" src="https://github.com/user-attachments/assets/9da3ca1d-416c-4d09-95be-7634f60bd457" />
+<br>
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/23e365b4-1bdf-4074-9724-d795ea1da5b7" />
-<br><br>
+<br>
 
 <img width="800" height="608" alt="SERVO_003" src="https://github.com/user-attachments/assets/a6ca154d-6616-407b-9e77-ab1566bb1a80" />
 <br>
