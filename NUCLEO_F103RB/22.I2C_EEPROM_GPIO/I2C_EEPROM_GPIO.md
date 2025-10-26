@@ -1,5 +1,9 @@
 # I2C_EEPROM_GPIO
 
+
+<img width="397" height="342" alt="120" src="https://github.com/user-attachments/assets/8af46b6a-c10c-4d6f-972a-76b16b26d90c" />
+<br>
+
 <img width="400" height="600" alt="NUCLEO-F103RB" src="https://github.com/user-attachments/assets/e7b74c47-b97c-47a9-a429-cc13ede19b19" />
 <br>
 
