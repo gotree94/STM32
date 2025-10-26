@@ -1,5 +1,9 @@
 # 피에조 부저로 마리오 음악을 연주
 
+<img width="358" height="278" alt="127" src="https://github.com/user-attachments/assets/4ec83cb3-fcac-45a0-b27c-9221ebe30de6" />
+<br>
+
+
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/774d7903-5392-4df3-b8da-f16d6996ea9c" />
 
 ### 타이머 설정 (TIM1):
