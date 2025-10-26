@@ -1,5 +1,7 @@
 # I2C CLCD
 
+<img width="706" height="170" alt="129" src="https://github.com/user-attachments/assets/8fdba439-49cd-47d9-8069-223c4ea9305b" />
+
   * PB8 - SCL
   * PB9 - SDA
 
