@@ -1,5 +1,8 @@
 # GY-GPS6MV2 GPS 모듈 테스트 프로그램
 
+<img width="403" height="217" alt="112" src="https://github.com/user-attachments/assets/7589c4d0-1193-4820-ae89-863db5318aaa" />
+
+
 ## 📋 프로그램 기능
 
 이 프로그램은 GY-GPS6MV2 GPS 모듈을 테스트하고 모니터링할 수 있습니다:
