@@ -1,10 +1,11 @@
 # Rotary_Encoder
 
+<img width="441" height="398" alt="123" src="https://github.com/user-attachments/assets/902366a5-0f6a-45f6-bb35-d44e01f62e27" />
+
+
 # STM32F103 로터리 인코더 CubeMX 설정 가이드
 
 <img width="659" height="438" alt="018" src="https://github.com/user-attachments/assets/f0a23ff8-f3b8-400f-8962-11001e33f095" />
-
-
 
 ## 1. 프로젝트 생성
 
