@@ -1,6 +1,6 @@
 # GM009605 LCD 
 
-<img width="417" height="394" alt="131" src="https://github.com/user-attachments/assets/6d05b431-3f45-44a3-b1b3-e4dd7362c97f" />
+<img width="200" height="190" alt="131" src="https://github.com/user-attachments/assets/6d05b431-3f45-44a3-b1b3-e4dd7362c97f" />
 <br>
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/a54e4c3e-b7c0-4c67-ba45-32d441bbbdcb" />
