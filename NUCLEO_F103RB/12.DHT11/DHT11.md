@@ -1,5 +1,7 @@
 # DHT11 : 온도 습도 센서
 
+<img width="267" height="135" alt="133" src="https://github.com/user-attachments/assets/09ede793-cb31-4652-9575-fa08fdfe5ec3" />
+
    * PA0 - DATA
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/8e00380d-6d85-49b3-b845-88558092ffc0" />
