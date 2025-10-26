@@ -1,5 +1,9 @@
 # JoyStick
 
+<img width="250" height="250" alt="134" src="https://github.com/user-attachments/assets/f7f2b0c1-67c2-4f8a-9eb3-1fbc0cf3060c" />
+<br>
+
+
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/776ad826-64e2-421f-9d18-10c543671cbf" />
 <br>
 
