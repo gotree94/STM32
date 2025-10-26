@@ -1,6 +1,6 @@
 # USB 
 
-<img width="437" height="240" alt="114" src="https://github.com/user-attachments/assets/81720200-956a-48cd-b84b-50dbb0435176" />
+<img width="337" height="240" alt="114" src="https://github.com/user-attachments/assets/81720200-956a-48cd-b84b-50dbb0435176" />
 
 
 # USB Host
