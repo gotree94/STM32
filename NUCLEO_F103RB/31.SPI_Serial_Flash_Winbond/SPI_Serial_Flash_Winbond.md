@@ -1,5 +1,8 @@
 # SPI_Serial_Flash_Winbond
 
+<img width="339" height="277" alt="140" src="https://github.com/user-attachments/assets/d5cbfafe-d930-48dd-ae72-e96d0210a62e" />
+
+
   - 인식이 되었다 안되었다 하는 모듈이 있다.
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5071fc8b-00bf-4fcf-9c83-39f2225a3e25" />
