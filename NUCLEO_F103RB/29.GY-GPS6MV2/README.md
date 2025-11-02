@@ -2,6 +2,15 @@
 
 <img width="403" height="217" alt="112" src="https://github.com/user-attachments/assets/7589c4d0-1193-4820-ae89-863db5318aaa" />
 
+* gps_monitor.py
+
+<img width="993" height="506" alt="001" src="https://github.com/user-attachments/assets/5330c876-3261-44c7-a196-3b1569d15505" />
+<br>
+
+* gps_monitor_gui.py
+
+<img width="1202" height="832" alt="002" src="https://github.com/user-attachments/assets/96ba5705-9273-4b5d-b8ff-585cff169abe" />
+<br>
 
 ## 📋 프로그램 기능
 
