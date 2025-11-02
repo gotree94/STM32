@@ -29,7 +29,7 @@
   - NS-SD04_ReferenceManual_KR.pdf
   - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
   - [] 28.USB HOST
-  - [] 29.GY-GPS6MV2
+  - [] 29.GY-GPS6MV2 (PC와 인터페이스 확인 : 9600bps)
   - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
   - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
   - [완료] 32.FATFS
