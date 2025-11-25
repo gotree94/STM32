@@ -274,8 +274,87 @@ Hardware Registers
    * CubeIDE로 최적화 → 성능/메모리 최적화, 디버깅, 양산
 
 
+# NUCLEO-F411RE의 부트로더 상황
 
+## 1. ST 공식 NUCLEO 보드의 경우
+* NUCLEO 보드는 출하 시 부트로더 없이 나옵니다:
+  * 0x08000000부터 사용자 코드 영역
+  * ST-Link를 통해 직접 프로그래밍
 
+## 2. Arduino로 업로드할 때
+**Tools → Upload method → STM32CubeProgrammer (SWD)**를 선택했기 때문에:
+```
+Arduino IDE
+    ↓
+STM32CubeProgrammer
+    ↓
+ST-Link (SWD)
+    ↓
+Flash 0x08000000에 직접 업로드
+```
+* 부트로더를 거치지 않고 직접 업로드됩니다!
+
+## 3. 부트로더가 필요한 경우
+* 만약 Upload method를 다음 중 하나로 선택했다면 부트로더가 필요해요:
+   * Serial (USB to TTL)
+   * STM32 bootloader (DFU)
+   * HID bootloader
+
+* 이 경우에는:
+
+```
+0x08000000 - 0x0800XXXX: 부트로더
+0x0800XXXX - 0x080FFFFF: 사용자 코드
+```
+
+## 4. 현재 상태 확인
+* 현재 NUCLEO-F411RE는:
+
+```
+0x08000000: Arduino 스케치 시작 주소
+           (부트로더 없음, 코드가 직접 실행됨)
+```
+
+* STM32CubeProgrammer로 Flash 내용을 확인하면:
+   * 0x08000000부터 바로 vector table이 시작됨
+   * Reset_Handler 주소가 바로 있음
+
+## CubeIDE vs Arduino 차이점 (부트로더 관점)
+* CubeIDE로 작업할 때:
+```
+0x08000000: 당신의 코드 시작
+```
+
+* 부트로더 없음
+* ST-Link로 직접 프로그래밍
+
+* 현재 Arduino 방식:
+```
+0x08000000: Arduino 스케치 시작
+```
+
+* 부트로더 없음 (SWD 업로드 사용)
+* ST-Link로 직접 프로그래밍
+* CubeIDE와 동일한 메모리 레이아웃!
+
+* Arduino (Serial/DFU 업로드 시):
+```
+0x08000000: 부트로더
+0x08008000: Arduino 스케치 시작
+```
+
+* USB 시리얼로 업로드 가능
+* ST-Link 불필요
+
+## 정리
+* 현재 방식으로는 부트로더를 올리지 않았습니다
+* ST-Link를 통해 Flash에 직접 업로드했어요
+* CubeIDE로 작업하는 것과 메모리 구조는 동일합니다
+
+* 차이점:
+* CubeIDE: HAL 코드 직접 작성
+* Arduino: Arduino API로 래핑된 코드 작성
+* 둘 다 0x08000000부터 시작하는 동일한 메모리 레이아웃
 
 
 
