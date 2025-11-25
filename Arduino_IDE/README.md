@@ -120,6 +120,19 @@ void loop() {
 <br>
 <img width="1022" height="528" alt="008" src="https://github.com/user-attachments/assets/d1d20f50-1e0b-40ad-8c70-2faa4c01b293" />
 <br>
+
+```
+Sketch uses 10256 bytes (1%) of program storage space. Maximum is 524288 bytes.
+Global variables use 1092 bytes (0%) of dynamic memory, leaving 129980 bytes for local variables. Maximum is 131072 bytes.
+STM32CubeProgrammer not found (STM32_Programmer_CLI.exe).
+  Please install it or add '<STM32CubeProgrammer path>/bin' to your PATH environment:
+  https://www.st.com/en/development-tools/stm32cubeprog.html
+  Aborting!
+Failed uploading: uploading error: exit status 1
+```
+
+
+
 <img width="1024" height="1365" alt="009" src="https://github.com/user-attachments/assets/8e8ca39e-6e4e-4672-9110-63eb8a8d434b" />
 <br>
 <img width="1024" height="1365" alt="010" src="https://github.com/user-attachments/assets/b294f540-1628-4c1c-8a1d-845cc5905237" />
