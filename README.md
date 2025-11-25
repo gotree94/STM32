@@ -36,6 +36,7 @@
   - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
   - [] 34.2.4" TFT SPI 240*320
   - [] 35.RTC
+  - [] 36.MAX98357 I2S DAC
 
 ## NUCLEO_F411RE
  - [완료] 01.LED_Blink
@@ -71,4 +72,5 @@
  - [] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
  - [] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
  - [] 32.FATFS
+ - [] 36.MAX98357 I2S DAC
 
