@@ -50,5 +50,60 @@ https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectron
 <img width="1085" height="1532" alt="005" src="https://github.com/user-attachments/assets/c312f522-2299-48b2-aa9d-a8adc837cbe9" />
 
 
+## 업로드 설정
 
+### 1. 필수 설정 확인
+   * Tools → Board → STM32 MCU based boards → Nucleo-64
+   * Tools → Board part number → Nucleo F411RE
+   * Tools → Upload method → STM32CubeProgrammer (SWD)
+   * Tools → Port → (NUCLEO 보드의 COM 포트 선택)
+
+### 2. STM32CubeProgrammer 설치 확인
+   * 만약 업로드 시 에러가 발생하면 STM32CubeProgrammer가 필요해요:
+
+   * STM32CubeProgrammer 다운로드
+   * 설치 후 Arduino IDE 재시작
+
+### 간단한 테스트 예제
+* 예제 1: Blink (LED 깜빡임)
+* File → Examples → 01.Basics → Blink
+
+```cpp
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);  // NUCLEO-F411RE는 PA5가 기본 LED
+}
+
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+}
+```
+
+* 업로드 후 **녹색 LED(LD2)**가 1초 간격으로 깜빡이면 성공!
+
+* 예제 2: Serial 통신 테스트
+```cpp
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  Serial.println("Hello from NUCLEO-F411RE!");
+  delay(1000);
+}
+```
+
+* 업로드 후:
+   * Tools → Serial Monitor 열기
+   * 우측 하단 보드레이트 115200 설정
+   * "Hello from NUCLEO-F411RE!" 메시지가 1초마다 출력되면 성공!
+
+
+* 업로드 버튼 클릭!
+: Arduino IDE 상단의 → (Upload) 버튼을 누르면:
+   * 컴파일 진행
+   * ST-Link를 통해 자동 업로드
+   * 보드 자동 리셋 후 실행
 
