@@ -1,4 +1,4 @@
-# STM32F411 iwth Arduino IDE
+# STM32F411 with Arduino IDE
 
 * https://www.arduino.cc/en/software/#ide
 
