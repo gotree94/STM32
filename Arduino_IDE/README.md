@@ -45,5 +45,6 @@ https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectron
    * Tools → Board part number → Nucleo F411RE
  
 
+<img width="1088" height="1503" alt="004" src="https://github.com/user-attachments/assets/b1eaad8c-b5a9-4769-ab79-d90d32fbc892" />
 
 
