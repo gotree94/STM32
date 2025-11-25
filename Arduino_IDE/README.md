@@ -11,6 +11,14 @@ File → Preferences에서 Additional Boards Manager URLs에 아래 URL이 있�
 https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
 ```
 
+<img width="1083" height="763" alt="001" src="https://github.com/user-attachments/assets/e205a678-5d0a-4df4-878b-a9a9a60887f8" />
+<br>
+<img width="1083" height="763" alt="002" src="https://github.com/user-attachments/assets/6df13f21-b44b-49ff-895e-224f7867073b" />
+<br>
+<img width="1081" height="705" alt="003" src="https://github.com/user-attachments/assets/60f1731a-227e-4bf5-bed4-3481c00bb5f0" />
+<br>
+
+
 ## STM32 Arduino 코어 두 가지 버전
 ### 1. STM32 MCU based boards (2.11.0) - 공식 추천 ✅
 
