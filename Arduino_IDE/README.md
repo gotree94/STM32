@@ -107,3 +107,36 @@ void loop() {
    * ST-Link를 통해 자동 업로드
    * 보드 자동 리셋 후 실행
 
+
+* 다운로드 해결
+  * https://www.st.com/en/development-tools/stm32cubeprog.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
