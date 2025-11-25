@@ -47,4 +47,8 @@ https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectron
 
 <img width="1088" height="1503" alt="004" src="https://github.com/user-attachments/assets/b1eaad8c-b5a9-4769-ab79-d90d32fbc892" />
 
+<img width="1085" height="1532" alt="005" src="https://github.com/user-attachments/assets/c312f522-2299-48b2-aa9d-a8adc837cbe9" />
+
+
+
 
