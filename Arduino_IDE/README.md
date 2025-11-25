@@ -37,10 +37,10 @@ https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectron
 * 지원 보드: Nucleo-8S208RB, Nucleo-8L152R8
 * STM32와는 다른 아키텍처
 
-* NUCLEO-F411RE를 위한 선택
+### NUCLEO-F411RE를 위한 선택
    * STM32 MCU based boards (2.11.0)을 설치하세요!
    * 이것이 STM32F411 같은 32비트 ARM Cortex-M 기반 보드를 위한 패키지입니다.
-* 설치 후 보드 선택
+### 설치 후 보드 선택
    * Tools → Board → STM32 MCU based boards → Nucleo-64
    * Tools → Board part number → Nucleo F411RE
  
