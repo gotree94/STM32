@@ -357,7 +357,134 @@ Flash 0x08000000에 직접 업로드
 * 둘 다 0x08000000부터 시작하는 동일한 메모리 레이아웃
 
 
+# NUCLEO-F411RE에 부트로더를 설치
 
+## STM32duino 부트로더 설치
+
+### 1. 부트로더 파일 다운로드
+STM32duino 공식 부트로더를 다운로드합니다:
+bash# GitHub에서 부트로더 다운로드
+https://github.com/stm32duino/Arduino_Core_STM32/tree/main/bootloaders
+```
+
+**NUCLEO-F411RE용 부트로더:**
+- 파일명: `generic_boot20_pc13.bin` 또는 `NUCLEO_F411RE_boot.bin`
+
+또는 직접 링크:
+```
+https://github.com/stm32duino/Arduino_Core_STM32/raw/main/bootloaders/generic/generic_boot20_pc13.bin
+
+### 2. STM32CubeProgrammer로 부트로더 업로드
+방법 A: GUI 사용
+
+STM32CubeProgrammer 실행
+ST-LINK 연결 설정 후 Connect
+Erasing & Programming 탭 선택
+File path: 다운로드한 부트로더 .bin 파일 선택
+Start address: 0x08000000 입력
+Start Programming 클릭
+
+방법 B: CLI 사용
+bash# Windows
+"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" -c port=SWD -w generic_boot20_pc13.bin 0x08000000 -v -s
+
+```
+# Linux
+STM32_Programmer_CLI -c port=SWD -w generic_boot20_pc13.bin 0x08000000 -v -s
+```
+
+### 3. Arduino IDE 업로드 설정 변경
+
+부트로더 설치 후 Arduino IDE에서:
+```
+Tools → Upload method → Serial 또는 STM32duino bootloader
+```
+
+### 4. 부트로더 진입 방법
+STM32duino 부트로더 특징:
+
+전원 인가 후 처음 몇 초 동안 부트로더 모드
+이 시간 내에 업로드 시도하면 부트로더가 활성화됨
+또는 특정 조건으로 부트로더 진입 (보드마다 다름)
+
+
+대안: HID 부트로더 사용
+HID 부트로더는 드라이버 없이 작동하는 장점이 있어요.
+1. HID 부트로더 다운로드
+bashhttps://github.com/Serasidis/STM32_HID_Bootloader
+NUCLEO-F411RE용:
+bashgit clone https://github.com/Serasidis/STM32_HID_Bootloader.git
+cd STM32_HID_Bootloader/bootloader_F4
+# F411 폴더에서 .bin 파일 찾기
+2. 부트로더 업로드
+bashSTM32_Programmer_CLI -c port=SWD -w hid_generic_pc13.bin 0x08000000 -v -s
+```
+
+### 3. Arduino IDE 설정
+```
+Tools → Upload method → HID Bootloader 2.2
+4. HID 부트로더 업로드 도구 설치
+HID 부트로더 사용을 위해 별도 업로더 필요:
+Windows:
+bash# Arduino15 폴더에 자동 설치됨
+%LOCALAPPDATA%\Arduino15\packages\STM32\tools\
+```
+
+---
+
+## 부트로더 후 메모리 맵
+
+### STM32duino 부트로더 (8KB)
+```
+0x08000000 - 0x08001FFF: 부트로더 (8KB)
+0x08002000 - 0x0807FFFF: 사용자 코드 (Arduino 스케치)
+```
+
+### HID 부트로더 (8KB)
+```
+0x08000000 - 0x08001FFF: 부트로더 (8KB)
+0x08002000 - 0x0807FFFF: 사용자 코드
+
+테스트 Arduino 스케치
+부트로더 설치 후 이 코드로 테스트:
+cppvoid setup() {
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  Serial.println("Bootloader upload test!");
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(500);
+}
+업로드 시:
+
+Arduino IDE에서 Upload 클릭
+보드 리셋 (자동 또는 수동)
+부트로더가 새 코드 수신
+자동 실행
+
+
+부트로더 진입 문제 해결
+만약 부트로더로 진입이 안 되면:
+수동 부트로더 모드:
+
+BOOT0 핀을 HIGH로 설정 (점퍼 또는 버튼)
+RESET 버튼 누르기
+부트로더 모드 진입
+업로드 후 BOOT0를 다시 LOW로
+
+또는 코드로 부트로더 점프:
+cppvoid jumpToBootloader() {
+  void (*SysMemBootJump)(void);
+  __disable_irq();
+  SysMemBootJump = (void (*)(void)) (*((uint32_t *) 0x1FFF0004));
+  __set_MSP(0x20001000);
+  SysMemBootJump();
+  while (1);
+}
 
 
 
