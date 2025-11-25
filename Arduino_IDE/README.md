@@ -112,10 +112,20 @@ void loop() {
   * https://www.st.com/en/development-tools/stm32cubeprog.html
 
 
-
-
-
-
+<img width="1024" height="1365" alt="012" src="https://github.com/user-attachments/assets/6f9640d9-41f7-4103-8178-475521bf7ae1" />
+<br>
+<img width="1083" height="763" alt="006" src="https://github.com/user-attachments/assets/05e9bc39-fa72-4740-a7bd-fa5475b8914d" />
+<br>
+<img width="1083" height="763" alt="007" src="https://github.com/user-attachments/assets/097a4b07-e85e-48be-b8ea-a7529caeef81" />
+<br>
+<img width="1022" height="528" alt="008" src="https://github.com/user-attachments/assets/d1d20f50-1e0b-40ad-8c70-2faa4c01b293" />
+<br>
+<img width="1024" height="1365" alt="009" src="https://github.com/user-attachments/assets/8e8ca39e-6e4e-4672-9110-63eb8a8d434b" />
+<br>
+<img width="1024" height="1365" alt="010" src="https://github.com/user-attachments/assets/b294f540-1628-4c1c-8a1d-845cc5905237" />
+<br>
+<img width="659" height="374" alt="011" src="https://github.com/user-attachments/assets/c88dc2e0-37dd-4f8f-a474-28e8e29b085a" />
+<br>
 
 
 
