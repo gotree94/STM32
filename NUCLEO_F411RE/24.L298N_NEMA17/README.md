@@ -20,7 +20,7 @@
 
 <img width="600" height="450" alt="1278835" src="https://github.com/user-attachments/assets/941b6745-785e-4424-b2bf-f61838438c17" />
 <br>
-<img width="4229" height="2605" alt="img" src="https://github.com/user-attachments/assets/8d6467dc-704f-40d5-977e-eac1a73a50eb" />
+<img width="600" height="450" alt="img" src="https://github.com/user-attachments/assets/aee2114e-fcc7-4dd0-a459-f0a9e98015dd" />
 <br>
 <br>
 <img width="500" height="218" alt="17HS3430-Stepper-motor" src="https://github.com/user-attachments/assets/7ce92906-b200-4607-9f1a-201ffe36899b" />
