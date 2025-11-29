@@ -49,14 +49,15 @@
 
    * 여기서는 디지털 D2~D5를 모터 제어용으로 사용하겠습니다.
 
-기능	L298N 핀	Nucleo Arduino 핀	MCU 핀	비고
-IN1	IN1	D2	PA10	코일A 방향1
-IN2	IN2	D3	PB3	코일A 방향2
-IN3	IN3	D4	PB5	코일B 방향1
-IN4	IN4	D5	PB4	코일B 방향2
-ENA(1,2)	ENA	점퍼로 5V 고정	-	나중에 PWM 쓰면 연결
-ENB(3,4)	ENB	점퍼로 5V 고정	-	동일
-GND	GND	GND	-	공통 GND 필수
+|기능		|L298N 핀	|Nucleo Arduino 핀	|MCU 핀	|비고|
+|:--:|:--:|:--:|:--:|:--:|
+|IN1		|IN1		|D2					|PA10	|코일A 방향1|
+|IN2		|IN2		|D3					|PB3	|코일A 방향2|
+|IN3		|IN3		|D4					|PB5	|코일B 방향1|
+|IN4		|IN4		|D5					|PB4	|코일B 방향2|
+|ENA(1,2)	|ENA		|점퍼로 5V 고정		|-		|나중에 PWM 쓰면 연결|
+|ENB(3,4)	|ENB		|점퍼로 5V 고정		|-		|동일|
+|GND		|GND		|GND				|-		|공통 GND 필수|
 
    * 이렇게 연결하면, PA10/PB3/PB5/PB4를 4-비트 패턴으로 토글하면서 풀스텝 구동할 수 있습니다.
 
