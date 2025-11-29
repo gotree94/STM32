@@ -2,9 +2,6 @@
 
 <img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/c2b1cc58-ef59-46ea-8436-30d41cc2303a" />
 
-<img width="659" height="1894" alt="005" src="https://github.com/user-attachments/assets/4364051b-172c-437a-b1c3-0c20cb9f7c8a" />
-
-
 ## 1. 프로젝트 목표
 
    * 보드: NUCLEO-STM32F411RE
