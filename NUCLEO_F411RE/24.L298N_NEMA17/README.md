@@ -1,817 +1,270 @@
-# 21.OV7670
+# 24.L298N_NEMA17
 
 <img width="671" height="569" alt="nucleo-f411re-pinout" src="https://github.com/user-attachments/assets/c2b1cc58-ef59-46ea-8436-30d41cc2303a" />
 
 <img width="659" height="1894" alt="005" src="https://github.com/user-attachments/assets/4364051b-172c-437a-b1c3-0c20cb9f7c8a" />
 
-```
-=== System Information ===
-MCU: STM32F411
-Clock Frequency: 84 MHz
-I2C Interface: I2C1 (PB8=SCL, PB9=SDA)
-UART Interface: UART2 (PA2=TX, PA3=RX)
-XCLK Output: PA8 (MCO1) @ 21MHz
-OV7670 I2C Address: 0x42 (7-bit: 0x21)
-=========================
 
-⚠️  IMPORTANT: Connect OV7670 XCLK to PA8!
+## 1. 프로젝트 목표
 
-Starting OV7670 diagnostic with XCLK generation...
+   * 보드: NUCLEO-STM32F411RE
+   * 드라이버: L298N 모듈
+   * 모터: NEMA17 17HS3430 (1.8°/step, 200 step/rev, 4-선 bipolar, 17HS3430) (makershop.co.nz)
+   * 기능:
+      * 정/역방향 회전
+      * 일정 속도로 1회전(또는 원하는 step 수) 구동
+      * 속도는 코드에서 step_delay_ms로 쉽게 조절
+   ※ 주의: 17HS3430은 정격 전류 ≈ 1.2 A/phase, 권선 저항 ≈ 1.9 Ω 수준으로, 권선 정격 전압은 약 2.3 V입니다.
+      (makershop.co.nz)
 
-=== Configuring MCO1 for XCLK ===
-✓ MCO1 configured: PA8 output = 21MHz
-  Source: PLLCLK (84MHz)
-  Divider: /4
-  Output: 21MHz (suitable for OV7670)
-=================================
+   * L298N은 전류제한 기능이 없는 단순 H-브릿지라서 장시간 고속/고토크 구동에는 적합하지 않고, 저속·짧은 시간 테스트용으로 쓰는 게 안전합니다. \
+   * (실사용은 A4988/TMC 계열 전류제어 드라이버 권장)
 
-Waiting for XCLK stabilization (500ms)...
-✓ XCLK should be stable now
+## 2. 하드웨어 구성
+### 2-1. 전원 구성
+   * NUCLEO-F411RE
+      * USB(PC)로 5V 공급
+      * IO는 모두 3.3V (BUT, L298N 입력은 TTL 호환이라 3.3V HIGH 인식 가능)
+   * L298N 모듈
+      * +12V (또는 6~9V 정도의 외부 전원, 처음에는 6~9V 권장)
+      * GND → NUCLEO GND와 반드시 공통 접지
+      * 5V-EN 점퍼가 있으면:
+         * 모터 전원에서 레귤레이터로 5V 만들어서 사용 → 보통 Nucleo에는 연결하지 말고, L298N 모듈 내에서만 사용
+      * EN 핀(ENA, ENB) 은 점퍼로 HIGH 고정하거나, 나중에 PWM 쓰려면 Nucleo 핀에 연결
 
+### 2-2. 스테퍼 모터 → L298N 연결
 
-=== Complete I2C1 Reinitialization ===
-Step 1: Deinitializing I2C1...
-Step 2: Resetting clocks...
-Step 3: Forcing GPIO configuration...
+   * 17HS3430은 4-선 bipolar 스테퍼입니다.
+   * 두 가닥씩 저항이 연결되는 쌍이 각 코일입니다.
+   * (일반적으로 3D 프린터용 17HS3430은 Black/Green, Red/Blue가 한 쌍이지만, 제조사마다 색 다를 수 있으니 반드시 테스터로 확인!)
 
-=== Forcing I2C1 GPIO Configuration (PB8/PB9) ===
-PB8 (SCL) Mode: 2 (should be 2), AF: 4 (should be 4)
-PB9 (SDA) Mode: 2 (should be 2), AF: 4 (should be 4)
-✓ GPIO configuration successful!
-==============================================
+   1. 테스터(저항 측정)로 쌍 찾기:
+      * 네 선 중 저항 값이 나오는 두 선이 코일 A
+      * 나머지 두 선이 코일 B
+   2. L298N 연결 (예시):
+      * 코일 A → OUT1, OUT2
+      * 코일 B → OUT3, OUT4
+      * (OUT1~4 중 어느 쪽이 +, − 인지는 방향만 바뀌는 문제라 치명적이진 않습니다.)
 
-Step 4: Reinitializing I2C1...
-✓ I2C1 initialized successfully!
-Step 5: Verifying configuration...
+### 2-3. NUCLEO-F411RE → L298N 입력 연결
 
-=== I2C Configuration Check (PB8/PB9) ===
-I2C1->CR1: 0x0001 (PE: Enabled)
-I2C1->SR1: 0x0000
-I2C1->SR2: 0x0000
-✓ GPIOB clock enabled
-✓ I2C1 clock enabled
-PB8 (SCL) Mode: Alternate Function (AF4)
-PB9 (SDA) Mode: Alternate Function (AF4)
-✓ PB8/PB9 correctly configured for I2C1 (AF4)
-======================================
+   * Nucleo의 Arduino 커넥터(D2~D7) 핀매핑은 UM1724에 정리되어 있습니다.
 
-=====================================
+   * 여기서는 디지털 D2~D5를 모터 제어용으로 사용하겠습니다.
 
+기능	L298N 핀	Nucleo Arduino 핀	MCU 핀	비고
+IN1	IN1	D2	PA10	코일A 방향1
+IN2	IN2	D3	PB3	코일A 방향2
+IN3	IN3	D4	PB5	코일B 방향1
+IN4	IN4	D5	PB4	코일B 방향2
+ENA(1,2)	ENA	점퍼로 5V 고정	-	나중에 PWM 쓰면 연결
+ENB(3,4)	ENB	점퍼로 5V 고정	-	동일
+GND	GND	GND	-	공통 GND 필수
 
-=== I2C Bus Scanner ===
-Scanning I2C addresses from 0x08 to 0x77...
-✓ Device found at 8-bit addr: 0x42 (7-bit: 0x21)
-  --> This could be OV7670!
-Total devices found: 1
-======================
+   * 이렇게 연결하면, PA10/PB3/PB5/PB4를 4-비트 패턴으로 토글하면서 풀스텝 구동할 수 있습니다.
 
+## 3. STM32CubeIDE / CubeMX 설정
 
-=== OV7670 Multi-Address Test ===
-Trying address 0x42 (7-bit: 0x21)...
-  ✓ Device responds at this address
-  ✓ PID Register (0x0A): 0x76
-  🎯 FOUND OV7670! Address: 0x42
-  ✓ VER Register (0x0B): 0x73
-  🎉 CONFIRMED: Valid OV7670 at address 0x42!
+   1. New STM32 Project
+      * Board Selector에서 NUCLEO-F411RE 선택
+   2. Clock은 기본값(내부 HSI + PLL) 그대로 사용해도 무방 (100 MHz 근처)
+   3. SYS
+      * Debug: Serial Wire (기본)
+   4. GPIO 설정
+      * PA10 (D2) → GPIO_Output, Push-Pull, No Pull
+      * PB3 (D3) → GPIO_Output, Push-Pull, No Pull
+      * PB5 (D4) → GPIO_Output, Push-Pull, No Pull
+      * PB4 (D5) → GPIO_Output, Push-Pull, No Pull
+   5. Project Manager에서 프로젝트 이름 예:
+      * F411_NEMA17_L298N
+   6. 코드 생성(Generate Code)
+      * 이제 Core/Src/main.c 안에 스테퍼 구동 코드를 추가합니다.
 
-Trying address 0x43 (7-bit: 0x21)...
-  ✓ Device responds at this address
-  ✓ PID Register (0x0A): 0x76
-  🎯 FOUND OV7670! Address: 0x43
-  ✓ VER Register (0x0B): 0x73
-  🎉 CONFIRMED: Valid OV7670 at address 0x43!
+## 4. 스테퍼 구동 코드 예제 (풀스텝, 정/역방향)
 
-Trying address 0x60 (7-bit: 0x30)...
-  ✗ No response at this address
+   * 아래 코드는 CubeMX가 생성한 main.c 에 추가하는 형태입니다.
+   * (특히 MX_GPIO_Init()은 CubeMX가 만들어준 그대로 두고, 그 위/아래에 함수만 추가)
 
-Trying address 0x61 (7-bit: 0x30)...
-  ✗ No response at this address
-
-===============================
-
-
-=== OV7670 Diagnostic Commands ===
-S - I2C bus scan
-P - Check I2C pin configuration
-F - Force GPIO configuration
-X - Complete I2C reinitialization
-C - Configure/Restart XCLK output
-1-5 - Change XCLK frequency
-M - Try multiple OV7670 addresses
-I - Check OV7670 ID
-R - Read key registers
-T - Basic configuration test
-A - Run ALL diagnostic tests
-H - Show this help
-===================================
-Ready for commands...
-
-```
-
-
-<img width="800" height="600" alt="004" src="https://github.com/user-attachments/assets/0a885f7e-a56b-4021-8872-d20865bf42d1" />
-
-<img width="800" height="600" alt="001" src="https://github.com/user-attachments/assets/b87e60e8-5abf-45fb-903e-bb6ffe89947d" />
-
-<img width="800" height="600" alt="002" src="https://github.com/user-attachments/assets/4a17ebab-30bd-4512-909c-12dfe973a138" />
-
-<img width="800" height="600" alt="003" src="https://github.com/user-attachments/assets/b5e4039a-3781-4653-b37b-aaf956a0b1fe" />
-
-```c
+### 4-1. pin 매크로 정의 (main.c 상단 부분)
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include <string.h>
 /* USER CODE END Includes */
-```
 
-```c
-/* USER CODE BEGIN PD */
-// OV7670 I2C Address
-#define OV7670_I2C_ADDR         0x42  // 7-bit address shifted left (0x21 << 1)
+/* USER CODE BEGIN PV */
+/* USER CODE END PV */
 
-// Key OV7670 Registers for status check
-#define OV7670_REG_PID          0x0A  // Product ID MSB (should be 0x76)
-#define OV7670_REG_VER          0x0B  // Product ID LSB (should be 0x73)
-#define OV7670_REG_MIDH         0x1C  // Manufacturer ID MSB (should be 0x7F)
-#define OV7670_REG_MIDL         0x1D  // Manufacturer ID LSB (should be 0xA2)
-#define OV7670_REG_COM1         0x04  // Common control 1
-#define OV7670_REG_COM7         0x12  // Common control 7
-#define OV7670_REG_COM10        0x15  // Common control 10
-#define OV7670_REG_CLKRC        0x11  // Clock control
-
-// I2C Pin definitions for PB8/PB9
-#define I2C_SCL_PIN             GPIO_PIN_8  // PB8
-#define I2C_SDA_PIN             GPIO_PIN_9  // PB9
-#define I2C_GPIO_PORT           GPIOB
-
-// XCLK Pin (MCO1 output)
-#define XCLK_PIN                GPIO_PIN_8  // PA8
-#define XCLK_GPIO_PORT          GPIOA
-/* USER CODE END PD */
-```
-
-```c
 /* USER CODE BEGIN PFP */
-static void Configure_MCO1_Output(void);
 /* USER CODE END PFP */
-```
 
-```c
 /* USER CODE BEGIN 0 */
 
-#ifdef __GNUC__
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
+// L298N 제어용 핀 매핑 (D2~D5)
+#define IN1_GPIO_Port GPIOA
+#define IN1_Pin       GPIO_PIN_10   // D2
 
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  */
-PUTCHAR_PROTOTYPE
-{
-    if (ch == '\n')
-        HAL_UART_Transmit(&huart2, (uint8_t*)"\r", 1, 0xFFFF);
-    HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
-    return ch;
-}
+#define IN2_GPIO_Port GPIOB
+#define IN2_Pin       GPIO_PIN_3    // D3
 
-/**
-  * @brief  MCO1 (PA8) 클럭 출력 설정 - OV7670 XCLK용
-  * @note   HSI/2 = 16MHz/2 = 8MHz 또는 PLLCLK/2 = 84MHz/2 = 42MHz
-  *         추가 분주기로 최종 클럭 조절 가능
-  */
-static void Configure_MCO1_Output(void)
-{
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
+#define IN3_GPIO_Port GPIOB
+#define IN3_Pin       GPIO_PIN_5    // D4
 
-    printf("\n=== Configuring MCO1 for XCLK ===\n");
+#define IN4_GPIO_Port GPIOB
+#define IN4_Pin       GPIO_PIN_4    // D5
 
-    // GPIOA 클럭 활성화
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-
-    // PA8을 MCO1 Alternate Function으로 설정
-    GPIO_InitStruct.Pin = XCLK_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF0_MCO;  // MCO는 AF0
-    HAL_GPIO_Init(XCLK_GPIO_PORT, &GPIO_InitStruct);
-
-    // MCO1 소스 및 분주 설정
-    // Option 1: HSI (16MHz) / 2 = 8MHz (안정적이지만 낮음)
-    // Option 2: PLLCLK (84MHz) / 4 = 21MHz (권장)
-    // Option 3: PLLCLK (84MHz) / 2 = 42MHz (너무 높을 수 있음)
-
-    // PLLCLK / 4 = 21MHz 설정 (OV7670에 적합)
-    HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_PLLCLK, RCC_MCODIV_4);
-
-    printf("✓ MCO1 configured: PA8 output = 21MHz\n");
-    printf("  Source: PLLCLK (84MHz)\n");
-    printf("  Divider: /4\n");
-    printf("  Output: 21MHz (suitable for OV7670)\n");
-    printf("=================================\n\n");
-
-    // XCLK 안정화 대기
-    printf("Waiting for XCLK stabilization (500ms)...\n");
-    HAL_Delay(500);
-    printf("✓ XCLK should be stable now\n\n");
-}
-
-/**
-  * @brief  XCLK 주파수 변경
-  * @param  divider: 1=84MHz, 2=42MHz, 3=28MHz, 4=21MHz, 5=16.8MHz
-  */
-void Change_XCLK_Frequency(uint32_t divider)
-{
-    printf("\n=== Changing XCLK Frequency ===\n");
-
-    uint32_t mcodiv;
-    float output_freq;
-
-    switch(divider) {
-        case 1:
-            mcodiv = RCC_MCODIV_1;
-            output_freq = 84.0f;
-            break;
-        case 2:
-            mcodiv = RCC_MCODIV_2;
-            output_freq = 42.0f;
-            break;
-        case 3:
-            mcodiv = RCC_MCODIV_3;
-            output_freq = 28.0f;
-            break;
-        case 4:
-            mcodiv = RCC_MCODIV_4;
-            output_freq = 21.0f;
-            break;
-        case 5:
-            mcodiv = RCC_MCODIV_5;
-            output_freq = 16.8f;
-            break;
-        default:
-            printf("Invalid divider! Using /4 (21MHz)\n");
-            mcodiv = RCC_MCODIV_4;
-            output_freq = 21.0f;
-            break;
-    }
-
-    HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_PLLCLK, mcodiv);
-
-    printf("✓ XCLK frequency changed to %.1f MHz\n", output_freq);
-    printf("  Divider: /%lu\n", divider);
-    printf("==============================\n\n");
-
-    HAL_Delay(100);  // 안정화 대기
-}
-
-/**
-  * @brief  OV7670 레지스터 읽기
-  */
-HAL_StatusTypeDef OV7670_ReadRegister(uint8_t reg_addr, uint8_t *data)
-{
-    HAL_StatusTypeDef status;
-    status = HAL_I2C_Master_Transmit(&hi2c1, OV7670_I2C_ADDR, &reg_addr, 1, 1000);
-    if (status != HAL_OK) return status;
-    status = HAL_I2C_Master_Receive(&hi2c1, OV7670_I2C_ADDR, data, 1, 1000);
-    return status;
-}
-
-/**
-  * @brief  OV7670 레지스터 쓰기
-  */
-HAL_StatusTypeDef OV7670_WriteRegister(uint8_t reg_addr, uint8_t data)
-{
-    uint8_t buf[2] = {reg_addr, data};
-    return HAL_I2C_Master_Transmit(&hi2c1, OV7670_I2C_ADDR, buf, 2, 1000);
-}
-
-/**
-  * @brief  I2C 핀을 강제로 Alternate Function으로 설정 (PB8/PB9)
-  */
-void Force_I2C1_GPIO_Config(void)
-{
-    printf("\n=== Forcing I2C1 GPIO Configuration (PB8/PB9) ===\n");
-
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-
-    GPIO_InitStruct.Pin = I2C_SCL_PIN | I2C_SDA_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
-
-    HAL_GPIO_Init(I2C_GPIO_PORT, &GPIO_InitStruct);
-
-    uint32_t moder_val = GPIOB->MODER;
-    uint32_t afr_val = GPIOB->AFR[1];
-
-    uint32_t pb8_mode = (moder_val >> (8 * 2)) & 0x3;
-    uint32_t pb9_mode = (moder_val >> (9 * 2)) & 0x3;
-    uint32_t pb8_af = (afr_val >> ((8-8) * 4)) & 0xF;
-    uint32_t pb9_af = (afr_val >> ((9-8) * 4)) & 0xF;
-
-    printf("PB8 (SCL) Mode: %lu (should be 2), AF: %lu (should be 4)\n", pb8_mode, pb8_af);
-    printf("PB9 (SDA) Mode: %lu (should be 2), AF: %lu (should be 4)\n", pb9_mode, pb9_af);
-
-    if (pb8_mode == 2 && pb9_mode == 2 && pb8_af == 4 && pb9_af == 4) {
-        printf("✓ GPIO configuration successful!\n");
-    } else {
-        printf("✗ GPIO configuration failed!\n");
-    }
-    printf("==============================================\n\n");
-}
-
-/**
-  * @brief  I2C 핀 설정 및 상태 확인
-  */
-void I2C_CheckPinStatus(void)
-{
-    printf("\n=== I2C Configuration Check (PB8/PB9) ===\n");
-
-    printf("I2C1->CR1: 0x%04X ", (uint16_t)I2C1->CR1);
-    printf("(PE: %s)\n", (I2C1->CR1 & I2C_CR1_PE) ? "Enabled" : "Disabled");
-
-    printf("I2C1->SR1: 0x%04X\n", (uint16_t)I2C1->SR1);
-    printf("I2C1->SR2: 0x%04X\n", (uint16_t)I2C1->SR2);
-
-    if (RCC->AHB1ENR & RCC_AHB1ENR_GPIOBEN) {
-        printf("✓ GPIOB clock enabled\n");
-    } else {
-        printf("✗ GPIOB clock disabled\n");
-    }
-
-    if (RCC->APB1ENR & RCC_APB1ENR_I2C1EN) {
-        printf("✓ I2C1 clock enabled\n");
-    } else {
-        printf("✗ I2C1 clock disabled\n");
-    }
-
-    uint32_t moder_val = GPIOB->MODER;
-    uint32_t afr_val = GPIOB->AFR[1];
-
-    uint32_t pb8_mode = (moder_val >> (8 * 2)) & 0x3;
-    uint32_t pb9_mode = (moder_val >> (9 * 2)) & 0x3;
-    uint32_t pb8_af = (afr_val >> ((8-8) * 4)) & 0xF;
-    uint32_t pb9_af = (afr_val >> ((9-8) * 4)) & 0xF;
-
-    printf("PB8 (SCL) Mode: ");
-    switch (pb8_mode) {
-        case 0: printf("Input"); break;
-        case 1: printf("Output"); break;
-        case 2: printf("Alternate Function (AF%lu)", pb8_af); break;
-        case 3: printf("Analog"); break;
-    }
-    printf("\n");
-
-    printf("PB9 (SDA) Mode: ");
-    switch (pb9_mode) {
-        case 0: printf("Input"); break;
-        case 1: printf("Output"); break;
-        case 2: printf("Alternate Function (AF%lu)", pb9_af); break;
-        case 3: printf("Analog"); break;
-    }
-    printf("\n");
-
-    if (pb8_mode == 2 && pb9_mode == 2 && pb8_af == 4 && pb9_af == 4) {
-        printf("✓ PB8/PB9 correctly configured for I2C1 (AF4)\n");
-    } else {
-        printf("✗ GPIO pins not properly configured for I2C\n");
-    }
-
-    printf("======================================\n\n");
-}
-
-/**
-  * @brief  I2C 버스 스캔
-  */
-void I2C_Scanner(void)
-{
-    printf("\n=== I2C Bus Scanner ===\n");
-    printf("Scanning I2C addresses from 0x08 to 0x77...\n");
-
-    uint8_t found_devices = 0;
-
-    for (uint8_t addr = 0x08; addr <= 0x77; addr++) {
-        HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 1, 100);
-
-        if (result == HAL_OK) {
-            printf("✓ Device found at 8-bit addr: 0x%02X (7-bit: 0x%02X)\n", addr << 1, addr);
-            found_devices++;
-
-            if (addr == 0x21 || addr == 0x42 || addr == 0x60) {
-                printf("  --> This could be OV7670!\n");
-            }
-        }
-    }
-
-    if (found_devices == 0) {
-        printf("❌ No I2C devices found!\n");
-        printf("Make sure XCLK is connected and running!\n");
-    } else {
-        printf("Total devices found: %d\n", found_devices);
-    }
-    printf("======================\n\n");
-}
-
-/**
-  * @brief  다양한 OV7670 주소로 ID 읽기 시도
-  */
-void OV7670_TryMultipleAddresses(void)
-{
-    printf("\n=== OV7670 Multi-Address Test ===\n");
-
-    uint8_t possible_addresses[] = {0x42, 0x43, 0x60, 0x61};
-    uint8_t num_addresses = sizeof(possible_addresses) / sizeof(possible_addresses[0]);
-
-    for (uint8_t i = 0; i < num_addresses; i++) {
-        uint8_t addr = possible_addresses[i];
-        printf("Trying address 0x%02X (7-bit: 0x%02X)...\n", addr, addr >> 1);
-
-        HAL_StatusTypeDef ready_result = HAL_I2C_IsDeviceReady(&hi2c1, addr, 3, 100);
-        if (ready_result == HAL_OK) {
-            printf("  ✓ Device responds at this address\n");
-
-            uint8_t reg_addr = 0x0A;
-            uint8_t pid_value = 0;
-
-            HAL_StatusTypeDef tx_result = HAL_I2C_Master_Transmit(&hi2c1, addr, &reg_addr, 1, 1000);
-            if (tx_result == HAL_OK) {
-                HAL_StatusTypeDef rx_result = HAL_I2C_Master_Receive(&hi2c1, addr, &pid_value, 1, 1000);
-                if (rx_result == HAL_OK) {
-                    printf("  ✓ PID Register (0x0A): 0x%02X\n", pid_value);
-                    if (pid_value == 0x76) {
-                        printf("  🎯 FOUND OV7670! Address: 0x%02X\n", addr);
-
-                        uint8_t ver_addr = 0x0B;
-                        uint8_t ver_value = 0;
-                        HAL_I2C_Master_Transmit(&hi2c1, addr, &ver_addr, 1, 1000);
-                        HAL_I2C_Master_Receive(&hi2c1, addr, &ver_value, 1, 1000);
-                        printf("  ✓ VER Register (0x0B): 0x%02X\n", ver_value);
-
-                        if (ver_value == 0x73) {
-                            printf("  🎉 CONFIRMED: Valid OV7670 at address 0x%02X!\n", addr);
-                        }
-                    }
-                }
-            }
-        } else {
-            printf("  ✗ No response at this address\n");
-        }
-        printf("\n");
-    }
-    printf("===============================\n\n");
-}
-
-/**
-  * @brief  OV7670 센서 ID 확인
-  */
-uint8_t OV7670_CheckID(void)
-{
-    uint8_t pid, ver, midh, midl;
-    HAL_StatusTypeDef status;
-
-    printf("\n=== OV7670 ID Check ===\n");
-
-    status = OV7670_ReadRegister(OV7670_REG_PID, &pid);
-    if (status != HAL_OK) {
-        printf("Failed to read PID register (0x%02X)\n", OV7670_REG_PID);
-        return 0;
-    }
-
-    status = OV7670_ReadRegister(OV7670_REG_VER, &ver);
-    if (status != HAL_OK) {
-        printf("Failed to read VER register (0x%02X)\n", OV7670_REG_VER);
-        return 0;
-    }
-
-    status = OV7670_ReadRegister(OV7670_REG_MIDH, &midh);
-    if (status != HAL_OK) {
-        printf("Failed to read MIDH register (0x%02X)\n", OV7670_REG_MIDH);
-        return 0;
-    }
-
-    status = OV7670_ReadRegister(OV7670_REG_MIDL, &midl);
-    if (status != HAL_OK) {
-        printf("Failed to read MIDL register (0x%02X)\n", OV7670_REG_MIDL);
-        return 0;
-    }
-
-    printf("Product ID: 0x%02X%02X (Expected: 0x7673)\n", pid, ver);
-    printf("Manufacturer ID: 0x%02X%02X (Expected: 0x7FA2)\n", midh, midl);
-
-    if (pid == 0x76 && ver == 0x73 && midh == 0x7F && midl == 0xA2) {
-        printf("✓ OV7670 sensor detected successfully!\n");
-        return 1;
-    } else {
-        printf("✗ Invalid sensor ID - may be faulty or not OV7670\n");
-        return 0;
-    }
-}
-
-/**
-  * @brief  OV7670 주요 레지스터 상태 확인
-  */
-void OV7670_CheckRegisters(void)
-{
-    uint8_t reg_value;
-    HAL_StatusTypeDef status;
-
-    printf("\n=== OV7670 Register Status ===\n");
-
-    status = OV7670_ReadRegister(OV7670_REG_CLKRC, &reg_value);
-    printf("CLKRC (0x%02X): 0x%02X %s\n",
-           OV7670_REG_CLKRC, reg_value,
-           (status == HAL_OK) ? "✓" : "✗");
-
-    status = OV7670_ReadRegister(OV7670_REG_COM1, &reg_value);
-    printf("COM1  (0x%02X): 0x%02X %s\n",
-           OV7670_REG_COM1, reg_value,
-           (status == HAL_OK) ? "✓" : "✗");
-
-    status = OV7670_ReadRegister(OV7670_REG_COM7, &reg_value);
-    printf("COM7  (0x%02X): 0x%02X %s",
-           OV7670_REG_COM7, reg_value,
-           (status == HAL_OK) ? "✓" : "✗");
-    if (status == HAL_OK) {
-        printf(" (Reset: %s, Format: %s)",
-               (reg_value & 0x80) ? "Active" : "Normal",
-               (reg_value & 0x04) ? "RGB" : "YUV");
-    }
-    printf("\n");
-
-    status = OV7670_ReadRegister(OV7670_REG_COM10, &reg_value);
-    printf("COM10 (0x%02X): 0x%02X %s",
-           OV7670_REG_COM10, reg_value,
-           (status == HAL_OK) ? "✓" : "✗");
-    if (status == HAL_OK) {
-        printf(" (HSYNC: %s, VSYNC: %s)",
-               (reg_value & 0x40) ? "Active Low" : "Active High",
-               (reg_value & 0x20) ? "Active Low" : "Active High");
-    }
-    printf("\n");
-
-    printf("============================\n\n");
-}
-
-/**
-  * @brief  OV7670 기본 설정 테스트
-  */
-void OV7670_BasicConfigTest(void)
-{
-    printf("\n=== OV7670 Basic Config Test ===\n");
-
-    printf("Testing software reset...\n");
-    HAL_StatusTypeDef status = OV7670_WriteRegister(OV7670_REG_COM7, 0x80);
-    if (status == HAL_OK) {
-        printf("✓ Software reset command sent\n");
-        HAL_Delay(100);
-
-        uint8_t pid;
-        status = OV7670_ReadRegister(OV7670_REG_PID, &pid);
-        if (status == HAL_OK && pid == 0x76) {
-            printf("✓ Sensor responsive after reset\n");
-        } else {
-            printf("✗ Sensor not responsive after reset\n");
-        }
-    } else {
-        printf("✗ Failed to send software reset\n");
-    }
-
-    printf("Testing clock divider setting...\n");
-    status = OV7670_WriteRegister(OV7670_REG_CLKRC, 0x00);
-    if (status == HAL_OK) {
-        uint8_t clkrc_read;
-        status = OV7670_ReadRegister(OV7670_REG_CLKRC, &clkrc_read);
-        if (status == HAL_OK) {
-            printf("✓ CLKRC write/read test: wrote 0x00, read 0x%02X\n", clkrc_read);
-        } else {
-            printf("✗ Failed to read back CLKRC\n");
-        }
-    } else {
-        printf("✗ Failed to write CLKRC\n");
-    }
-
-    printf("===============================\n\n");
-}
-
-/**
-  * @brief  완전한 I2C1 재초기화
-  */
-void Complete_I2C1_Reinit(void)
-{
-    printf("\n=== Complete I2C1 Reinitialization ===\n");
-
-    printf("Step 1: Deinitializing I2C1...\n");
-    HAL_I2C_DeInit(&hi2c1);
-
-    printf("Step 2: Resetting clocks...\n");
-    __HAL_RCC_I2C1_CLK_DISABLE();
-    __HAL_RCC_I2C1_FORCE_RESET();
-    HAL_Delay(10);
-    __HAL_RCC_I2C1_RELEASE_RESET();
-    __HAL_RCC_I2C1_CLK_ENABLE();
-
-    printf("Step 3: Forcing GPIO configuration...\n");
-    Force_I2C1_GPIO_Config();
-
-    printf("Step 4: Reinitializing I2C1...\n");
-    if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
-        printf("✗ I2C1 initialization failed!\n");
-    } else {
-        printf("✓ I2C1 initialized successfully!\n");
-    }
-
-    printf("Step 5: Verifying configuration...\n");
-    I2C_CheckPinStatus();
-
-    printf("=====================================\n\n");
-}
-
-/**
-  * @brief  시스템 정보 출력
-  */
-void PrintSystemInfo(void)
-{
-    printf("\n=== System Information ===\n");
-    printf("MCU: STM32F411\n");
-    printf("Clock Frequency: 84 MHz\n");
-    printf("I2C Interface: I2C1 (PB8=SCL, PB9=SDA)\n");
-    printf("UART Interface: UART2 (PA2=TX, PA3=RX)\n");
-    printf("XCLK Output: PA8 (MCO1) @ 21MHz\n");
-    printf("OV7670 I2C Address: 0x%02X (7-bit: 0x%02X)\n", OV7670_I2C_ADDR, OV7670_I2C_ADDR >> 1);
-    printf("=========================\n\n");
-}
-
-/**
-  * @brief  명령어 처리
-  */
-void ProcessCommand(char cmd)
-{
-    switch (cmd) {
-        case 's':
-        case 'S':
-            I2C_Scanner();
-            break;
-
-        case 'p':
-        case 'P':
-            I2C_CheckPinStatus();
-            break;
-
-        case 'f':
-        case 'F':
-            Force_I2C1_GPIO_Config();
-            break;
-
-        case 'x':
-        case 'X':
-            Complete_I2C1_Reinit();
-            break;
-
-        case 'c':
-        case 'C':
-            Configure_MCO1_Output();
-            break;
-
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-            Change_XCLK_Frequency(cmd - '0');
-            break;
-
-        case 'm':
-        case 'M':
-            OV7670_TryMultipleAddresses();
-            break;
-
-        case 'i':
-        case 'I':
-            OV7670_CheckID();
-            break;
-
-        case 'r':
-        case 'R':
-            OV7670_CheckRegisters();
-            break;
-
-        case 't':
-        case 'T':
-            OV7670_BasicConfigTest();
-            break;
-
-        case 'a':
-        case 'A':
-            printf("Running COMPLETE diagnostic with XCLK...\n\n");
-            Configure_MCO1_Output();
-            Complete_I2C1_Reinit();
-            I2C_Scanner();
-            OV7670_TryMultipleAddresses();
-            if (OV7670_CheckID()) {
-                OV7670_CheckRegisters();
-                OV7670_BasicConfigTest();
-            }
-            break;
-
-        case 'h':
-        case 'H':
-        case '?':
-            printf("\n=== OV7670 Diagnostic Commands ===\n");
-            printf("S - I2C bus scan\n");
-            printf("P - Check I2C pin configuration\n");
-            printf("F - Force GPIO configuration\n");
-            printf("X - Complete I2C reinitialization\n");
-            printf("C - Configure/Restart XCLK output\n");
-            printf("1-5 - Change XCLK frequency\n");
-            printf("      1=84MHz, 2=42MHz, 3=28MHz, 4=21MHz(default), 5=16.8MHz\n");
-            printf("M - Try multiple OV7670 addresses\n");
-            printf("I - Check OV7670 ID\n");
-            printf("R - Read key registers\n");
-            printf("T - Basic configuration test\n");
-            printf("A - Run ALL diagnostic tests\n");
-            printf("H - Show this help\n");
-            printf("===================================\n\n");
-            break;
-
-        default:
-            printf("Unknown command: %c\n", cmd);
-            printf("Type 'H' for help\n\n");
-            break;
-    }
-}
-
-/**
-  * @brief  Main application entry point
-  */
-void UserApp_Main(void)
-{
-    PrintSystemInfo();
-
-    printf("⚠️  IMPORTANT: Connect OV7670 XCLK to PA8!\n\n");
-
-    printf("Starting OV7670 diagnostic with XCLK generation...\n");
-
-    // XCLK 출력 설정 (가장 먼저!)
-    Configure_MCO1_Output();
-
-    // I2C 초기화
-    Complete_I2C1_Reinit();
-
-    // 진단 시작
-    I2C_Scanner();
-    OV7670_TryMultipleAddresses();
-
-    printf("\n=== OV7670 Diagnostic Commands ===\n");
-    printf("S - I2C bus scan\n");
-    printf("P - Check I2C pin configuration\n");
-    printf("F - Force GPIO configuration\n");
-    printf("X - Complete I2C reinitialization\n");
-    printf("C - Configure/Restart XCLK output\n");
-    printf("1-5 - Change XCLK frequency\n");
-    printf("M - Try multiple OV7670 addresses\n");
-    printf("I - Check OV7670 ID\n");
-    printf("R - Read key registers\n");
-    printf("T - Basic configuration test\n");
-    printf("A - Run ALL diagnostic tests\n");
-    printf("H - Show this help\n");
-    printf("===================================\n");
-    printf("Ready for commands...\n\n");
-}
+// 방향 정의
+#define DIR_CW   1   // 시계방향
+#define DIR_CCW  0   // 반시계방향
 
 /* USER CODE END 0 */
-```
 
-```c
+
+만약 CubeMX에서 IN1_Pin, IN1_GPIO_Port 같은 매크로를 이미 생성하게 설정했다면, 위 define는 빼고 CubeMX가 만든 이름을 그대로 쓰셔도 됩니다.
+
+4-2. 한 스텝씩 진행하는 함수들
+// 풀스텝용 패턴 (IN1, IN2, IN3, IN4)
+// OUT1=A+, OUT2=A-, OUT3=B+, OUT4=B- 가정
+static const uint8_t STEP_SEQ_FULL[4][4] = {
+  {1, 0, 1, 0},  // 스텝 0
+  {0, 1, 1, 0},  // 스텝 1
+  {0, 1, 0, 1},  // 스텝 2
+  {1, 0, 0, 1}   // 스텝 3
+};
+
+// 코일 출력을 실제 GPIO에 반영
+static void stepper_write_coils(uint8_t in1, uint8_t in2, uint8_t in3, uint8_t in4)
+{
+  HAL_GPIO_WritePin(IN1_GPIO_Port, IN1_Pin, in1 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(IN2_GPIO_Port, IN2_Pin, in2 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(IN3_GPIO_Port, IN3_Pin, in3 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(IN4_GPIO_Port, IN4_Pin, in4 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+// index 위치의 풀스텝 패턴 적용
+static void stepper_full_step(uint8_t index)
+{
+  uint8_t i = index & 0x03; // 0~3 만큼만 사용
+  stepper_write_coils(
+      STEP_SEQ_FULL[i][0],
+      STEP_SEQ_FULL[i][1],
+      STEP_SEQ_FULL[i][2],
+      STEP_SEQ_FULL[i][3]
+  );
+}
+
+// N 스텝 회전 (dir: DIR_CW / DIR_CCW, step_delay_ms: 스텝 사이 딜레이)
+void stepper_rotate_steps(uint32_t steps, uint8_t dir, uint32_t step_delay_ms)
+{
+  int8_t step_idx = 0;
+
+  for (uint32_t s = 0; s < steps; s++)
+  {
+    stepper_full_step(step_idx);
+
+    if (dir == DIR_CW)
+      step_idx++;
+    else
+      step_idx--;
+
+    if (step_idx > 3) step_idx = 0;
+    if (step_idx < 0) step_idx = 3;
+
+    HAL_Delay(step_delay_ms);
+  }
+
+  // 스텝 완료 후 전류를 빼고 싶으면 모두 LOW
+  stepper_write_coils(0, 0, 0, 0);
+}
+
+4-3. main() 루프 예제
+int main(void)
+{
+  /* MCU Configuration---------------------------------------------*/
+
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+
+  /* USER CODE BEGIN 2 */
+  // 초기에는 코일 OFF
+  stepper_write_coils(0, 0, 0, 0);
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    UserApp_Main();
+  while (1)
+  {
+    // 1회전 = 200 스텝 (1.8도/스텝 기준)
+    uint32_t one_rev_steps = 200;
 
-    uint8_t rx_buffer[1];
+    // 시계방향 1회전 (속도: step당 5ms → 약 10 rev/min)
+    stepper_rotate_steps(one_rev_steps, DIR_CW, 5);
+    HAL_Delay(1000);
 
-    while (1)
-    {
-    /* USER CODE END WHILE */
+    // 반시계방향 1회전
+    stepper_rotate_steps(one_rev_steps, DIR_CCW, 5);
+    HAL_Delay(1000);
 
-    /* USER CODE BEGIN 3 */
+    // 속도를 더 빠르게 하고 싶으면 step_delay_ms를 줄이면 됩니다.
+  }
+  /* USER CODE END WHILE */
+}
 
-      if (HAL_UART_Receive(&huart2, rx_buffer, 1, 10) == HAL_OK) {
-          char received_char = (char)rx_buffer[0];
+4-4. GPIO 초기화 확인 (MX_GPIO_Init)
 
-          if (received_char != '\r' && received_char != '\n') {
-              printf("%c\n", received_char);
-          }
+CubeMX에서 설정했다면 대략 이런 코드가 들어있을 겁니다.
+(없거나 다르면 PA10/PB3/PB4/PB5가 Output으로 설정되었는지만 확인)
 
-          ProcessCommand(received_char);
-          printf("> ");
-      }
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-      HAL_Delay(1);
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
-    }
-  /* USER CODE END 3 */
-```
+  /*Configure GPIO pins : PA10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PB3 PB4 PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+5. 속도 / 방향 / 고급 기능 확장 아이디어
+
+지금 프로젝트는 정해진 속도 · 정/역 한 번씩 도는 기본 구조입니다.
+조금만 확장하면:
+
+User Button (PC13) 으로 방향 토글
+
+TIM2 / TIM3 Interrupt 로 step 타이머 구성 → HAL_Delay 없이 non-blocking 스텝 구동
+
+UART 명령(예: “S1000 D1 R200”)으로 속도/방향/스텝 수 제어
+
+PWM으로 ENA/ENB 제어 → 간단한 전류/토크 제어 흉내 (duty 조절)
+
+6. 전류/발열 관련 꼭 체크
+
+17HS3430의 정격 전류/저항을 보면, 사실상 **저전압+전류제어 드라이버(A4988, DRV8825, TMC 계열)**를 쓰는 게 정석입니다.
+makershop.co.nz
++1
+
+L298N으로 장시간 고토크 구동하면:
+
+모터 과열
+
+L298N 자체 발열 심함
+
+처음에는
+
+공급 전압을 6~9V 정도로 낮게,
+
+duty(혹은 step 주기)를 크게 해서
+
+모터가 많이 뜨거워지지 않는지 손으로 자주 확인하면서 테스트하는 걸 추천합니다.
