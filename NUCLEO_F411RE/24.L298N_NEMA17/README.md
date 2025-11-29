@@ -83,6 +83,8 @@ GND	GND	GND	-	공통 GND 필수
    * (특히 MX_GPIO_Init()은 CubeMX가 만들어준 그대로 두고, 그 위/아래에 함수만 추가)
 
 ### 4-1. pin 매크로 정의 (main.c 상단 부분)
+
+```c
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 
@@ -112,11 +114,13 @@ GND	GND	GND	-	공통 GND 필수
 #define DIR_CCW  0   // 반시계방향
 
 /* USER CODE END 0 */
+```
 
+   * 만약 CubeMX에서 IN1_Pin, IN1_GPIO_Port 같은 매크로를 이미 생성하게 설정했다면, 위 define는 빼고 CubeMX가 만든 이름을 그대로 쓰셔도 됩니다.
 
-만약 CubeMX에서 IN1_Pin, IN1_GPIO_Port 같은 매크로를 이미 생성하게 설정했다면, 위 define는 빼고 CubeMX가 만든 이름을 그대로 쓰셔도 됩니다.
+### 4-2. 한 스텝씩 진행하는 함수들
 
-4-2. 한 스텝씩 진행하는 함수들
+```c
 // 풀스텝용 패턴 (IN1, IN2, IN3, IN4)
 // OUT1=A+, OUT2=A-, OUT3=B+, OUT4=B- 가정
 static const uint8_t STEP_SEQ_FULL[4][4] = {
@@ -170,8 +174,11 @@ void stepper_rotate_steps(uint32_t steps, uint8_t dir, uint32_t step_delay_ms)
   // 스텝 완료 후 전류를 빼고 싶으면 모두 LOW
   stepper_write_coils(0, 0, 0, 0);
 }
+```
 
-4-3. main() 루프 예제
+### 4-3. main() 루프 예제
+
+```c
 int main(void)
 {
   /* MCU Configuration---------------------------------------------*/
@@ -204,12 +211,14 @@ int main(void)
   }
   /* USER CODE END WHILE */
 }
+```
 
-4-4. GPIO 초기화 확인 (MX_GPIO_Init)
+### 4-4. GPIO 초기화 확인 (MX_GPIO_Init)
 
-CubeMX에서 설정했다면 대략 이런 코드가 들어있을 겁니다.
-(없거나 다르면 PA10/PB3/PB4/PB5가 Output으로 설정되었는지만 확인)
+   * CubeMX에서 설정했다면 대략 이런 코드가 들어있을 겁니다.
+   * (없거나 다르면 PA10/PB3/PB4/PB5가 Output으로 설정되었는지만 확인)
 
+```c
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -232,8 +241,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
+```
 
-5. 속도 / 방향 / 고급 기능 확장 아이디어
+## 5. 속도 / 방향 / 고급 기능 확장 아이디어
 
 지금 프로젝트는 정해진 속도 · 정/역 한 번씩 도는 기본 구조입니다.
 조금만 확장하면:
