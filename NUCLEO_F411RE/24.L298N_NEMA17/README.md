@@ -18,8 +18,8 @@
    * (실사용은 A4988/TMC 계열 전류제어 드라이버 권장)
 
 
-<img width="300" height="250" alt="1278835" src="https://github.com/user-attachments/assets/941b6745-785e-4424-b2bf-f61838438c17" />
-<img width="360" height="300" alt="img" src="https://github.com/user-attachments/assets/aee2114e-fcc7-4dd0-a459-f0a9e98015dd" />
+<img width="400" height="250" alt="1278835" src="https://github.com/user-attachments/assets/941b6745-785e-4424-b2bf-f61838438c17" />
+<img width="450" height="300" alt="img" src="https://github.com/user-attachments/assets/aee2114e-fcc7-4dd0-a459-f0a9e98015dd" />
 <br>
 <img width="500" height="218" alt="17HS3430-Stepper-motor" src="https://github.com/user-attachments/assets/7ce92906-b200-4607-9f1a-201ffe36899b" />
 <br>
