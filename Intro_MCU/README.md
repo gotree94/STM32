@@ -348,6 +348,12 @@
 - Grand View Research - MCU Market Analysis
 - Precedence Research - MCU Market Size
 
+### 비트별 시장 점유율
+- 8비트와 32비트 MCU가 시장의 주류로, 각각 38%와 44%를 차지합니다.
+  https://www.hardfindelec.com/a/76030.html
+- 32비트 세그먼트가 2023년 기준 50% 이상의 매출 점유율을 기록하며 시장을 주도하고 있습니다.
+  https://www.grandviewresearch.com/industry-analysis/microcontroller-market
+
 ---
 
 ## 📝 라이선스
