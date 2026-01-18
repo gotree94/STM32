@@ -47,7 +47,7 @@
 
 <img width="600" height="600" alt="Vector_eyes_i2c" src="https://github.com/user-attachments/assets/1ae23ead-18a3-42db-9aa8-1aeb8c7b910b" />
 
-![LCD2-I2C](https://github.com/user-attachments/assets/0db133eb-f22b-4fc4-b455-8bbb33c05f58)
+![LCD2-I2C](https://github.com/user-attachments/assets/23b93b8c-650a-4a46-9b13-841880512bde)
 
 
 ---
