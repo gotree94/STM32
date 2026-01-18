@@ -2,6 +2,8 @@
 
 NUCLEO-F103RB 보드를 이용한 다양한 LED 모듈 테스트 프로젝트 모음입니다.
 
+<img width="797" height="515" alt="016" src="https://github.com/user-attachments/assets/9171c78e-659c-459f-9610-1c25bbe0b4fc" />
+
 ## 📋 프로젝트 목록
 
 | No. | 모듈명 | 설명 | 핀 연결 |
