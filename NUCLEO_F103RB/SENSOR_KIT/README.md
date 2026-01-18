@@ -690,6 +690,213 @@ stm32_sensors/
 
 ---
 
+# STM32F103 센서 모듈 테스트 프로젝트
+
+NUCLEO-F103RB 보드를 사용한 다양한 센서 모듈 테스트 코드 모음입니다.
+
+## 📋 프로젝트 개요
+
+이 저장소는 STM32F103 마이크로컨트롤러를 사용하여 다양한 센서 모듈을 테스트하고 학습하기 위한 예제 코드를 제공합니다. 각 센서별로 독립적인 프로젝트로 구성되어 있어 필요한 부분만 선택적으로 활용할 수 있습니다.
+
+## 🔧 개발 환경
+
+| 항목 | 사양 |
+|------|------|
+| 보드 | NUCLEO-F103RB |
+| MCU | STM32F103RBT6 (Cortex-M3, 72MHz) |
+| IDE | STM32CubeIDE 1.13+ |
+| Library | STM32 HAL Driver |
+| Debugger | ST-Link V2-1 (온보드) |
+
+## 📁 프로젝트 구조
+
+```
+stm32_sensors/
+├── README.md                    # 이 파일
+├── 01_magic_light/              # 매직 라이트컴 모듈
+│   ├── main.c
+│   └── README.md
+├── 02_angle_switch/             # 각도 스위치 모듈
+│   ├── main.c
+│   └── README.md
+├── 03_ball_switch/              # 볼 스위치 모듈
+│   ├── main.c
+│   └── README.md
+├── 04_light_sensor/             # 조도 센서 모듈
+│   ├── main.c
+│   └── README.md
+└── 05_analog_hall/              # 아날로그 홀센서 모듈
+    ├── main.c
+    └── README.md
+```
+
+## 📚 센서 모듈 요약
+
+| # | 센서 | 모델 | 출력 타입 | 인터페이스 | 주요 기능 |
+|---|------|------|----------|-----------|----------|
+| 21 | 매직 라이트컴 | KY-027 | 디지털 | GPIO + PWM | 기울기 감지 + LED 페이드 |
+| 22 | 각도 스위치 | KY-020 | 디지털 | EXTI | 기울기 ON/OFF 감지 |
+| 23 | 볼 스위치 | KY-002 | 디지털 | EXTI | 진동/충격 감지 |
+| 24 | 조도 센서 | KY-018 | 아날로그 | ADC + DMA | 밝기 측정 |
+| 25 | 아날로그 홀센서 | KY-035 | 아날로그 | ADC + DMA | 자기장 극성/강도 측정 |
+
+## 🔌 공통 핀 배치
+
+```
+NUCLEO-F103RB 핀 할당
+═══════════════════════════════════════
+
+센서 입력:
+  PA0 ─────► 센서 Signal (ADC/GPIO)
+
+통신:
+  PA2 ─────► USART2_TX (ST-Link VCP)
+  PA3 ─────► USART2_RX (ST-Link VCP)
+
+출력:
+  PA5 ─────► 보드 내장 LED (LD2)
+  PA6 ─────► PWM 출력 (TIM3_CH1)
+
+전원:
+  3.3V ────► 센서 VCC
+  GND ─────► 센서 GND
+```
+
+## 🚀 빠른 시작
+
+### 1. 저장소 클론
+
+```bash
+git clone https://github.com/your-username/stm32_sensors.git
+cd stm32_sensors
+```
+
+### 2. STM32CubeIDE에서 프로젝트 생성
+
+1. **File → New → STM32 Project** 선택
+2. **Board Selector** 탭에서 `NUCLEO-F103RB` 선택
+3. 프로젝트 이름 입력 후 **Finish**
+4. 생성된 `main.c`에 원하는 센서 폴더의 `main.c` 내용 복사
+
+### 3. 빌드 및 다운로드
+
+1. **Project → Build All** (Ctrl+B)
+2. **Run → Debug** (F11) 또는 **Run → Run** (Ctrl+F11)
+
+### 4. 시리얼 모니터 연결
+
+```bash
+# Linux/Mac
+screen /dev/ttyACM0 115200
+
+# Windows: PuTTY 또는 Tera Term 사용
+# - COM 포트 확인 (장치 관리자)
+# - 속도: 115200 bps
+```
+
+## 📊 센서별 특징
+
+### 01. 매직 라이트컴 모듈 (KY-027)
+
+수은 기울기 스위치와 LED가 결합된 모듈. 기울임에 따라 부드럽게 LED 밝기가 변화합니다.
+
+```
+특징: GPIO 입력 + PWM 출력
+용도: 인터랙티브 조명, 레벨 표시기
+```
+
+### 02. 각도 스위치 모듈 (KY-020)
+
+금속 볼 기반 기울기 스위치. 특정 각도 이상 기울면 ON 상태가 됩니다.
+
+```
+특징: 외부 인터럽트 + 디바운싱
+용도: 자세 감지, 도난 방지
+```
+
+### 03. 볼 스위치 모듈 (KY-002)
+
+진동/충격에 반응하는 순간 접촉 스위치. 짧은 펄스 신호를 생성합니다.
+
+```
+특징: 외부 인터럽트 + 강도 추정
+용도: 노크 감지, 충격 모니터링
+```
+
+### 04. 조도 센서 모듈 (KY-018)
+
+CdS 광저항(LDR)을 이용한 밝기 측정. 빛이 밝으면 저항이 낮아집니다.
+
+```
+특징: ADC + DMA + 평균 필터
+용도: 자동 조명, 광량 모니터링
+```
+
+### 05. 아날로그 홀센서 모듈 (KY-035)
+
+49E 선형 홀센서로 자기장의 세기와 극성을 측정합니다.
+
+```
+특징: ADC + DMA + 영점 보정 + 극성 감지
+용도: 비접촉 위치 감지, RPM 측정
+```
+
+## 🛠️ 공통 기능 코드
+
+### UART printf 리다이렉트
+
+```c
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+```
+
+### 시스템 클럭 설정 (72MHz)
+
+```c
+/* HSE 8MHz → PLL → 72MHz SYSCLK */
+RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+```
+
+### ADC DMA 설정
+
+```c
+/* ADC1 Channel 0 (PA0), 12-bit, DMA 연속 전송 */
+HAL_ADC_Start_DMA(&hadc1, (uint32_t*)buffer, size);
+```
+
+## 📌 트러블슈팅
+
+### 시리얼 출력이 안 보임
+
+1. ST-Link 드라이버 설치 확인
+2. COM 포트 번호 확인 (장치 관리자)
+3. 보드 리셋 후 재시도
+4. 다른 터미널 프로그램 시도
+
+### ADC 값이 불안정함
+
+1. 전원 노이즈 확인 (100nF 디커플링 커패시터 추가)
+2. 샘플링 시간 증가 (`ADC_SAMPLETIME_239CYCLES_5`)
+3. 평균 필터 샘플 수 증가
+
+### 인터럽트가 동작하지 않음
+
+1. NVIC 인터럽트 활성화 확인
+2. AFIO 클럭 활성화 확인
+3. 인터럽트 핸들러 함수명 확인
+
+## 🤝 기여
+
+이슈 리포트, 기능 제안, Pull Request를 환영합니다!
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingSensor`)
+3. Commit your changes (`git commit -m 'Add some AmazingSensor'`)
+4. Push to the branch (`git push origin feature/AmazingSensor`)
+5. Open a Pull Request
+
 
 
 
