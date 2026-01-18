@@ -532,8 +532,159 @@ sConfig.Channel = ADC_CHANNEL_X;   // 해당 ADC 채널
 
 ---
 
+# STM32F103 Sensor Module Test Projects
 
+## 📌 개요
 
+NUCLEO-F103RB 보드를 이용한 다양한 센서 모듈 테스트 프로젝트 모음입니다. 각 센서별로 독립적인 테스트 코드와 상세한 문서를 제공합니다.
+
+## 🎯 프로젝트 목록
+
+| No | 센서 | 디렉토리 | 설명 |
+|----|------|----------|------|
+| 16 | 미니 리드 모듈 | `mini_reed/` | 자석 감지 (문/창문 열림 감지) |
+| 17 | 심박 센서 모듈 | `heartbeat/` | 심박수 측정 (BPM 계산) |
+| 18 | 레이저 모듈 | `laser/` | 레이저 제어 (PWM, SOS 등) |
+| 19 | 버튼 스위치 모듈 | `button_switch/` | 다양한 버튼 이벤트 감지 |
+| 20 | 충격 센서 모듈 | `shock_sensor/` | 충격/진동 감지 |
+
+## 📂 프로젝트 구조
+
+```
+stm32_sensors/
+├── README.md                 # 이 파일
+├── mini_reed/
+│   ├── main.c               # 미니 리드 모듈 소스
+│   └── README.md
+├── heartbeat/
+│   ├── main.c               # 심박 센서 모듈 소스
+│   └── README.md
+├── laser/
+│   ├── main.c               # 레이저 모듈 소스
+│   └── README.md
+├── button_switch/
+│   ├── main.c               # 버튼 스위치 모듈 소스
+│   └── README.md
+└── shock_sensor/
+    ├── main.c               # 충격 센서 모듈 소스
+    └── README.md
+```
+
+## 🔧 공통 하드웨어
+
+### 개발 보드
+- **NUCLEO-F103RB** (STM32F103RBT6)
+- 72MHz Cortex-M3
+- 128KB Flash, 20KB SRAM
+
+### 공통 핀 배치
+
+| 기능 | 핀 | 설명 |
+|------|-----|------|
+| User LED | PA5 | 내장 LED |
+| User Button | PC13 | 내장 버튼 |
+| UART TX | PA2 | USART2 TX (ST-Link VCP) |
+| UART RX | PA3 | USART2 RX (ST-Link VCP) |
+
+### 센서별 핀 배치 요약
+
+| 센서 | 신호 핀 | 추가 핀 |
+|------|---------|---------|
+| Mini Reed | PA0 (Digital) | - |
+| Heartbeat | PA0 (ADC) | - |
+| Laser | PA0 (PWM) | - |
+| Button Switch | PA0 (Digital) | - |
+| Shock Sensor | PA0 (Digital) | PA1 (ADC) |
+
+## 🚀 빠른 시작
+
+### 1. 개발 환경 설정
+
+1. **STM32CubeIDE 설치**
+   - [STM32CubeIDE 다운로드](https://www.st.com/en/development-tools/stm32cubeide.html)
+
+2. **새 프로젝트 생성**
+   ```
+   File → New → STM32 Project
+   Board Selector → NUCLEO-F103RB
+   ```
+
+3. **CubeMX 설정**
+   - 각 센서 README.md의 핀 설정 참조
+
+### 2. 코드 적용
+
+1. 원하는 센서 디렉토리의 `main.c` 열기
+2. 생성된 프로젝트의 `main.c`에 코드 복사
+3. 빌드 및 다운로드
+
+### 3. 시리얼 모니터 연결
+
+- **Baud Rate**: 115200
+- **Data Bits**: 8
+- **Stop Bits**: 1
+- **Parity**: None
+
+## 📊 센서별 기능 요약
+
+### 1. 미니 리드 모듈 (Mini Reed)
+```
+기능: 자석 감지
+출력: Digital (HIGH/LOW)
+응용: 도어 센서, 위치 감지
+특징: 폴링 방식, 디바운싱 처리
+```
+
+### 2. 심박 센서 모듈 (Heartbeat)
+```
+기능: 심박수 측정
+출력: Analog (ADC)
+응용: 건강 모니터링
+특징: BPM 계산, 피크 감지 알고리즘
+```
+
+### 3. 레이저 모듈 (Laser)
+```
+기능: 레이저 제어
+출력: PWM (밝기 조절)
+응용: 포인터, 거리 측정
+특징: 다중 모드 (ON/BLINK/PWM/SOS)
+```
+
+### 4. 버튼 스위치 모듈 (Button Switch)
+```
+기능: 버튼 이벤트 감지
+출력: Digital
+응용: UI 입력
+특징: 짧은/긴 누름, 더블 클릭 감지
+```
+
+### 5. 충격 센서 모듈 (Shock Sensor)
+```
+기능: 충격/진동 감지
+출력: Digital + Analog
+응용: 보안, 물류
+특징: 강도 측정, 통계 제공
+```
+
+## 🛠️ 공통 트러블슈팅
+
+| 문제 | 원인 | 해결 방법 |
+|------|------|----------|
+| 컴파일 오류 | HAL 라이브러리 누락 | CubeMX에서 HAL 생성 확인 |
+| 다운로드 실패 | ST-Link 연결 | USB 연결 및 드라이버 확인 |
+| UART 출력 없음 | Baud rate 불일치 | 115200 설정 확인 |
+| 센서 무반응 | 전원 문제 | 3.3V/5V 확인 |
+
+## 📚 참고 자료
+
+### STM32 문서
+- [STM32F103 Datasheet](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
+- [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
+
+### HAL 라이브러리
+- [STM32F1 HAL Description](https://www.st.com/resource/en/user_manual/um1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf)
 
 
 
