@@ -1050,6 +1050,112 @@ LDR(광저항)로 주변 밝기를 측정합니다.
 
 ---
 
+# STM32 IR Sensor Projects (Arduino)
+
+NUCLEO-F103RB 보드를 이용한 IR(적외선) 센서 Arduino 프로젝트 모음
+
+## 프로젝트 목록
+
+| 프로젝트 | 설명 | 난이도 |
+|----------|------|--------|
+| [01_IR_Transmitter](./01_IR_Transmitter) | IR LED를 이용한 38kHz NEC 신호 송신 | ⭐⭐ |
+| [02_IR_Receiver](./02_IR_Receiver) | IR 수신 모듈 기본 테스트 (펄스 측정) | ⭐ |
+| [03_IR_Remote_Decoder](./03_IR_Remote_Decoder) | IR 리모컨 NEC 프로토콜 디코딩 | ⭐⭐⭐ |
+
+## 하드웨어 요구사항
+
+### 필수
+- NUCLEO-F103RB 개발보드
+- USB 케이블 (Mini-B)
+- 브레드보드 및 점퍼 와이어
+
+### IR 송신용
+- IR LED (940nm)
+- 100Ω 저항
+- (선택) 2N2222 트랜지스터 + 1kΩ 저항
+
+### IR 수신용
+- IR 수신 모듈 (TSOP1838, VS1838B 등)
+- IR 리모컨 (NEC 프로토콜)
+
+## 전체 핀 배치
+
+```
+           NUCLEO-F103RB
+          ┌─────────────┐
+          │             │
+[IR LED]──│ PA8 (D7)    │ ← 38kHz PWM 출력
+          │             │
+[IR RX] ──│ PA0 (A0)    │ ← IR 수신 입력
+          │             │
+[LED]   ──│ PA5 (D13)   │ ← 내장 LED
+          │             │
+[BTN]   ──│ PC13        │ ← 내장 버튼
+          │             │
+[USB]   ──│ PA2/PA3     │ ← UART2 (Virtual COM)
+          │             │
+          │     GND     │─── GND
+          │    3.3V     │─── VCC
+          └─────────────┘
+```
+
+## Arduino IDE 설정
+
+### 1. STM32 보드 패키지 설치
+
+File → Preferences → Additional Boards Manager URLs에 추가:
+```
+https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+```
+
+Tools → Board → Boards Manager → "STM32" 검색 후 설치
+
+### 2. 보드 선택
+
+- Board: **Nucleo-64**
+- Board part number: **Nucleo F103RB**
+- Upload method: **STM32CubeProgrammer (SWD)**
+
+### 3. 시리얼 모니터 설정
+
+- Baud Rate: **115200**
+- Line ending: **Both NL & CR**
+
+## 빠른 시작
+
+```bash
+# 1. 저장소 클론
+git clone https://github.com/your-username/stm32-ir-arduino.git
+
+# 2. Arduino IDE에서 .ino 파일 열기
+# 3. 보드 및 포트 선택
+# 4. 업로드 (Ctrl+U)
+# 5. 시리얼 모니터 열기 (Ctrl+Shift+M)
+```
+
+## NEC 프로토콜 요약
+
+```
+프레임: [Leader 9ms][Space 4.5ms][32-bit Data][Stop]
+
+Data: [Address 8-bit][~Address 8-bit][Command 8-bit][~Command 8-bit]
+
+Bit 0: 560us pulse + 560us space
+Bit 1: 560us pulse + 1690us space
+
+Repeat: 9ms pulse + 2.25ms space + Stop bit
+```
+
+## 참고 자료
+
+- [NEC Protocol](https://www.sbprojects.net/knowledge/ir/nec.php)
+- [STM32duino Wiki](https://github.com/stm32duino/wiki/wiki)
+- [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724.pdf)
+
+
+---
+
+
 
 
 
