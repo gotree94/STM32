@@ -161,14 +161,207 @@ int main(void) {
 - [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 - [STM32CubeF1 HAL Documentation](https://www.st.com/resource/en/user_manual/um1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf)
 
-## 📜 라이선스
+---
 
-MIT License
+# STM32F103 NUCLEO 센서 테스트 프로젝트
 
-Copyright (c) 2024
+STM32F103 NUCLEO 보드를 이용한 다양한 센서 모듈 테스트 예제 모음입니다.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## 프로젝트 구조
+
+```
+stm32_sensors/
+├── README.md                    # 이 파일
+├── 01_Relay/                    # 릴레이 모듈
+│   ├── main.c
+│   └── README.md
+├── 02_Sound_Sensor_High/        # 고감도 소리센서 모듈
+│   ├── main.c
+│   └── README.md
+├── 03_Sound_Sensor_Small/       # 소형 소리센서 모듈
+│   ├── main.c
+│   └── README.md
+├── 04_Tracking_Module/          # 라인 트래킹 모듈
+│   ├── main.c
+│   └── README.md
+└── 05_Obstacle_Sensor/          # 장애물 감지센서 모듈
+    ├── main.c
+    └── README.md
+```
+
+## 센서 모듈 요약
+
+| # | 센서 | 출력 타입 | 주요 핀 | 용도 |
+|---|------|----------|---------|------|
+| 01 | 릴레이 | Digital Out | PA5 | AC/DC 부하 제어 |
+| 02 | 고감도 소리센서 | Analog + Digital | PA0(AO), PA1(DO) | 소리 크기 측정 |
+| 03 | 소형 소리센서 | Digital | PA0 (EXTI) | 소리 감지 |
+| 04 | 트래킹 모듈 | Digital x3 | PA0, PA1, PA4 | 라인 추적 |
+| 05 | 장애물 감지센서 | Digital x2 | PA0, PA1 | 장애물 감지 |
+
+## 공통 하드웨어 요구사항
+
+### 필수 장비
+- STM32F103 NUCLEO 보드 (NUCLEO-F103RB)
+- USB 케이블 (Mini-B 또는 보드에 맞는 타입)
+- 점퍼 와이어 (M-F 타입)
+- 브레드보드 (옵션)
+
+### 개발 환경
+- STM32CubeIDE (권장)
+- STM32CubeMX (핀 설정용)
+- 시리얼 터미널 (PuTTY, Tera Term 등)
+
+## 공통 핀 배치
+
+```
+NUCLEO-F103RB 핀 맵 (주요 사용 핀)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        CN7                          CN10
+    ┌─────────┐                  ┌─────────┐
+    │ PC10  1 │                  │ D10   1 │
+    │ PC12  2 │                  │ D2    2 │
+    │  VDD  3 │                  │ D3    3 │
+    │ BOOT0 4 │                  │ D4    4 │
+    │   NC  5 │                  │ D5    5 │
+    │   NC  6 │                  │ D6    6 │
+    │ PA13  7 │                  │ D7    7 │
+    │ PA14  8 │                  │ D8    8 │
+    │ PA15  9 │                  │ D9    9 │
+    │  GND 10 │                  │ D10  10 │
+    │ PB7  11 │                  │ PA5* 11 │ ← LED / 릴레이
+    │ PC13 12 │ ← User Button   │ PA6  12 │
+    │ PC14 13 │                  │ PA7  13 │
+    │ PC15 14 │                  │ PB6  14 │
+    │ PH0  15 │                  │ PC7  15 │
+    │ PH1  16 │                  │ PA9  16 │
+    │ VBAT 17 │                  │ PA8  17 │
+    │ PC2  18 │                  │ PB10 18 │
+    │ PC3  19 │                  │ PB4  19 │
+    │  ... .. │                  │ PB5  20 │
+    └─────────┘                  └─────────┘
+
+        CN8                          CN9
+    ┌─────────┐                  ┌─────────┐
+    │ PA0* 28 │ ← ADC/센서1      │ PA1* 30 │ ← 센서2
+    │ PA4* 32 │ ← 센서3          │ PB0  34 │
+    │  ... .. │                  │  ... .. │
+    └─────────┘                  └─────────┘
+
+* 주로 사용하는 핀
+```
+
+## UART 설정 (공통)
+
+모든 프로젝트는 USART2를 통해 디버그 메시지를 출력합니다.
+
+| 설정 | 값 |
+|------|-----|
+| Baud Rate | 115200 |
+| Data Bits | 8 |
+| Stop Bits | 1 |
+| Parity | None |
+| Flow Control | None |
+
+NUCLEO 보드는 ST-LINK의 Virtual COM Port를 통해 PC와 통신합니다.
+
+## 빠른 시작 가이드
+
+### 1. 프로젝트 생성
+
+```
+STM32CubeIDE:
+File → New → STM32 Project
+Board Selector → NUCLEO-F103RB → Next
+프로젝트 이름 입력 → Finish
+```
+
+### 2. 핀 설정 (CubeMX)
+
+각 센서별 README.md의 CubeMX 설정 참조
+
+### 3. 코드 복사
+
+각 폴더의 `main.c` 내용을 프로젝트의 `main.c`에 복사
+
+### 4. 빌드 및 업로드
+
+```
+Project → Build All (Ctrl+B)
+Run → Debug (F11) 또는 Run (Ctrl+F11)
+```
+
+### 5. 시리얼 모니터 연결
+
+```
+PuTTY / Tera Term 설정:
+- Port: COMx (장치관리자에서 확인)
+- Speed: 115200
+```
+
+## 센서별 Quick Reference
+
+### 01. 릴레이 모듈
+```c
+// ON/OFF 제어
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);   // ON
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); // OFF
+```
+
+### 02. 고감도 소리센서
+```c
+// ADC 읽기
+uint16_t sound_level = HAL_ADC_GetValue(&hadc1);  // 0-4095
+
+// 디지털 출력 읽기
+uint8_t detected = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);  // 0=감지
+```
+
+### 03. 소형 소리센서
+```c
+// 인터럽트 콜백
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == GPIO_PIN_0) {
+        // 소리 감지됨!
+    }
+}
+```
+
+### 04. 트래킹 모듈
+```c
+// 3채널 읽기
+uint8_t left   = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);  // 0=라인
+uint8_t center = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+uint8_t right  = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4);
+```
+
+### 05. 장애물 감지센서
+```c
+// 장애물 감지 확인
+uint8_t obstacle = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);  // 0=장애물
+```
+
+## 트러블슈팅 공통 사항
+
+| 증상 | 원인 | 해결방법 |
+|------|------|----------|
+| 시리얼 출력 없음 | UART 미초기화 | CubeMX에서 USART2 활성화 |
+| 센서 무반응 | 전원 문제 | VCC/GND 연결 확인 |
+| 불안정한 값 | 노이즈 | 디커플링 캐패시터 추가 |
+| 업로드 실패 | ST-LINK 드라이버 | ST-LINK 드라이버 재설치 |
+
+## 확장 아이디어
+
+1. **스마트 홈**: 릴레이 + 소리센서 → 박수로 조명 제어
+2. **라인트레이서**: 트래킹 모듈 + 모터 드라이버
+3. **장애물 회피 로봇**: 장애물 센서 + 서보모터
+4. **소음 모니터**: 소리센서 + OLED 디스플레이
+
+## 참고 자료
+
+- [STM32F103 Reference Manual (RM0008)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [NUCLEO-F103RB User Manual (UM1724)](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
+- [STM32CubeIDE User Guide](https://www.st.com/resource/en/user_manual/um2609-stm32cubeide-user-guide-stmicroelectronics.pdf)
+
 copies of the Software.
