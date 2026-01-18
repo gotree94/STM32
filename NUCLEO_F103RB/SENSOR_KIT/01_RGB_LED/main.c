@@ -233,7 +233,7 @@ static void MX_TIM2_Init(void)
     __HAL_RCC_TIM2_CLK_ENABLE();
     
     htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 71;              // 72MHz / 72 = 1MHz
+    htim2.Init.Prescaler = 63;              // 64MHz / 64 = 1MHz
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim2.Init.Period = PWM_PERIOD;         // 1MHz / 1000 = 1kHz PWM
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
