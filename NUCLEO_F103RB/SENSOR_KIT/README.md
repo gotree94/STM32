@@ -897,14 +897,187 @@ HAL_ADC_Start_DMA(&hadc1, (uint32_t*)buffer, size);
 4. Push to the branch (`git push origin feature/AmazingSensor`)
 5. Open a Pull Request
 
-
-
-
-
-
 ---
 
+# STM32F103 Sensor Module Test Collection
 
+NUCLEO-F103RB 보드를 이용한 다양한 센서 모듈 테스트 프로젝트 모음
+
+## 📌 프로젝트 개요
+
+STM32F103 마이크로컨트롤러를 이용하여 다양한 센서 모듈을 테스트하는 예제 코드 모음입니다. 각 센서별로 독립적인 프로젝트로 구성되어 있으며, HAL 라이브러리 기반으로 작성되었습니다.
+
+## 📂 프로젝트 구조
+
+```
+stm32_sensors/
+├── README.md                    # 이 파일
+├── 01_Hall_Magnetic/            # 홀 마그네틱 센서
+│   ├── main.c
+│   └── README.md
+├── 02_Temperature_Sensor/       # 온도 센서 (NTC/LM35)
+│   ├── main.c
+│   └── README.md
+├── 03_Analog_Light_Sensor/      # 아날로그 광센서 (LDR)
+│   ├── main.c
+│   └── README.md
+├── 04_Knock_Sensor/             # 노크(진동) 센서
+│   ├── main.c
+│   └── README.md
+└── 05_Photo_Interrupter/        # 포토 인터럽터
+    ├── main.c
+    └── README.md
+```
+
+## 🔧 공통 하드웨어
+
+### 개발 보드
+- **NUCLEO-F103RB**: STM32F103RBT6 탑재 (64KB Flash, 20KB RAM)
+- 온보드 ST-Link/V2 디버거
+- Virtual COM Port (USART2)
+
+### 공통 핀 배치
+| 기능 | 핀 | 설명 |
+|------|-----|------|
+| Sensor Input | PA0 | 센서 신호 입력 (ADC/GPIO) |
+| LED | PA5 | 온보드 LED (LD2) |
+| UART TX | PA2 | ST-Link Virtual COM |
+| UART RX | PA3 | ST-Link Virtual COM |
+
+## 📊 센서 모듈 요약
+
+| # | 센서 | 입력 타입 | 주요 기능 |
+|---|------|----------|----------|
+| 26 | Hall Magnetic | Digital | 자석 감지, 회전 감지 |
+| 27 | Temperature | Analog (ADC) | 온도 측정, 알람 |
+| 28 | Light Sensor | Analog (ADC) | 조도 측정, 자동 조명 |
+| 29 | Knock Sensor | Digital (EXTI) | 진동 감지, 패턴 인식 |
+| 30 | Photo Interrupter | Digital (EXTI) | 물체 감지, RPM 측정 |
+
+## 💻 개발 환경
+
+### 필수 소프트웨어
+- **STM32CubeIDE** 1.10.0 이상
+- **STM32CubeMX** (선택, 프로젝트 설정용)
+- **ST-Link Driver**
+
+### 시리얼 터미널
+- PuTTY, Tera Term, 또는 Arduino Serial Monitor
+- 설정: 115200 baud, 8N1
+
+## 🚀 빠른 시작
+
+### 1. 프로젝트 생성
+
+STM32CubeIDE에서 새 프로젝트를 생성합니다:
+1. File → New → STM32 Project
+2. Board Selector에서 "NUCLEO-F103RB" 선택
+3. 프로젝트 이름 입력 후 Finish
+
+### 2. 코드 복사
+
+원하는 센서의 `main.c` 내용을 프로젝트의 `Core/Src/main.c`에 복사합니다.
+
+### 3. 빌드 및 실행
+
+```bash
+1. Project → Build All (Ctrl+B)
+2. Run → Run As → STM32 Application
+3. 시리얼 터미널로 출력 확인
+```
+
+### 4. 하드웨어 연결
+
+각 센서 폴더의 README.md에서 핀 연결 정보를 확인합니다.
+
+## 📋 센서별 세부 정보
+
+### 01. Hall Magnetic Sensor (홀 마그네틱)
+- **모듈**: KY-003 또는 호환
+- **원리**: 홀 효과를 이용한 자기장 감지
+- **응용**: 도어 센서, RPM 측정, 위치 감지
+
+### 02. Temperature Sensor (온도 센서)
+- **모듈**: KY-013 (NTC) 또는 LM35
+- **원리**: 서미스터 저항 변화 / 전압 출력
+- **응용**: 환경 모니터링, 온도 알람
+
+### 03. Analog Light Sensor (광센서)
+- **모듈**: KY-018 (LDR/CdS)
+- **원리**: 광저항의 저항 변화
+- **응용**: 자동 조명, 주야간 감지
+
+### 04. Knock Sensor (노크 센서)
+- **모듈**: KY-031 (압전 소자)
+- **원리**: 진동에 의한 전압 발생
+- **응용**: 진동 감지, 비밀 노크 잠금
+
+### 05. Photo Interrupter (포토 인터럽터)
+- **모듈**: KY-010 (슬롯형)
+- **원리**: 적외선 빛의 차단/통과 감지
+- **응용**: 엔코더, 카운터, 속도 측정
+
+## ⚙️ 공통 코드 설명
+
+### 시스템 클럭 설정 (64MHz)
+```c
+void SystemClock_Config(void)
+{
+    // HSI 8MHz -> PLL x16 -> 64MHz SYSCLK
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+    // APB1: 32MHz (최대), APB2: 64MHz
+}
+```
+
+### UART printf 리다이렉션
+```c
+#ifdef __GNUC__
+int __io_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+#endif
+```
+
+### ADC 캘리브레이션
+```c
+HAL_ADCEx_Calibration_Start(&hadc1);  // 정확도 향상
+```
+
+## 🔌 커넥터 핀맵 (NUCLEO-F103RB)
+
+### CN8 (Arduino Analog)
+```
+Pin  Function    Sensor Use
+---  --------    ----------
+1    PA0 (A0)    Sensor Input
+2    PA1 (A1)    -
+3    PA4 (A2)    -
+4    PB0 (A3)    -
+5    PC1 (A4)    -
+6    PC0 (A5)    -
+```
+
+### CN9 (Arduino Digital)
+```
+Pin  Function    Use
+---  --------    ---
+1    PC7 (D9)    -
+2    PA9 (D8)    -
+...
+```
+
+## 📚 참고 자료
+
+### 공식 문서
+- [STM32F103 Reference Manual (RM0008)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [STM32F103 Datasheet](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
+- [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
+
+### HAL 라이브러리
+- [STM32F1 HAL Driver Documentation](https://www.st.com/resource/en/user_manual/um1850-description-of-stm32f1-hal-and-lowlayer-drivers-stmicroelectronics.pdf)
 
 
 ---
