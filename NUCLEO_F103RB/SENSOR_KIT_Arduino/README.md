@@ -4,8 +4,6 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 
 <img width="797" height="515" alt="016" src="https://github.com/user-attachments/assets/c1b7755b-5fee-49ca-80ca-d538b5927ad6" />
 
-
-
 ## 📋 목차
 
 - [개발 환경 설정](#개발-환경-설정)
@@ -20,6 +18,16 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 
 1. [Arduino IDE 다운로드](https://www.arduino.cc/en/software)에서 최신 버전 설치
 2. Arduino IDE 2.x 버전 권장
+
+<img width="816" height="808" alt="001" src="https://github.com/user-attachments/assets/218e7e99-26bd-41c4-8563-78e9e007d216" /> <br>
+<img width="581" height="360" alt="002" src="https://github.com/user-attachments/assets/1b187be9-9a95-4a1b-90b2-d95fbcad96b4" /> <br>
+<img width="581" height="360" alt="003" src="https://github.com/user-attachments/assets/f8ca3b50-5814-407e-b087-bde7dc50976e" /> <br>
+<img width="581" height="360" alt="004" src="https://github.com/user-attachments/assets/a3c32fc9-463e-4231-9c4c-4b112f6fc08e" /> <br>
+<img width="581" height="360" alt="005" src="https://github.com/user-attachments/assets/ad32dd41-d429-4f0d-b207-ce7805889d01" /> <br>
+<img width="581" height="360" alt="006" src="https://github.com/user-attachments/assets/eacff9b5-8fd8-431a-b17c-0cf0b7c6b7f7" /> <br>
+<img width="581" height="360" alt="007" src="https://github.com/user-attachments/assets/767fd1e4-dbfa-4ad6-812b-3befcb153f8c" /> <br>
+<img width="1272" height="721" alt="008" src="https://github.com/user-attachments/assets/10fb6a0e-0ba9-4665-8c19-58b6ce26aa9f" /> <br>
+<img width="1272" height="721" alt="009" src="https://github.com/user-attachments/assets/4ea9c482-a8e1-447e-9367-e7aca98b24a1" /> <br>
 
 ### 2. STM32 보드 매니저 추가
 
