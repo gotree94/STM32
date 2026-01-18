@@ -25,7 +25,7 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 <img width="581" height="360" alt="005" src="https://github.com/user-attachments/assets/ad32dd41-d429-4f0d-b207-ce7805889d01" /> <br>
 <img width="581" height="360" alt="006" src="https://github.com/user-attachments/assets/eacff9b5-8fd8-431a-b17c-0cf0b7c6b7f7" /> <br>
 <img width="581" height="360" alt="007" src="https://github.com/user-attachments/assets/767fd1e4-dbfa-4ad6-812b-3befcb153f8c" /> <br>
-<img width="1272" height="721" alt="008" src="https://github.com/user-attachments/assets/10fb6a0e-0ba9-4665-8c19-58b6ce26aa9f" /> <br>
+
 <img width="1272" height="721" alt="009" src="https://github.com/user-attachments/assets/4ea9c482-a8e1-447e-9367-e7aca98b24a1" /> <br>
 
 ### 2. STM32 보드 매니저 추가
