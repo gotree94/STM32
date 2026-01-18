@@ -21,7 +21,7 @@
 - GPIO Output: PA1, PA6, PB6
 - Clock: 64MHz
 
-<img width="945" height="920" alt="Vector_eyes" src="https://github.com/user-attachments/assets/53959064-5ec3-40ef-a595-a55f5119c4d2" />
+<img width="600" height="600" alt="Vector_eyes" src="https://github.com/user-attachments/assets/53959064-5ec3-40ef-a595-a55f5119c4d2" />
 
 ![LCD2-SPI](https://github.com/user-attachments/assets/965a8470-b695-40bb-bb92-f692bc773d2d)
 
@@ -45,7 +45,7 @@
 
 **주의:** I2C 주소가 안 맞으면 `SSD1306_I2C_ADDR`를 `0x7A`로 변경
 
-<img width="1006" height="1013" alt="Vector_eyes_i2c" src="https://github.com/user-attachments/assets/1ae23ead-18a3-42db-9aa8-1aeb8c7b910b" />
+<img width="600" height="600" alt="Vector_eyes_i2c" src="https://github.com/user-attachments/assets/1ae23ead-18a3-42db-9aa8-1aeb8c7b910b" />
 
 ![LCD2-I2C](https://github.com/user-attachments/assets/0db133eb-f22b-4fc4-b455-8bbb33c05f58)
 
@@ -110,7 +110,7 @@ D3 = PB3    D7 = PA8
 | LOOK_DOWN | 아래 보기 |
 
 
-<img width="1268" height="1194" alt="Vector_ili9341" src="https://github.com/user-attachments/assets/dd46cf44-fbfb-4fe1-b929-d7dd6334df94" />
+<img width="600" height="600" alt="Vector_ili9341" src="https://github.com/user-attachments/assets/dd46cf44-fbfb-4fe1-b929-d7dd6334df94" />
 
 ![LCD2-1](https://github.com/user-attachments/assets/7632225a-6112-48a9-a988-f198e04e598b)
 
