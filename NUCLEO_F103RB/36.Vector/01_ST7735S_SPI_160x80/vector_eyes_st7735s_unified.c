@@ -61,11 +61,20 @@ SPI_HandleTypeDef hspi1;
 #define ST7735_GMCTRN1 0xE1
 
 // Colors (RGB565)
-#define BLACK       0x0000
-#define WHITE       0xFFFF
-#define EYE_COLOR   0x07E0   // Green (눈 외곽)
-#define EYE_PUPIL   0x0320   // Dark Green (눈동자)
-#define EYE_BRIGHT  0xAFE5   // Light Green (하이라이트)
+//색상		EYE_COLOR	EYE_PUPIL	EYE_BRIGHT
+//마젠타		0x07E0		0x0320		0xAFE5
+//시안		0x001F		0x000F		0x5D7F
+//노랑		0xF800		0x7800		0xFBEF
+//빨강		0xFFE0		0x7BE0		0xFFF5
+//파랑		0x07FF		0x033F		0xAFFF
+//초록		0xF81F		0x780F		0xFC9F
+//주황		0xFD20		0x7A00		0xFED0
+//흰색		0xFFFF		0x7BEF		0xFFFF
+#define BLACK       0xFFFF
+#define WHITE       0x0000
+#define EYE_COLOR   0xFD20 //0x07E0   // Green (눈 외곽)
+#define EYE_PUPIL   0x7A00 //0x0320   // Dark Green (눈동자)
+#define EYE_BRIGHT  0xFED0 //0xAFE5   // Light Green (하이라이트)
 
 // 눈 위치 (화면 좌표)
 #define LX              40      // 왼쪽 눈 중심 X
@@ -274,12 +283,12 @@ static void LCD_Clear(uint16_t color) {
 static void Eye_Normal(int16_t cx, int16_t ox, int16_t oy) {
     // 1. 눈 외곽 (초록색)
     LCD_RoundRect(cx - EYE_W/2, CY - EYE_H/2, EYE_W, EYE_H, EYE_R, EYE_COLOR);
-    
+
     // 2. 눈동자 (어두운 초록) - 시선 방향에 따라 이동
     int16_t pupil_x = cx + ox;
     int16_t pupil_y = CY + oy;
     LCD_FillCircle(pupil_x, pupil_y, 8, EYE_PUPIL);
-    
+
     // 3. 하이라이트 (밝은 초록)
     LCD_FillCircle(pupil_x - 3, pupil_y - 4, 3, EYE_BRIGHT);
 }
@@ -295,7 +304,7 @@ static void Eye_Half(int16_t cx, uint8_t pct) {
     if(h < 10) { Eye_Closed(cx); return; }
     int16_t top = CY + EYE_H/2 - h;
     LCD_RoundRect(cx - EYE_W/2, top, EYE_W, h, EYE_R/2, EYE_COLOR);
-    
+
     // 눈동자 (반쯤 보이게)
     if(pct > 40) {
         LCD_FillCircle(cx, CY + 3, 7, EYE_PUPIL);
@@ -320,7 +329,7 @@ static void Eye_Sad(int16_t cx) {
     LCD_FillCircle(cx, CY + 4, 7, EYE_PUPIL);
     LCD_FillCircle(cx - 2, CY + 1, 2, EYE_BRIGHT);
     // 슬픈 눈썹
-    LCD_ThickLine(cx - EYE_W/2, CY - EYE_H/2 - 2, 
+    LCD_ThickLine(cx - EYE_W/2, CY - EYE_H/2 - 2,
                   cx + EYE_W/2, CY - EYE_H/2 + 10, 4, EYE_COLOR);
 }
 
@@ -333,10 +342,10 @@ static void Eye_Angry(int16_t cx, uint8_t is_left) {
     LCD_FillCircle(cx - 2, CY, 2, EYE_BRIGHT);
     // 화난 눈썹
     if(is_left) {
-        LCD_ThickLine(cx - EYE_W/2 - 3, CY - EYE_H/2 + 6, 
+        LCD_ThickLine(cx - EYE_W/2 - 3, CY - EYE_H/2 + 6,
                       cx + EYE_W/2 + 3, CY - EYE_H/2 - 6, 5, EYE_COLOR);
     } else {
-        LCD_ThickLine(cx - EYE_W/2 - 3, CY - EYE_H/2 - 6, 
+        LCD_ThickLine(cx - EYE_W/2 - 3, CY - EYE_H/2 - 6,
                       cx + EYE_W/2 + 3, CY - EYE_H/2 + 6, 5, EYE_COLOR);
     }
 }
@@ -470,7 +479,7 @@ static void Anim_Blink(void) {
     LCD_Clear(BLACK);
     Eye_Half(LX, 70);
     Eye_Half(RX, 70);
-    
+
     // 30% 감기
     LCD_Clear(BLACK);
     Eye_Half(LX, 30);
@@ -486,7 +495,7 @@ static void Anim_Blink(void) {
     LCD_Clear(BLACK);
     Eye_Half(LX, 30);
     Eye_Half(RX, 30);
-    
+
     // 70% 뜨기
     LCD_Clear(BLACK);
     Eye_Half(LX, 70);
