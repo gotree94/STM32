@@ -4,8 +4,6 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 
 <img width="797" height="515" alt="016" src="https://github.com/user-attachments/assets/c1b7755b-5fee-49ca-80ca-d538b5927ad6" />
 
-<img width="816" height="808" alt="001" src="https://github.com/user-attachments/assets/218e7e99-26bd-41c4-8563-78e9e007d216" /> <br>
-
 ## 📋 목차
 
 - [개발 환경 설정](#개발-환경-설정)
@@ -20,7 +18,6 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 
 1. [Arduino IDE 다운로드](https://www.arduino.cc/en/software)에서 최신 버전 설치
 2. Arduino IDE 2.x 버전 권장
-
 
 <img width="581" height="360" alt="002" src="https://github.com/user-attachments/assets/1b187be9-9a95-4a1b-90b2-d95fbcad96b4" /> <br>
 <img width="581" height="360" alt="003" src="https://github.com/user-attachments/assets/f8ca3b50-5814-407e-b087-bde7dc50976e" /> <br>
