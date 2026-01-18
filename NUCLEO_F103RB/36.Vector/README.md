@@ -77,7 +77,8 @@ D3 = PB3    D7 = PA8
 
 <img width="600" height="600" alt="Vector_ili9341" src="https://github.com/user-attachments/assets/dd46cf44-fbfb-4fe1-b929-d7dd6334df94" />
 
-![LCD2-1](https://github.com/user-attachments/assets/7632225a-6112-48a9-a988-f198e04e598b)
+![LCD2](https://github.com/user-attachments/assets/c0259d40-d3c2-431d-812d-e49869f3ec68)
+
 
 
 ---
