@@ -47,6 +47,13 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 3. **STM32 MCU based boards** by STMicroelectronics 설치 (최신 버전)
 4. 설치 완료까지 대기 (수 분 소요)
 
+<img width="641" height="489" alt="011" src="https://github.com/user-attachments/assets/57ceb5e0-130d-4f9b-ba3f-27398e3c9a95" />
+<br>
+<img width="1272" height="721" alt="012" src="https://github.com/user-attachments/assets/3ac8b772-7bdc-4aed-9e7e-98247e3f6596" />
+<br>
+<img width="1272" height="721" alt="013" src="https://github.com/user-attachments/assets/e6f73dff-17c2-44b1-b8fa-c51617099798" />
+<br>
+
 ### 4. 보드 설정
 
 **Tools** (도구) 메뉴에서 다음과 같이 설정:
