@@ -366,4 +366,45 @@ uint8_t obstacle = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);  // 0=장애물
 - [NUCLEO-F103RB User Manual (UM1724)](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 - [STM32CubeIDE User Guide](https://www.st.com/resource/en/user_manual/um2609-stm32cubeide-user-guide-stmicroelectronics.pdf)
 
-copies of the Software.
+---
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
+
+---
+
+
+
+
+
+
+---
+
+
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
