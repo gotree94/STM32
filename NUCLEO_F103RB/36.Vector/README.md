@@ -23,9 +23,7 @@
 
 <img width="600" height="600" alt="Vector_eyes" src="https://github.com/user-attachments/assets/fdcf7d33-e51a-4500-82f0-af05907c9c6b" />
 
-
-![LCD2-SPI](https://github.com/user-attachments/assets/965a8470-b695-40bb-bb92-f692bc773d2d)
-
+![LCD2-SPI](https://github.com/user-attachments/assets/e2da22dd-a559-4a5e-b8d0-0d02c30b888c)
 
 ---
 
