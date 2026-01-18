@@ -8,368 +8,456 @@
  ******************************************************************************
  * @hardware
  *   - Board: NUCLEO-F103RB
- *   - SMD LED Module (KY-011 또는 유사 모듈)
+ *   - SMD LED Module (KY-009 또는 유사 모듈)
  *   - Connections:
- *     - S (Signal) -> PA5 (TIM2_CH1 또는 GPIO)
- *     - VCC        -> 3.3V
- *     - GND        -> GND
+ *     - R (Red)   -> PA0 (TIM2_CH1)
+ *     - G (Green) -> PA1 (TIM2_CH2)  
+ *     - B (Blue)  -> PB10 (TIM2_CH3)
+ *     - GND       -> GND (공통 캐소드) 또는 3.3V (공통 애노드)
  ******************************************************************************
  */
 
-#include "stm32f1xx_hal.h"
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include "stm32f1xx_hal.h"
+/* USER CODE END Includes */
 
-/* Private defines */
-#define LED_PIN         GPIO_PIN_5
-#define LED_PORT        GPIOA
-#define PWM_PERIOD      999
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+void RGB_SetColor(uint8_t red, uint8_t green, uint8_t blue);
+void RGB_Demo_Fade(void);
+void RGB_Demo_Rainbow(void);
+/* USER CODE END PTD */
 
-/* Operation Mode */
-typedef enum {
-    MODE_GPIO = 0,
-    MODE_PWM
-} LED_Mode_t;
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define PWM_PERIOD      999     // PWM 주기 (0~999 = 1000단계)
+/* USER CODE END PD */
 
-/* Private variables */
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim2;
-UART_HandleTypeDef huart2;
-LED_Mode_t currentMode = MODE_GPIO;
 
-/* Private function prototypes */
+UART_HandleTypeDef huart2;
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
-void LED_GPIO_Mode_Init(void);
-void LED_PWM_Mode_Init(void);
-void LED_SetBrightness(uint8_t brightness);
-void LED_Blink(uint32_t on_time, uint32_t off_time, uint8_t count);
-void LED_Breathe(uint16_t cycle_ms);
-void LED_SOS(void);
-
+static void MX_TIM2_Init(void);
+/* USER CODE BEGIN PFP */
 /* UART printf 리다이렉션 */
 int __io_putchar(int ch) {
     HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
     return ch;
 }
+/* USER CODE END PFP */
 
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+/**
+ * @brief RGB LED 색상 설정 (0~255)
+ */
+void RGB_SetColor(uint8_t red, uint8_t green, uint8_t blue)
+{
+    /* 0~255를 0~PWM_PERIOD로 변환 */
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, (red * PWM_PERIOD) / 255);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, (green * PWM_PERIOD) / 255);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, (blue * PWM_PERIOD) / 255);
+}
+
+/**
+ * @brief 페이드 효과 데모
+ */
+void RGB_Demo_Fade(void)
+{
+    /* Red 페이드 인/아웃 */
+    for (int i = 0; i <= 255; i += 5) {
+        RGB_SetColor(i, 0, 0);
+        HAL_Delay(10);
+    }
+    for (int i = 255; i >= 0; i -= 5) {
+        RGB_SetColor(i, 0, 0);
+        HAL_Delay(10);
+    }
+
+    /* Green 페이드 인/아웃 */
+    for (int i = 0; i <= 255; i += 5) {
+        RGB_SetColor(0, i, 0);
+        HAL_Delay(10);
+    }
+    for (int i = 255; i >= 0; i -= 5) {
+        RGB_SetColor(0, i, 0);
+        HAL_Delay(10);
+    }
+
+    /* Blue 페이드 인/아웃 */
+    for (int i = 0; i <= 255; i += 5) {
+        RGB_SetColor(0, 0, i);
+        HAL_Delay(10);
+    }
+    for (int i = 255; i >= 0; i -= 5) {
+        RGB_SetColor(0, 0, i);
+        HAL_Delay(10);
+    }
+}
+
+/**
+ * @brief 레인보우 효과 데모 (색상환 순환)
+ */
+void RGB_Demo_Rainbow(void)
+{
+    uint8_t r, g, b;
+
+    for (int i = 0; i < 360; i += 2) {
+        /* HSV to RGB 변환 (S=1, V=1 고정) */
+        int region = i / 60;
+        int remainder = (i - (region * 60)) * 255 / 60;
+
+        switch (region) {
+            case 0:  r = 255; g = remainder; b = 0; break;
+            case 1:  r = 255 - remainder; g = 255; b = 0; break;
+            case 2:  r = 0; g = 255; b = remainder; break;
+            case 3:  r = 0; g = 255 - remainder; b = 255; break;
+            case 4:  r = remainder; g = 0; b = 255; break;
+            default: r = 255; g = 0; b = 255 - remainder; break;
+        }
+
+        RGB_SetColor(r, g, b);
+        HAL_Delay(20);
+    }
+
+    RGB_SetColor(0, 0, 0);
+}
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-    /* MCU 초기화 */
-    HAL_Init();
-    SystemClock_Config();
-    
-    /* 주변장치 초기화 */
-    MX_GPIO_Init();
-    MX_TIM2_Init();
-    MX_USART2_UART_Init();
-    
-    printf("\r\n========================================\r\n");
-    printf("  SMD LED Module Test - NUCLEO-F103RB\r\n");
-    printf("========================================\r\n\n");
-    
-    while (1)
-    {
-        /* Test 1: GPIO 모드 - 기본 점멸 */
-        printf("[Test 1] GPIO Mode - Basic Blink\r\n");
-        LED_GPIO_Mode_Init();
-        currentMode = MODE_GPIO;
-        
-        printf("  Slow blink (500ms)...\r\n");
-        LED_Blink(500, 500, 5);
-        
-        printf("  Fast blink (100ms)...\r\n");
-        LED_Blink(100, 100, 10);
-        
-        printf("  Asymmetric blink (200/800ms)...\r\n");
-        LED_Blink(200, 800, 5);
-        
-        HAL_Delay(500);
-        
-        /* Test 2: PWM 모드 - 밝기 조절 */
-        printf("\r\n[Test 2] PWM Mode - Brightness Control\r\n");
-        LED_PWM_Mode_Init();
-        currentMode = MODE_PWM;
-        
-        printf("  Brightness levels: ");
-        for (int level = 0; level <= 100; level += 25) {
-            printf("%d%% ", level);
-            LED_SetBrightness((level * 255) / 100);
-            HAL_Delay(800);
-        }
-        printf("\r\n");
-        
-        HAL_Delay(500);
-        
-        /* Test 3: 호흡 효과 */
-        printf("\r\n[Test 3] Breathing Effect\r\n");
-        printf("  2 second cycle...\r\n");
-        for (int i = 0; i < 3; i++) {
-            LED_Breathe(2000);
-        }
-        
-        printf("  1 second cycle...\r\n");
-        for (int i = 0; i < 5; i++) {
-            LED_Breathe(1000);
-        }
-        
-        HAL_Delay(500);
-        
-        /* Test 4: SOS 신호 */
-        printf("\r\n[Test 4] SOS Signal\r\n");
-        LED_GPIO_Mode_Init();
-        currentMode = MODE_GPIO;
-        LED_SOS();
-        
-        HAL_Delay(500);
-        
-        /* Test 5: 심박 효과 */
-        printf("\r\n[Test 5] Heartbeat Effect\r\n");
-        LED_PWM_Mode_Init();
-        currentMode = MODE_PWM;
-        
-        for (int beat = 0; beat < 10; beat++) {
-            /* 첫 번째 박동 */
-            for (int i = 0; i <= 255; i += 15) {
-                LED_SetBrightness(i);
-                HAL_Delay(5);
-            }
-            for (int i = 255; i >= 0; i -= 15) {
-                LED_SetBrightness(i);
-                HAL_Delay(5);
-            }
-            HAL_Delay(100);
-            
-            /* 두 번째 박동 (약간 약하게) */
-            for (int i = 0; i <= 180; i += 15) {
-                LED_SetBrightness(i);
-                HAL_Delay(5);
-            }
-            for (int i = 180; i >= 0; i -= 15) {
-                LED_SetBrightness(i);
-                HAL_Delay(5);
-            }
-            HAL_Delay(400);
-        }
-        
-        LED_SetBrightness(0);
-        
-        printf("\r\n--- Cycle Complete ---\r\n\n");
-        HAL_Delay(2000);
-    }
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART2_UART_Init();
+  MX_TIM2_Init();
+  /* USER CODE BEGIN 2 */
+  /* PWM 시작 */
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);  // Red
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);  // Green
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);  // Blue
+
+  printf("\r\n========================================\r\n");
+  printf("  RGB LED Module Test - NUCLEO-F103RB\r\n");
+  printf("========================================\r\n\n");
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  /* 기본 색상 테스트 */
+	         printf("[Test 1] Basic Colors\r\n");
+
+	         printf("  Red...\r\n");
+	         RGB_SetColor(255, 0, 0);
+	         HAL_Delay(1000);
+
+	         printf("  Green...\r\n");
+	         RGB_SetColor(0, 255, 0);
+	         HAL_Delay(1000);
+
+	         printf("  Blue...\r\n");
+	         RGB_SetColor(0, 0, 255);
+	         HAL_Delay(1000);
+
+	         printf("  Yellow (R+G)...\r\n");
+	         RGB_SetColor(255, 255, 0);
+	         HAL_Delay(1000);
+
+	         printf("  Cyan (G+B)...\r\n");
+	         RGB_SetColor(0, 255, 255);
+	         HAL_Delay(1000);
+
+	         printf("  Magenta (R+B)...\r\n");
+	         RGB_SetColor(255, 0, 255);
+	         HAL_Delay(1000);
+
+	         printf("  White (R+G+B)...\r\n");
+	         RGB_SetColor(255, 255, 255);
+	         HAL_Delay(1000);
+
+	         printf("  OFF...\r\n\n");
+	         RGB_SetColor(0, 0, 0);
+	         HAL_Delay(500);
+
+	         /* 페이드 효과 */
+	         printf("[Test 2] Fade Effect\r\n");
+	         RGB_Demo_Fade();
+	         HAL_Delay(500);
+
+	         /* 레인보우 효과 */
+	         printf("[Test 3] Rainbow Effect\r\n");
+	         RGB_Demo_Rainbow();
+	         HAL_Delay(500);
+
+	         printf("\r\n--- Cycle Complete ---\r\n\n");
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
 }
 
 /**
- * @brief GPIO 모드 초기화
- */
-void LED_GPIO_Mode_Init(void)
-{
-    HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-    
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = LED_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
-    
-    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
-}
-
-/**
- * @brief PWM 모드 초기화
- */
-void LED_PWM_Mode_Init(void)
-{
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = LED_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
-    
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-}
-
-/**
- * @brief LED 밝기 설정 (PWM 모드)
- * @param brightness: 0~255
- */
-void LED_SetBrightness(uint8_t brightness)
-{
-    if (currentMode == MODE_PWM) {
-        __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, (brightness * PWM_PERIOD) / 255);
-    }
-}
-
-/**
- * @brief LED 점멸 (GPIO 모드)
- */
-void LED_Blink(uint32_t on_time, uint32_t off_time, uint8_t count)
-{
-    for (uint8_t i = 0; i < count; i++) {
-        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
-        HAL_Delay(on_time);
-        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
-        HAL_Delay(off_time);
-    }
-}
-
-/**
- * @brief LED 호흡 효과 (PWM 모드)
- * @param cycle_ms: 한 호흡 주기(ms)
- */
-void LED_Breathe(uint16_t cycle_ms)
-{
-    uint16_t step_delay = cycle_ms / 512;  // 256 up + 256 down
-    
-    /* 밝아지기 */
-    for (int i = 0; i <= 255; i++) {
-        LED_SetBrightness(i);
-        HAL_Delay(step_delay);
-    }
-    
-    /* 어두워지기 */
-    for (int i = 255; i >= 0; i--) {
-        LED_SetBrightness(i);
-        HAL_Delay(step_delay);
-    }
-}
-
-/**
- * @brief SOS 모스부호 신호
- *        S: ···  O: ---  S: ···
- */
-void LED_SOS(void)
-{
-    const uint16_t dot = 150;    // 점
-    const uint16_t dash = 450;   // 선 (점의 3배)
-    const uint16_t gap = 150;    // 요소 간격
-    const uint16_t letter_gap = 450;  // 문자 간격
-    
-    for (int repeat = 0; repeat < 3; repeat++) {
-        /* S: ··· */
-        for (int i = 0; i < 3; i++) {
-            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
-            HAL_Delay(dot);
-            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
-            HAL_Delay(gap);
-        }
-        HAL_Delay(letter_gap);
-        
-        /* O: --- */
-        for (int i = 0; i < 3; i++) {
-            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
-            HAL_Delay(dash);
-            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
-            HAL_Delay(gap);
-        }
-        HAL_Delay(letter_gap);
-        
-        /* S: ··· */
-        for (int i = 0; i < 3; i++) {
-            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
-            HAL_Delay(dot);
-            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
-            HAL_Delay(gap);
-        }
-        
-        HAL_Delay(1000);  // SOS 반복 간격
-    }
-}
-
-/**
- * @brief System Clock Configuration (72MHz)
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-    
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-    HAL_RCC_OscConfig(&RCC_OscInitStruct);
-    
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-                                | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2);
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /**
- * @brief GPIO Initialization
- */
-static void MX_GPIO_Init(void)
-{
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-}
-
-/**
- * @brief TIM2 Initialization (PWM)
- */
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_TIM2_Init(void)
 {
-    TIM_OC_InitTypeDef sConfigOC = {0};
-    
-    __HAL_RCC_TIM2_CLK_ENABLE();
-    
-    htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 71;              // 72MHz / 72 = 1MHz
-    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = PWM_PERIOD;         // 1MHz / 1000 = 1kHz PWM
-    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    HAL_TIM_PWM_Init(&htim2);
-    
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = 0;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    
-    HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1);
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 63;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 999;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
 }
 
 /**
- * @brief USART2 Initialization
- */
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_USART2_UART_Init(void)
 {
-    __HAL_RCC_USART2_CLK_ENABLE();
-    
-    huart2.Instance = USART2;
-    huart2.Init.BaudRate = 115200;
-    huart2.Init.WordLength = UART_WORDLENGTH_8B;
-    huart2.Init.StopBits = UART_STOPBITS_1;
-    huart2.Init.Parity = UART_PARITY_NONE;
-    huart2.Init.Mode = UART_MODE_TX_RX;
-    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-    HAL_UART_Init(&huart2);
-    
-    /* USART2 GPIO 설정 (PA2: TX, PA3: RX) */
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = GPIO_PIN_2;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    
-    GPIO_InitStruct.Pin = GPIO_PIN_3;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
 }
 
 /**
- * @brief SysTick Handler
- */
-void SysTick_Handler(void)
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
 {
-    HAL_IncTick();
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+
+  /* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LD2_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+
+  /* USER CODE END MX_GPIO_Init_2 */
 }
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
+
