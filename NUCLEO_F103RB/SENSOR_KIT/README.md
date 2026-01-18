@@ -1090,9 +1090,9 @@ NUCLEO-F103RB 보드를 이용한 IR(적외선) 센서 테스트 프로젝트 �
 
 | 프로젝트 | 설명 | 난이도 |
 |----------|------|--------|
-| [01_IR_Transmitter](./01_IR_Transmitter) | IR LED를 이용한 38kHz 변조 신호 송신 | ⭐⭐ |
-| [02_IR_Receiver](./02_IR_Receiver) | IR 수신 모듈 기본 테스트 (신호 감지) | ⭐ |
-| [03_IR_Remote_Decoder](./03_IR_Remote_Decoder) | IR 리모컨 NEC 프로토콜 디코딩 | ⭐⭐⭐ |
+| [31.IR_Transmitter](./31.IR_Transmitter) | IR LED를 이용한 38kHz 변조 신호 송신 | ⭐⭐ |
+| [32.IR_Receiver](./32.IR_Receiver) | IR 수신 모듈 기본 테스트 (신호 감지) | ⭐ |
+| [33.IR_Remote_Decoder](./33.IR_Remote_Decoder) | IR 리모컨 NEC 프로토콜 디코딩 | ⭐⭐⭐ |
 
 ## 하드웨어 요구사항
 
