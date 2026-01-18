@@ -193,11 +193,11 @@ stm32_sensors/
 
 | # | 센서 | 출력 타입 | 주요 핀 | 용도 |
 |---|------|----------|---------|------|
-| 01 | 릴레이 | Digital Out | PA5 | AC/DC 부하 제어 |
-| 02 | 고감도 소리센서 | Analog + Digital | PA0(AO), PA1(DO) | 소리 크기 측정 |
-| 03 | 소형 소리센서 | Digital | PA0 (EXTI) | 소리 감지 |
-| 04 | 트래킹 모듈 | Digital x3 | PA0, PA1, PA4 | 라인 추적 |
-| 05 | 장애물 감지센서 | Digital x2 | PA0, PA1 | 장애물 감지 |
+| 06 | 릴레이 | Digital Out | PA5 | AC/DC 부하 제어 |
+| 07 | 고감도 소리센서 | Analog + Digital | PA0(AO), PA1(DO) | 소리 크기 측정 |
+| 08 | 소형 소리센서 | Digital | PA0 (EXTI) | 소리 감지 |
+| 09 | 트래킹 모듈 | Digital x3 | PA0, PA1, PA4 | 라인 추적 |
+| 10 | 장애물 감지센서 | Digital x2 | PA0, PA1 | 장애물 감지 |
 
 ## 공통 하드웨어 요구사항
 
