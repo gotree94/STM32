@@ -946,13 +946,13 @@ stm32_sensors/
 
 ## 📊 센서 모듈 요약
 
-| # | 센서 | 입력 타입 | 주요 기능 |
-|---|------|----------|----------|
-| 26 | Hall Magnetic | Digital | 자석 감지, 회전 감지 |
-| 27 | Temperature | Analog (ADC) | 온도 측정, 알람 |
-| 28 | Light Sensor | Analog (ADC) | 조도 측정, 자동 조명 |
-| 29 | Knock Sensor | Digital (EXTI) | 진동 감지, 패턴 인식 |
-| 30 | Photo Interrupter | Digital (EXTI) | 물체 감지, RPM 측정 |
+| 센서 | 입력 타입 | 주요 기능 |
+|--------|----------|----------|
+| [26.Hall_Magnetic](./26.Hall_Magnetic) | Digital | 자석 감지, 회전 감지 |
+| [27.Temperature](./27.Temperature) | Analog (ADC) | 온도 측정, 알람 |
+| [28.Light_Sensor](./28.Light_Sensor) | Analog (ADC) | 조도 측정, 자동 조명 |
+| [29.Knock_Sensor](./29.Knock_Sensor) | Digital (EXTI) | 진동 감지, 패턴 인식 |
+| [30.Photo_Interrupter](./30.Photo_Interrupter) | Digital (EXTI) | 물체 감지, RPM 측정 |
 
 ## 💻 개발 환경
 
