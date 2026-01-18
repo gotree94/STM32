@@ -1,20 +1,21 @@
-/* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    main.c
+ * @author  Namu
+ * @brief   RGB LED Module Test for NUCLEO-F103RB
+ * @note    RGB LED는 공통 캐소드(Common Cathode) 타입 사용
+ *          PWM을 이용한 색상 혼합 구현
+ ******************************************************************************
+ * @hardware
+ *   - Board: NUCLEO-F103RB
+ *   - RGB LED Module (KY-016 또는 유사 모듈)
+ *   - Connections:
+ *     - R (Red)   -> PA0 (TIM2_CH1)
+ *     - G (Green) -> PA1 (TIM2_CH2)  
+ *     - B (Blue)  -> PB10 (TIM2_CH3)
+ *     - GND       -> GND (공통 캐소드) 또는 3.3V (공통 애노드)
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
