@@ -163,11 +163,3 @@ Anim_SetExpr(EXPR_NORMAL);  // 일반으로 복귀
 
 ---
 
-## 📝 라이선스
-
-MIT License - 자유롭게 사용, 수정, 배포 가능
-
----
-
-**Created:** 2025-01-18
-**Author:** Vector Eyes Project
