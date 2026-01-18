@@ -22,7 +22,7 @@ RGB LED Module          NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
 │     R  ─────┼────────┤ PA0 (TIM2_CH1)
 │     G  ─────┼────────┤ PA1 (TIM2_CH2)
-│     B  ─────┼────────┤ PA2 (TIM2_CH3)
+│     B  ─────┼────────┤ PB10 (TIM2_CH3)
 │   GND  ─────┼────────┤ GND
 └─────────────┘        └─────────────┘
 ```
@@ -32,14 +32,14 @@ RGB LED Module          NUCLEO-F103RB
 ### 회로도
 
 ```
-        ┌──────────────────────────────┐
-        │        RGB LED Module        │
-        │                              │
+        ┌─────────────────────────────┐
+        │        RGB LED Module       │
+        │                             │
 PA0 ────┤ R (Red)     ┌───┐           │
         │             │ R │           │
 PA1 ────┤ G (Green)   │ G │  ───┬─────┤ GND
         │             │ B │     │     │
-PA2 ────┤ B (Blue)    └───┘     │     │
+PB10 ───┤ B (Blue)    └───┘     │     │
         │                       │     │
         └───────────────────────┼─────┘
                                GND
@@ -59,7 +59,7 @@ PA2 ────┤ B (Blue)    └───┘     │     │
 Timer: TIM2
 Prescaler: 63 (64MHz / 64 = 1MHz)
 Period: 999 (1MHz / 1000 = 1kHz PWM)
-Channels: CH1(PA0), CH2(PA1), CH3(PA2)
+Channels: CH1(PA0), CH2(PA1), CH3(PB10)
 ```
 
 ### 주요 함수
@@ -281,12 +281,6 @@ void RGB_Demo_Rainbow(void)
 	         printf("\r\n--- Cycle Complete ---\r\n\n");
     /* USER CODE END WHILE */
 ```
-
-
-
-
-
-
 ## 📊 시리얼 출력 예시
 
 ```
