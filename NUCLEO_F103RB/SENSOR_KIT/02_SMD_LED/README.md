@@ -5,6 +5,7 @@ SMD(Surface Mount Device) LED 모듈을 STM32F103 NUCLEO 보드에서 GPIO 및 P
 ## 📌 개요
 
 SMD LED 모듈은 표면실장형 LED로, 일반 스루홀 LED보다 밝고 소형이며 효율적입니다. 이 프로젝트에서는 GPIO를 이용한 단순 ON/OFF 제어와 PWM을 이용한 밝기 조절을 모두 테스트합니다.
+# RGB LED Module Test - NUCLEO-F103RB
 
 ## 🛠 하드웨어 구성
 
@@ -12,88 +13,85 @@ SMD LED 모듈은 표면실장형 LED로, 일반 스루홀 LED보다 밝고 소�
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | NUCLEO-F103RB | 1 | STM32F103RB 탑재 |
-| SMD LED 모듈 | 1 | KY-011 또는 호환 모듈 |
-| 점퍼 와이어 | 3 | Female-Female |
+| RGB LED 모듈 | 1 | KY-011 또는 호환 모듈 |
+| 점퍼 와이어 | 4 | Female-Female |
 
 ### 핀 연결
 
 ```
-SMD LED Module          NUCLEO-F103RB
+RGB LED Module          NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
-│     S  ─────┼────────┤ PA5 (TIM2_CH1)
-│   VCC  ─────┼────────┤ 3.3V
+│     R  ─────┼────────┤ PA0 (TIM2_CH1)
+│     G  ─────┼────────┤ PA1 (TIM2_CH2)
+│     B  ─────┼────────┤ PB10 (TIM2_CH3)
 │   GND  ─────┼────────┤ GND
 └─────────────┘        └─────────────┘
 ```
 
+> ⚠️ **주의**: 공통 애노드(Common Anode) 타입의 경우 GND 대신 3.3V에 연결하고, PWM 극성을 반전시켜야 합니다.
+
 ### 회로도
 
 ```
-                3.3V
-                 │
-                 │
-    ┌────────────┴────────────┐
-    │       SMD LED Module    │
-    │                         │
-    │   ┌───┐                 │
-    │   │LED│    R (내장)     │
-    │   └─┬─┘    220Ω        │
-    │     │                   │
-    └─────┼───────────────────┘
-          │
-          S ──────── PA5
-          │
-         GND
+        ┌─────────────────────────────┐
+        │        RGB LED Module       │
+        │                             │
+PA0 ────┤ R (Red)     ┌───┐           │
+        │             │ R │           │
+PA1 ────┤ G (Green)   │ G │  ───┬─────┤ GND
+        │             │ B │     │     │
+PB10 ───┤ B (Blue)    └───┘     │     │
+        │                       │     │
+        └───────────────────────┼─────┘
+                               GND
 ```
-
-> 💡 **참고**: 대부분의 SMD LED 모듈은 내장 저항이 있어 별도의 저항 없이 사용 가능합니다.
 
 ## 💻 소프트웨어
 
 ### 주요 기능
 
-1. **GPIO 모드**: 단순 ON/OFF 점멸
-2. **PWM 모드**: 0~100% 밝기 조절
-3. **호흡 효과**: 점진적 밝기 변화
-4. **SOS 신호**: 모스부호 패턴
-5. **심박 효과**: 두 번 박동 패턴
+1. **기본 색상 출력**: Red, Green, Blue, Yellow, Cyan, Magenta, White
+2. **페이드 효과**: 각 색상의 점진적 밝기 변화
+3. **레인보우 효과**: HSV 색상환 순환
 
-### 동작 모드
+### PWM 설정
 
 ```c
-typedef enum {
-    MODE_GPIO = 0,  // GPIO 디지털 출력
-    MODE_PWM        // PWM 아날로그 출력
-} LED_Mode_t;
+Timer: TIM2
+Prescaler: 63 (64MHz / 64 = 1MHz)
+Period: 999 (1MHz / 1000 = 1kHz PWM)
+Channels: CH1(PA0), CH2(PA1), CH3(PB10)
 ```
 
 ### 주요 함수
 
 ```c
-// 모드 전환
-void LED_GPIO_Mode_Init(void);  // GPIO 모드로 전환
-void LED_PWM_Mode_Init(void);   // PWM 모드로 전환
+// RGB 색상 설정 (0~255 값)
+void RGB_SetColor(uint8_t red, uint8_t green, uint8_t blue);
 
-// LED 제어
-void LED_SetBrightness(uint8_t brightness);  // 밝기 설정 (0~255)
-void LED_Blink(uint32_t on_time, uint32_t off_time, uint8_t count);
-void LED_Breathe(uint16_t cycle_ms);  // 호흡 효과
-void LED_SOS(void);  // SOS 신호
+// 페이드 효과 데모
+void RGB_Demo_Fade(void);
+
+// 레인보우 효과 데모
+void RGB_Demo_Rainbow(void);
 ```
 
-### PWM 설정
+### 색상 혼합 원리
 
-```c
-Timer: TIM2, Channel 1
-Prescaler: 71 (72MHz / 72 = 1MHz)
-Period: 999 (1MHz / 1000 = 1kHz PWM)
-GPIO: PA5 (TIM2_CH1)
-```
+| 색상 | R | G | B | 설명 |
+|------|---|---|---|------|
+| Red | 255 | 0 | 0 | 빨강 |
+| Green | 0 | 255 | 0 | 초록 |
+| Blue | 0 | 0 | 255 | 파랑 |
+| Yellow | 255 | 255 | 0 | R + G |
+| Cyan | 0 | 255 | 255 | G + B |
+| Magenta | 255 | 0 | 255 | R + B |
+| White | 255 | 255 | 255 | R + G + B |
 
 ## 📂 프로젝트 구조
 
 ```
-02_SMD_LED/
+01_RGB_LED/
 ├── main.c          # 메인 소스 코드
 └── README.md       # 프로젝트 설명서
 ```
@@ -105,92 +103,216 @@ GPIO: PA5 (TIM2_CH1)
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 후 보드에 플래시
 
-### Makefile 사용 시
-```bash
-make clean
-make all
-make flash
+```c
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <string.h>
+#include <stdio.h>
+#include "stm32f1xx_hal.h"
+/* USER CODE END Includes */
 ```
 
+```c
+/* USER CODE BEGIN PTD */
+void RGB_SetColor(uint8_t red, uint8_t green, uint8_t blue);
+void RGB_Demo_Fade(void);
+void RGB_Demo_Rainbow(void);
+/* USER CODE END PTD */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define PWM_PERIOD      999     // PWM 주기 (0~999 = 1000단계)
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+/* UART printf 리다이렉션 */
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+/* USER CODE END PFP */
+```
+
+```c
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+/**
+ * @brief RGB LED 색상 설정 (0~255)
+ */
+void RGB_SetColor(uint8_t red, uint8_t green, uint8_t blue)
+{
+    /* 0~255를 0~PWM_PERIOD로 변환 */
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, (red * PWM_PERIOD) / 255);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, (green * PWM_PERIOD) / 255);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, (blue * PWM_PERIOD) / 255);
+}
+
+/**
+ * @brief 페이드 효과 데모
+ */
+void RGB_Demo_Fade(void)
+{
+    /* Red 페이드 인/아웃 */
+    for (int i = 0; i <= 255; i += 5) {
+        RGB_SetColor(i, 0, 0);
+        HAL_Delay(10);
+    }
+    for (int i = 255; i >= 0; i -= 5) {
+        RGB_SetColor(i, 0, 0);
+        HAL_Delay(10);
+    }
+
+    /* Green 페이드 인/아웃 */
+    for (int i = 0; i <= 255; i += 5) {
+        RGB_SetColor(0, i, 0);
+        HAL_Delay(10);
+    }
+    for (int i = 255; i >= 0; i -= 5) {
+        RGB_SetColor(0, i, 0);
+        HAL_Delay(10);
+    }
+
+    /* Blue 페이드 인/아웃 */
+    for (int i = 0; i <= 255; i += 5) {
+        RGB_SetColor(0, 0, i);
+        HAL_Delay(10);
+    }
+    for (int i = 255; i >= 0; i -= 5) {
+        RGB_SetColor(0, 0, i);
+        HAL_Delay(10);
+    }
+}
+
+/**
+ * @brief 레인보우 효과 데모 (색상환 순환)
+ */
+void RGB_Demo_Rainbow(void)
+{
+    uint8_t r, g, b;
+
+    for (int i = 0; i < 360; i += 2) {
+        /* HSV to RGB 변환 (S=1, V=1 고정) */
+        int region = i / 60;
+        int remainder = (i - (region * 60)) * 255 / 60;
+
+        switch (region) {
+            case 0:  r = 255; g = remainder; b = 0; break;
+            case 1:  r = 255 - remainder; g = 255; b = 0; break;
+            case 2:  r = 0; g = 255; b = remainder; break;
+            case 3:  r = 0; g = 255 - remainder; b = 255; break;
+            case 4:  r = remainder; g = 0; b = 255; break;
+            default: r = 255; g = 0; b = 255 - remainder; break;
+        }
+
+        RGB_SetColor(r, g, b);
+        HAL_Delay(20);
+    }
+
+    RGB_SetColor(0, 0, 0);
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  /* PWM 시작 */
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);  // Red
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);  // Green
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);  // Blue
+
+  printf("\r\n========================================\r\n");
+  printf("  RGB LED Module Test - NUCLEO-F103RB\r\n");
+  printf("========================================\r\n\n");
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  /* 기본 색상 테스트 */
+	         printf("[Test 1] Basic Colors\r\n");
+
+	         printf("  Red...\r\n");
+	         RGB_SetColor(255, 0, 0);
+	         HAL_Delay(1000);
+
+	         printf("  Green...\r\n");
+	         RGB_SetColor(0, 255, 0);
+	         HAL_Delay(1000);
+
+	         printf("  Blue...\r\n");
+	         RGB_SetColor(0, 0, 255);
+	         HAL_Delay(1000);
+
+	         printf("  Yellow (R+G)...\r\n");
+	         RGB_SetColor(255, 255, 0);
+	         HAL_Delay(1000);
+
+	         printf("  Cyan (G+B)...\r\n");
+	         RGB_SetColor(0, 255, 255);
+	         HAL_Delay(1000);
+
+	         printf("  Magenta (R+B)...\r\n");
+	         RGB_SetColor(255, 0, 255);
+	         HAL_Delay(1000);
+
+	         printf("  White (R+G+B)...\r\n");
+	         RGB_SetColor(255, 255, 255);
+	         HAL_Delay(1000);
+
+	         printf("  OFF...\r\n\n");
+	         RGB_SetColor(0, 0, 0);
+	         HAL_Delay(500);
+
+	         /* 페이드 효과 */
+	         printf("[Test 2] Fade Effect\r\n");
+	         RGB_Demo_Fade();
+	         HAL_Delay(500);
+
+	         /* 레인보우 효과 */
+	         printf("[Test 3] Rainbow Effect\r\n");
+	         RGB_Demo_Rainbow();
+	         HAL_Delay(500);
+
+	         printf("\r\n--- Cycle Complete ---\r\n\n");
+    /* USER CODE END WHILE */
+```
 ## 📊 시리얼 출력 예시
 
 ```
 ========================================
-  SMD LED Module Test - NUCLEO-F103RB
+  RGB LED Module Test - NUCLEO-F103RB
 ========================================
 
-[Test 1] GPIO Mode - Basic Blink
-  Slow blink (500ms)...
-  Fast blink (100ms)...
-  Asymmetric blink (200/800ms)...
+[Test 1] Basic Colors
+  Red...
+  Green...
+  Blue...
+  Yellow (R+G)...
+  Cyan (G+B)...
+  Magenta (R+B)...
+  White (R+G+B)...
+  OFF...
 
-[Test 2] PWM Mode - Brightness Control
-  Brightness levels: 0% 25% 50% 75% 100%
-
-[Test 3] Breathing Effect
-  2 second cycle...
-  1 second cycle...
-
-[Test 4] SOS Signal
-
-[Test 5] Heartbeat Effect
+[Test 2] Fade Effect
+[Test 3] Rainbow Effect
 
 --- Cycle Complete ---
-```
-
-## 📝 테스트 패턴 상세
-
-### SOS 모스부호
-```
-S: · · ·  (짧게 3번)
-O: — — —  (길게 3번)
-S: · · ·  (짧게 3번)
-
-타이밍:
-- 점(dot): 150ms
-- 선(dash): 450ms (점의 3배)
-- 요소 간격: 150ms
-- 문자 간격: 450ms
-```
-
-### 심박 효과
-```
-1. 첫 번째 박동: 0→255→0 (강하게)
-2. 짧은 휴식: 100ms
-3. 두 번째 박동: 0→180→0 (약하게)
-4. 긴 휴식: 400ms
 ```
 
 ## 🔍 트러블슈팅
 
 | 증상 | 원인 | 해결 방법 |
 |------|------|----------|
-| LED가 켜지지 않음 | 배선 오류 | VCC/GND 확인 |
-| 밝기 조절 안됨 | 모드 설정 오류 | PWM 모드 확인 |
-| 깜빡임이 느림 | PWM 주파수 낮음 | Period 값 조정 |
-| LED가 너무 밝음 | 전류 과다 | 저항 추가 고려 |
-
-## 💡 응용 예제
-
-### 커스텀 점멸 패턴
-```c
-// 경고등 패턴 (빠른 이중 점멸)
-void LED_Warning(void) {
-    for (int i = 0; i < 5; i++) {
-        LED_Blink(50, 50, 2);   // 빠르게 2번
-        HAL_Delay(500);         // 긴 휴식
-    }
-}
-```
-
-### 레벨 인디케이터
-```c
-// 0~100 레벨을 LED 밝기로 표시
-void LED_ShowLevel(uint8_t level) {
-    if (level > 100) level = 100;
-    LED_SetBrightness((level * 255) / 100);
-}
-```
+| LED가 켜지지 않음 | 배선 오류 | 핀 연결 확인 |
+| 색상이 반대로 동작 | 공통 애노드 타입 | PWM 극성 반전 |
+| 색상이 어두움 | PWM 주기 문제 | Period 값 조정 |
+| 특정 색상만 동작 | GPIO 설정 오류 | AF 설정 확인 |
 
 ## 📚 참고 자료
 
