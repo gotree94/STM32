@@ -21,7 +21,7 @@
 - GPIO Output: PA1, PA6, PB6
 - Clock: 64MHz
 
-<img width="816" height="808" alt="Vector_eyes" src="https://github.com/user-attachments/assets/fdcf7d33-e51a-4500-82f0-af05907c9c6b" />
+<img width="600" height="600" alt="Vector_eyes" src="https://github.com/user-attachments/assets/fdcf7d33-e51a-4500-82f0-af05907c9c6b" />
 
 
 ![LCD2-SPI](https://github.com/user-attachments/assets/965a8470-b695-40bb-bb92-f692bc773d2d)
