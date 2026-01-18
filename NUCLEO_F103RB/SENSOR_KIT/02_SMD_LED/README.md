@@ -19,7 +19,7 @@ SMD(Surface Mount Device) LED 모듈을 STM32F103 NUCLEO 보드에서 GPIO 및 P
 ### 핀 연결
 
 ```
-RGB LED Module          NUCLEO-F103RB
+SMD LED Module          NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
 │     R  ─────┼────────┤ PA0 (TIM2_CH1)
 │     G  ─────┼────────┤ PA1 (TIM2_CH2)
@@ -34,7 +34,7 @@ RGB LED Module          NUCLEO-F103RB
 
 ```
         ┌─────────────────────────────┐
-        │        RGB LED Module       │
+        │        SMD LED Module       │
         │                             │
 PA0 ────┤ R (Red)     ┌───┐           │
         │             │ R │           │
