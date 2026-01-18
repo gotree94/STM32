@@ -550,5 +550,165 @@ NUCLEO-F103RB-Sensors/
 
 ---
 
+# NUCLEO-F103RB 센서 모듈 테스트 프로젝트
+
+Arduino IDE 환경에서 NUCLEO-F103RB 보드를 이용한 다양한 센서 모듈 테스트 프로젝트 모음입니다.
+
+## 📋 프로젝트 개요
+
+이 저장소는 STM32F103RB 기반 NUCLEO 보드를 Arduino IDE 환경에서 사용하여 다양한 센서 모듈을 테스트하는 예제 코드를 포함합니다.
+
+## 🎯 대상
+
+- 임베디드 시스템 입문자
+- STM32 Arduino 개발 환경 학습자
+- 센서 모듈 활용 프로젝트 개발자
+
+## 🔧 개발 환경 설정
+
+### 필수 소프트웨어
+
+1. **Arduino IDE** (1.8.x 또는 2.x)
+2. **STM32duino 보드 패키지**
+
+### STM32duino 설치 방법
+
+1. Arduino IDE → 파일 → 환경설정
+2. 추가적인 보드 매니저 URLs에 다음 추가:
+   ```
+   https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+   ```
+3. 도구 → 보드 → 보드 매니저
+4. "STM32" 검색 → **STM32 MCU based boards** 설치
+
+### 보드 설정
+
+| 설정 항목 | 값 |
+|-----------|-----|
+| 보드 | Nucleo-64 |
+| Board part number | Nucleo F103RB |
+| Upload method | STM32CubeProgrammer (SWD) |
+
+## 📁 프로젝트 구조
+
+```
+sensors/
+├── README.md                    # 이 파일
+├── 01_MiniReedSwitch/          # 미니 리드 스위치 모듈
+│   ├── MiniReedSwitch.ino
+│   └── README.md
+├── 02_HeartRateSensor/         # 심박 센서 모듈
+│   ├── HeartRateSensor.ino
+│   └── README.md
+├── 03_LaserModule/             # 레이저 모듈
+│   ├── LaserModule.ino
+│   └── README.md
+├── 04_ButtonSwitch/            # 버튼 스위치 모듈
+│   ├── ButtonSwitch.ino
+│   └── README.md
+└── 05_ShockSensor/             # 충격 센서 모듈
+    ├── ShockSensor.ino
+    └── README.md
+```
+
+## 📦 센서 모듈 목록
+
+| # | 모듈 | 설명 | 인터페이스 |
+|---|------|------|-----------|
+| 01 | 미니 리드 스위치 | 자기장 감지 스위치 | Digital |
+| 02 | 심박 센서 | PPG 방식 심박 측정 | Analog |
+| 03 | 레이저 모듈 | 650nm 적색 레이저 | Digital/PWM |
+| 04 | 버튼 스위치 | 푸시 버튼 입력 | Digital |
+| 05 | 충격 센서 | 진동/충격 감지 | Digital |
+
+## 🔌 공통 핀 배치
+
+### NUCLEO-F103RB 핀맵
+
+```
+                    NUCLEO-F103RB
+              ┌─────────────────────┐
+              │                     │
+    Arduino   │  STM32    Function  │
+    ─────────────────────────────────
+       A0     │   PA0     ADC/GPIO  │ ← 센서 연결
+       A1     │   PA1     ADC/GPIO  │
+       A2     │   PA4     ADC/GPIO  │
+       A3     │   PB0     ADC/GPIO  │
+       A4     │   PC1     ADC/I2C   │
+       A5     │   PC0     ADC/I2C   │
+              │                     │
+       D13    │   PA5     LED/SPI   │ ← 내장 LED
+              │                     │
+       3.3V   │   3.3V    Power     │
+       5V     │   5V      Power     │
+       GND    │   GND     Ground    │
+              └─────────────────────┘
+```
+
+## 🚀 빠른 시작
+
+1. **저장소 클론**
+   ```bash
+   git clone https://github.com/your-username/nucleo-sensor-test.git
+   ```
+
+2. **Arduino IDE에서 프로젝트 열기**
+   - 원하는 센서 폴더의 `.ino` 파일 열기
+
+3. **보드 연결 및 업로드**
+   - USB 케이블로 NUCLEO 보드 연결
+   - 올바른 포트 선택
+   - 업로드 버튼 클릭
+
+4. **시리얼 모니터 확인**
+   - 도구 → 시리얼 모니터
+   - 보드레이트: 115200
+
+## 📊 각 센서별 특징
+
+### 01. 미니 리드 스위치
+- **용도**: 도어/창문 개폐 감지
+- **동작**: 자석 접근 시 스위치 ON
+- **출력**: 디지털 (HIGH/LOW)
+
+### 02. 심박 센서
+- **용도**: 심박수(BPM) 측정
+- **동작**: PPG 광학 방식
+- **출력**: 아날로그 (0-4095)
+- **특징**: 이동평균 필터, BPM 계산
+
+### 03. 레이저 모듈
+- **용도**: 레이저 포인터, 정렬
+- **동작**: 디지털 ON/OFF, PWM 밝기 조절
+- **모드**: ON, OFF, Blink, SOS, Fade
+- **⚠️ 주의**: 눈 보호 필수
+
+### 04. 버튼 스위치
+- **용도**: 사용자 입력
+- **동작**: 디바운싱, 멀티 이벤트
+- **이벤트**: 싱글클릭, 더블클릭, 롱프레스
+
+### 05. 충격 센서
+- **용도**: 진동/충격 감지
+- **동작**: 인터럽트 + 폴링 하이브리드
+- **특징**: 강도 추정, 경보 모드
+
+## ⚠️ 주의사항
+
+1. **전원**: 센서별 권장 전압 확인 (3.3V 또는 5V)
+2. **레이저**: 절대 눈에 직접 비추지 말 것
+3. **심박 센서**: 손가락을 너무 세게 누르지 말 것
+4. **정전기**: 센서 취급 시 정전기 주의
+
+## 📚 참고 자료
+
+- [STM32duino GitHub](https://github.com/stm32duino)
+- [NUCLEO-F103RB 데이터시트](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
+- [Arduino Reference](https://www.arduino.cc/reference/en/)
+
+---
+
+
 
 
