@@ -709,6 +709,179 @@ sensors/
 
 ---
 
+# NUCLEO-F103RB 센서 모듈 테스트 프로젝트 (세트 2)
+
+Arduino IDE 환경에서 NUCLEO-F103RB 보드를 이용한 다양한 센서 모듈 테스트 프로젝트 모음입니다.
+
+## 📋 프로젝트 개요
+
+이 저장소는 STM32F103RB 기반 NUCLEO 보드를 Arduino IDE 환경에서 사용하여 기울기, 움직임, 조도, 자기장 감지 센서 모듈을 테스트하는 예제 코드를 포함합니다.
+
+## 🎯 대상
+
+- 임베디드 시스템 입문자
+- STM32 Arduino 개발 환경 학습자
+- 센서 모듈 활용 프로젝트 개발자
+
+## 🔧 개발 환경 설정
+
+### 필수 소프트웨어
+
+1. **Arduino IDE** (1.8.x 또는 2.x)
+2. **STM32duino 보드 패키지**
+
+### STM32duino 설치 방법
+
+1. Arduino IDE → 파일 → 환경설정
+2. 추가적인 보드 매니저 URLs에 다음 추가:
+   ```
+   https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+   ```
+3. 도구 → 보드 → 보드 매니저
+4. "STM32" 검색 → **STM32 MCU based boards** 설치
+
+### 보드 설정
+
+| 설정 항목 | 값 |
+|-----------|-----|
+| 보드 | Nucleo-64 |
+| Board part number | Nucleo F103RB |
+| Upload method | STM32CubeProgrammer (SWD) |
+
+## 📁 프로젝트 구조
+
+```
+sensors/
+├── README.md                       # 이 파일
+├── 01_MagicLightCup/              # 매직 라이트컵 모듈
+│   ├── MagicLightCup.ino
+│   └── README.md
+├── 02_TiltSwitch/                 # 각도 스위치 모듈
+│   ├── TiltSwitch.ino
+│   └── README.md
+├── 03_BallSwitch/                 # 볼 스위치 모듈
+│   ├── BallSwitch.ino
+│   └── README.md
+├── 04_LightSensor/                # 조도 센서 모듈
+│   ├── LightSensor.ino
+│   └── README.md
+└── 05_AnalogHallSensor/           # 아날로그 홀센서 모듈
+    ├── AnalogHallSensor.ino
+    └── README.md
+```
+
+## 📦 센서 모듈 목록
+
+| # | 모듈 | 설명 | 인터페이스 |
+|---|------|------|-----------|
+| 01 | 매직 라이트컵 | 수은 스위치 + LED (기울기 감지) | Digital + PWM |
+| 02 | 각도 스위치 | 기울기 감지 (틸트 스위치) | Digital |
+| 03 | 볼 스위치 | 움직임/진동 감지 | Digital |
+| 04 | 조도 센서 | 빛의 밝기 측정 (LDR) | Analog |
+| 05 | 아날로그 홀센서 | 자기장 세기/극성 감지 | Analog |
+
+## 🔌 공통 핀 배치
+
+### NUCLEO-F103RB 핀맵
+
+```
+                    NUCLEO-F103RB
+              ┌─────────────────────┐
+              │                     │
+    Arduino   │  STM32    Function  │
+    ─────────────────────────────────
+       A0     │   PA0     ADC/GPIO  │ ← 센서 연결
+       A1     │   PA1     ADC/GPIO  │ ← LED 제어 (PWM)
+       A2     │   PA4     ADC/GPIO  │
+       A3     │   PB0     ADC/GPIO  │
+              │                     │
+       D13    │   PA5     LED/SPI   │ ← 내장 LED
+              │                     │
+       3.3V   │   3.3V    Power     │
+       5V     │   5V      Power     │
+       GND    │   GND     Ground    │
+              └─────────────────────┘
+```
+
+## 🚀 빠른 시작
+
+1. **저장소 클론**
+   ```bash
+   git clone https://github.com/your-username/nucleo-sensor-test-set2.git
+   ```
+
+2. **Arduino IDE에서 프로젝트 열기**
+   - 원하는 센서 폴더의 `.ino` 파일 열기
+
+3. **보드 연결 및 업로드**
+   - USB 케이블로 NUCLEO 보드 연결
+   - 올바른 포트 선택
+   - 업로드 버튼 클릭
+
+4. **시리얼 모니터 확인**
+   - 도구 → 시리얼 모니터
+   - 보드레이트: 115200
+
+## 📊 각 센서별 특징
+
+### 01. 매직 라이트컵 (KY-027)
+- **용도**: 기울기에 따른 LED 효과
+- **구성**: 수은 스위치 + LED 일체형
+- **모드**: 기본 ON/OFF, 페이드, 물결 효과, 밝기 조절
+- **특징**: 물이 흐르는 듯한 조명 효과 구현 가능
+
+### 02. 각도 스위치 (KY-020)
+- **용도**: 기울기 감지
+- **동작**: 일정 각도 이상 기울어지면 감지
+- **특징**: 통계 기능, 경보 모드, 안정성 감지
+- **장점**: 수은 미사용으로 친환경
+
+### 03. 볼 스위치 (KY-017)
+- **용도**: 움직임/진동 감지
+- **동작**: 매우 민감한 움직임 감지
+- **모드**: 기본, 움직임 강도, 흔들기, 경보
+- **특징**: 흔들기 감지, RPM 측정 가능
+
+### 04. 조도 센서 (KY-018)
+- **용도**: 주변 밝기 측정
+- **동작**: LDR (광저항) 방식
+- **모드**: 측정, 모니터링, 자동 LED, 임계값 알림
+- **특징**: 이동평균 필터, 막대 그래프 표시
+
+### 05. 아날로그 홀센서 (KY-035)
+- **용도**: 자기장 감지
+- **동작**: 홀 효과로 자기장 세기/극성 측정
+- **모드**: 측정, 모니터링, 자석 감지, 가우스 미터
+- **특징**: N/S 극성 구분, RPM 측정, 영점 보정
+
+## 📊 센서 비교표
+
+| 센서 | 감지 대상 | 출력 타입 | 민감도 | 응용 |
+|------|----------|----------|--------|------|
+| 매직 라이트컵 | 기울기 | Digital+PWM | 중 | 조명 효과 |
+| 각도 스위치 | 기울기 | Digital | 낮음 | 기울기 감지 |
+| 볼 스위치 | 움직임 | Digital | 높음 | 진동/흔들기 |
+| 조도 센서 | 빛 | Analog | - | 밝기 측정 |
+| 홀센서 | 자기장 | Analog | - | 자석 감지 |
+
+## ⚠️ 주의사항
+
+1. **전원**: 센서별 권장 전압 확인 (3.3V 또는 5V)
+2. **매직 라이트컵**: 수은 스위치 포함 - 취급 주의
+3. **볼 스위치**: 매우 민감 - 디바운싱 필수
+4. **조도 센서**: 비선형 특성 - 정밀 측정에는 Lux 센서 권장
+5. **홀센서**: 영점 보정 필요 - 주변 자기장 영향 주의
+
+## 📚 참고 자료
+
+- [STM32duino GitHub](https://github.com/stm32duino)
+- [NUCLEO-F103RB 데이터시트](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
+- [Arduino Reference](https://www.arduino.cc/reference/en/)
+
+---
+
+
+
 
 
 
