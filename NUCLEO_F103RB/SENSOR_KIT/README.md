@@ -367,13 +367,168 @@ uint8_t obstacle = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);  // 0=장애물
 - [STM32CubeIDE User Guide](https://www.st.com/resource/en/user_manual/um2609-stm32cubeide-user-guide-stmicroelectronics.pdf)
 
 ---
+# STM32F103 센서 모듈 테스트 프로젝트
 
+NUCLEO-F103RB 보드를 이용한 다양한 센서 모듈 테스트 프로젝트 모음
 
+## 📋 프로젝트 개요
 
+이 저장소는 STM32F103 마이크로컨트롤러를 사용하여 다양한 센서 모듈을 테스트하는 예제 코드를 포함합니다. 각 센서별로 독립적인 프로젝트로 구성되어 있으며, HAL 라이브러리를 기반으로 작성되었습니다.
 
+## 🎯 대상 보드
 
+- **MCU**: STM32F103RB
+- **보드**: NUCLEO-F103RB
+- **클럭**: 72MHz (HSE + PLL)
+- **디버그 출력**: UART2 (115200bps, ST-Link Virtual COM)
 
+## 📁 프로젝트 구조
 
+```
+stm32f103_sensors/
+├── README.md                           # 이 파일
+├── 01_Flame_Sensor/                    # 불꽃 감지 센서
+│   ├── main.c
+│   └── README.md
+├── 02_Linear_Hall_Sensor/              # 리니어 홀 센서
+│   ├── main.c
+│   └── README.md
+├── 03_Touch_Sensor/                    # 터치 센서
+│   ├── main.c
+│   └── README.md
+├── 04_Digital_Temperature_Sensor/      # 디지털 온도 센서 (DS18B20)
+│   ├── main.c
+│   └── README.md
+└── 05_Reed_Switch/                     # 리드 스위치
+    ├── main.c
+    └── README.md
+```
+
+## 📊 센서 모듈 요약
+
+| # | 센서 | 인터페이스 | 주요 기능 | 응용 분야 |
+|---|------|-----------|----------|----------|
+| 11 | 불꽃 감지 | Digital + ADC | 화염 감지, 강도 측정 | 화재 경보, 안전 시스템 |
+| 12 | 리니어 홀 | Digital + ADC | 자기장 세기/극성 측정 | 위치 감지, 회전 측정 |
+| 13 | 터치 | Digital | 정전식 터치, 제스처 인식 | UI 입력, 버튼 대체 |
+| 14 | DS18B20 | 1-Wire | 디지털 온도 측정 | 온도 모니터링, 환경 제어 |
+| 15 | 리드 스위치 | Digital | 자기장 ON/OFF 감지 | 문/창문 센서, 보안 |
+
+## 🔌 공통 핀 배치
+
+모든 프로젝트는 아래의 공통 핀 배치를 사용합니다:
+
+```
+센서 모듈              NUCLEO-F103RB
+┌─────────────┐       ┌─────────────────┐
+│     VCC     │──────▶│      3.3V       │
+│     GND     │──────▶│      GND        │
+│     DO      │──────▶│      PA0        │ (Digital Input)
+│     AO      │──────▶│      PA1        │ (ADC1_IN1)
+└─────────────┘       └─────────────────┘
+
+UART2 (디버그 출력):
+  - TX: PA2
+  - RX: PA3
+  - Baudrate: 115200
+
+온보드 LED: PA5 (상태 표시용)
+```
+
+## 🛠️ 개발 환경
+
+### 필수 도구
+- **IDE**: STM32CubeIDE 1.x 이상
+- **HAL 라이브러리**: STM32Cube_FW_F1
+- **시리얼 터미널**: PuTTY, Tera Term, 또는 Arduino Serial Monitor
+
+### 빌드 방법
+
+1. STM32CubeIDE에서 새 프로젝트 생성
+   - Board Selector에서 "NUCLEO-F103RB" 선택
+   - Project Name 입력 후 생성
+
+2. 생성된 `main.c` 파일을 원하는 센서의 `main.c`로 교체
+
+3. 빌드 및 다운로드
+   ```
+   Project → Build All (Ctrl+B)
+   Run → Debug (F11) 또는 Run (Ctrl+F11)
+   ```
+
+4. 시리얼 터미널로 결과 확인
+   - COM 포트: ST-Link Virtual COM Port
+   - Baudrate: 115200
+   - Data: 8-N-1
+
+## 📝 사용 방법
+
+### 1. 하드웨어 연결
+```
+1. 센서 모듈의 VCC를 NUCLEO 보드의 3.3V에 연결
+2. 센서 모듈의 GND를 NUCLEO 보드의 GND에 연결
+3. 센서 모듈의 DO를 PA0에 연결
+4. (옵션) 센서 모듈의 AO를 PA1에 연결
+```
+
+### 2. 소프트웨어 설정
+```
+1. 해당 센서의 main.c 파일을 프로젝트에 복사
+2. 빌드 및 다운로드
+3. 시리얼 터미널로 출력 확인
+```
+
+### 3. 테스트
+```
+1. 센서에 적절한 자극 제공 (불꽃, 자석, 터치 등)
+2. 시리얼 출력에서 센서 반응 확인
+3. 온보드 LED 상태 확인
+```
+
+## 🔧 핀 변경 방법
+
+기본 핀(PA0, PA1)을 변경하려면:
+
+```c
+// 1. GPIO 핀 정의 수정
+#define SENSOR_PORT     GPIOB      // 원하는 포트
+#define SENSOR_PIN      GPIO_PIN_5  // 원하는 핀
+
+// 2. GPIO 초기화에서 클럭 활성화 수정
+__HAL_RCC_GPIOB_CLK_ENABLE();      // 해당 포트 클럭
+
+// 3. ADC 채널 수정 (아날로그 입력 사용 시)
+sConfig.Channel = ADC_CHANNEL_X;   // 해당 ADC 채널
+```
+
+## 🎓 학습 목표
+
+이 프로젝트를 통해 다음을 학습할 수 있습니다:
+
+1. **GPIO 입력 처리**: 디지털 센서 인터페이싱
+2. **ADC 사용**: 아날로그 센서 값 읽기
+3. **디바운싱**: 스위치/버튼 노이즈 제거
+4. **1-Wire 프로토콜**: DS18B20 통신
+5. **UART 통신**: 디버그 출력
+6. **타이머 활용**: 마이크로초 딜레이, 시간 측정
+7. **상태 머신**: 센서 상태 추적
+
+## 📚 참고 자료
+
+### STM32 문서
+- [STM32F103 Reference Manual (RM0008)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [NUCLEO-F103RB User Manual (UM1724)](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
+- [STM32F103 Datasheet](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
+
+### 센서 데이터시트
+- 각 센서별 README.md 파일 참조
+
+## ⚠️ 주의사항
+
+1. **전압 레벨**: 모든 센서는 3.3V로 구동 (5V 사용 시 MCU 손상 가능)
+2. **전류 제한**: GPIO 핀당 최대 25mA
+3. **정전기 주의**: ESD에 민감한 부품 취급 주의
+4. **단락 방지**: 연결 전 배선 확인
 
 ---
 
