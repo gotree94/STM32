@@ -13,7 +13,7 @@ SMD(Surface Mount Device) LED 모듈을 STM32F103 NUCLEO 보드에서 GPIO 및 P
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | NUCLEO-F103RB | 1 | STM32F103RB 탑재 |
-| RGB LED 모듈 | 1 | KY-009 또는 호환 모듈 |
+| SMD LED 모듈 | 1 | KY-009 또는 호환 모듈 |
 | 점퍼 와이어 | 4 | Female-Female |
 
 ### 핀 연결
