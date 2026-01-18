@@ -84,6 +84,54 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
   sudo udevadm control --reload-rules
   ```
 
+```arduino
+/**
+ ******************************************************************************
+ * @file    LD2_Blink.ino
+ * @brief   NUCLEO-F103RB LD2 LED Blink Test
+ * @date    2025-01-18
+ ******************************************************************************
+ * @details
+ * NUCLEO-F103RB 보드의 내장 LED(LD2)를 켜고 끄는 기본 테스트
+ * 
+ * LD2 LED: PA5 (D13)
+ * - Active HIGH (HIGH = ON, LOW = OFF)
+ ******************************************************************************
+ */
+
+#define LD2_PIN     PA5     // 내장 LED (D13과 동일)
+
+void setup() {
+    // 시리얼 초기화
+    Serial.begin(115200);
+    while (!Serial) { delay(10); }
+    
+    Serial.println();
+    Serial.println("NUCLEO-F103RB LD2 Blink Test");
+    Serial.println("LED Pin: PA5 (LD2)");
+    Serial.println();
+    
+    // LED 핀 출력 모드 설정
+    pinMode(LD2_PIN, OUTPUT);
+    
+    // 초기 상태: OFF
+    digitalWrite(LD2_PIN, LOW);
+}
+
+void loop() {
+    // LED ON
+    digitalWrite(LD2_PIN, HIGH);
+    Serial.println("LD2: ON");
+    delay(1000);
+    
+    // LED OFF
+    digitalWrite(LD2_PIN, LOW);
+    Serial.println("LD2: OFF");
+    delay(1000);
+}
+
+```
+
 ---
 
 ## NUCLEO-F103RB 보드 정보
