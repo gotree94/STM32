@@ -57,7 +57,7 @@ PA2 ────┤ B (Blue)    └───┘     │     │
 
 ```c
 Timer: TIM2
-Prescaler: 71 (72MHz / 72 = 1MHz)
+Prescaler: 63 (64MHz / 64 = 1MHz)
 Period: 999 (1MHz / 1000 = 1kHz PWM)
 Channels: CH1(PA0), CH2(PA1), CH3(PA2)
 ```
