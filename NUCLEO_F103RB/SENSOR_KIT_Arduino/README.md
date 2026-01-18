@@ -37,6 +37,9 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
    ```
 3. **OK** 클릭하여 저장
 
+<img width="1272" height="721" alt="010" src="https://github.com/user-attachments/assets/4a15da44-4528-4676-be03-f4458f658d40" />
+
+
 ### 3. STM32 보드 패키지 설치
 
 1. **Tools → Board → Boards Manager** (도구 → 보드 → 보드 매니저) 열기
