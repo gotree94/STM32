@@ -232,31 +232,31 @@ void loop() {
 | 03 | [2색 LED 모듈](./03_Two_Color_LED/) | 2색 LED 제어 | `03_Two_Color_LED` |
 | 04 | [소형 2색 LED 모듈](./04_Small_Two_Color_LED/) | 소형 2색 LED 제어 | `04_Small_Two_Color_LED` |
 | 05 | [7색 LED 모듈](./05_Seven_Color_LED/) | 자동 색상 변환 LED | `05_Seven_Color_LED` |
-| 06 | [릴레이 모듈](./06_Relay_Module/) | 릴레이 ON/OFF 제어 | `06_Relay_Module` |
-| 07 | [레이저 모듈](./07_Laser_Module/) | 레이저 다이오드 제어 | `07_Laser_Module` |
-| 08 | [버튼 스위치 모듈](./08_Button_Switch/) | 디지털 입력 + 디바운싱 | `08_Button_Switch` |
-| 09 | [터치 센서 모듈](./09_Touch_Sensor/) | 정전식 터치 입력 | `09_Touch_Sensor` |
-| 10 | [충격 센서 모듈](./10_Shock_Sensor/) | 진동/충격 감지 | `10_Shock_Sensor` |
-| 11 | [노크 센서 모듈](./11_Knock_Sensor/) | 압전 소자 진동 감지 | `11_Knock_Sensor` |
-| 12 | [볼 스위치 모듈](./12_Ball_Switch/) | 기울임 감지 | `12_Ball_Switch` |
-| 13 | [각도 스위치 모듈](./13_Tilt_Switch/) | 특정 각도 감지 | `13_Tilt_Switch` |
-| 14 | [매직 라이트컵 모듈](./14_Magic_Light_Cup/) | 수은 스위치 + LED | `14_Magic_Light_Cup` |
+| 06 | [릴레이 모듈](./06.relay_module/) | 릴레이 ON/OFF 제어 | `06.relay_module` |
+| 07 | [고감도 소리센서 모듈](./07.sound_sensor_high/) | 아날로그 마이크 | `07.sound_sensor_high` |
+| 08 | [소형 소리센서 모듈](./08.sound_sensor_small/) | 디지털 마이크 | `08.sound_sensor_small` |
+| 09 | [트래킹 모듈](./09.tracking_module/) | 라인 트레이싱 | `09.tracking_module` |
+| 10 | [장애물 감지센서 모듈](./10.obstacle_sensor/) | IR 반사 감지 | `10.obstacle_sensor` |
+| 11 | [불꽃 감지 모듈](./11_Flame_Sensor/) | IR 화염 감지 | `11_Flame_Sensor` |
+| 12 | [리니어 홀센서 모듈](./12_Linear_Hall_Sensor/) | 아날로그 자기장 | `12_Linear_Hall_Sensor` |
+| 13 | [터치 센서 모듈](./13_Touch_Sensor/) | 정전식 터치 입력 | `13_Touch_Sensor` |
+| 14 | [디지털 온도센서 모듈](./14_Digital_Temperature_Sensor/) | DS18B20 1-Wire | `14_Digital_Temperature_Sensor` |
 | 15 | [리드 스위치 모듈](./15_Reed_Switch/) | 자석 감지 | `15_Reed_Switch` |
-| 16 | [미니 리드 모듈](./16_Mini_Reed_Switch/) | 소형 자석 감지 | `16_Mini_Reed_Switch` |
-| 17 | [포토 인터럽트 모듈](./17_Photo_Interrupt/) | 광차단 감지 | `17_Photo_Interrupt` |
-| 18 | [조도 센서 모듈](./18_Light_Sensor/) | CdS 광량 측정 | `18_Light_Sensor` |
-| 19 | [불꽃 감지 모듈](./19_Flame_Sensor/) | IR 화염 감지 | `19_Flame_Sensor` |
-| 20 | [심박 센서 모듈](./20_Heart_Rate_Sensor/) | 광학식 PPG | `20_Heart_Rate_Sensor` |
-| 21 | [고감도 소리센서 모듈](./21_Sound_Sensor_High/) | 아날로그 마이크 | `21_Sound_Sensor_High` |
-| 22 | [소형 소리센서 모듈](./22_Sound_Sensor_Small/) | 디지털 마이크 | `22_Sound_Sensor_Small` |
-| 23 | [아날로그 온도센서 모듈](./23_Analog_Temp_Sensor/) | LM35 온도 측정 | `23_Analog_Temp_Sensor` |
-| 24 | [온도 센서 모듈](./24_Temperature_Sensor/) | NTC 서미스터 | `24_Temperature_Sensor` |
-| 25 | [디지털 온도센서 모듈](./25_Digital_Temp_Sensor/) | DS18B20 1-Wire | `25_Digital_Temp_Sensor` |
-| 26 | [리니어 홀센서 모듈](./26_Linear_Hall_Sensor/) | 아날로그 자기장 | `26_Linear_Hall_Sensor` |
-| 27 | [아날로그 홀센서 모듈](./27_Analog_Hall_Sensor/) | 자기장 세기 측정 | `27_Analog_Hall_Sensor` |
-| 28 | [홀 마그네틱 모듈](./28_Hall_Magnetic/) | 디지털 자석 감지 | `28_Hall_Magnetic` |
-| 29 | [트래킹 모듈](./29_Tracking_Module/) | 라인 트레이싱 | `29_Tracking_Module` |
-| 30 | [장애물 감지센서 모듈](./30_Obstacle_Sensor/) | IR 반사 감지 | `30_Obstacle_Sensor` |
+| 16 | [미니 리드 모듈](./16_MiniReedSwitch/) | 소형 자석 감지 | `16_MiniReedSwitch` |
+| 17 | [심박 센서 모듈](./17_HeartRateSensor/) | 광학식 PPG | `17_HeartRateSensor` |
+| 18 | [레이저 모듈](./18_LaserModule/) | 레이저 다이오드 제어 | `18_LaserModule` |
+| 19 | [버튼 스위치 모듈](./19_ButtonSwitch/) | 디지털 입력 + 디바운싱 | `19_ButtonSwitch` |
+| 20 | [충격 센서 모듈](./20_ShockSensor/) | 진동/충격 감지 | `20_ShockSensor` |
+| 21 | [매직 라이트컵 모듈](./21_MagicLightCup/) | 수은 스위치 + LED | `21_MagicLightCup` |
+| 22 | [각도 스위치 모듈](./22_TiltSwitch/) | 특정 각도 감지 | `22_TiltSwitch` |
+| 23 | [볼 스위치 모듈](./23_BallSwitch/) | 기울임 감지 | `23_BallSwitch` |
+| 24 | [조도 센서 모듈](./24_LightSensor/) | CdS 광량 측정 | `24_LightSensor` |
+| 25 | [아날로그 홀센서 모듈](./25_AnalogHallSensor/) | 자기장 세기 측정 | `25_AnalogHallSensor` |
+| 26 | [홀 마그네틱 모듈](./26_Hall_Magnetic_Module/) | 디지털 자석 감지 | `26_Hall_Magnetic_Module` |
+| 27 | [온도 센서 모듈](./27_Temperature_Sensor_Module/) | NTC 서미스터 | `27_Temperature_Sensor_Module` |
+| 28 | [아날로그 조도센서 모듈](./28_Analog_Light_Sensor_Module/) | 아날로그 광량 측정 | `28_Analog_Light_Sensor_Module` |
+| 29 | [노크 센서 모듈](./29_Knock_Sensor_Module/) | 압전 소자 진동 감지 | `29_Knock_Sensor_Module` |
+| 30 | [포토 인터럽트 모듈](./30_Photo_Interrupt_Module/) | 광차단 감지 | `30_Photo_Interrupt_Module` |
 | 31 | [IR 발신 모듈](./31_IR_Transmitter/) | 적외선 송신 | `31_IR_Transmitter` |
 | 32 | [IR 수신 모듈](./32_IR_Receiver/) | 적외선 수신 | `32_IR_Receiver` |
 | 33 | [IR 리모컨 수신](./33_IR_Remote_Decoder/) | 리모컨 디코딩 | `33_IR_Remote_Decoder` |
