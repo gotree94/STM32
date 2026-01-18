@@ -1082,6 +1082,113 @@ Pin  Function    Use
 
 ---
 
+# STM32F103 IR Sensor Projects
+
+NUCLEO-F103RB 보드를 이용한 IR(적외선) 센서 테스트 프로젝트 모음
+
+## 프로젝트 목록
+
+| 프로젝트 | 설명 | 난이도 |
+|----------|------|--------|
+| [01_IR_Transmitter](./01_IR_Transmitter) | IR LED를 이용한 38kHz 변조 신호 송신 | ⭐⭐ |
+| [02_IR_Receiver](./02_IR_Receiver) | IR 수신 모듈 기본 테스트 (신호 감지) | ⭐ |
+| [03_IR_Remote_Decoder](./03_IR_Remote_Decoder) | IR 리모컨 NEC 프로토콜 디코딩 | ⭐⭐⭐ |
+
+## 하드웨어 요구사항
+
+### 필수
+
+- NUCLEO-F103RB 개발보드
+- USB 케이블 (Mini-B)
+- 브레드보드 및 점퍼 와이어
+
+### IR 송신 모듈용
+
+- IR LED (940nm 권장)
+- 100Ω 저항
+- (선택) 2N2222 트랜지스터 + 1kΩ 저항
+
+### IR 수신 모듈용
+
+- IR 수신 모듈 (TSOP1838, VS1838B 등)
+- IR 리모컨 (NEC 프로토콜 지원)
+
+## 전체 회로도
+
+```
+                    NUCLEO-F103RB
+                   ┌─────────────┐
+                   │             │
+    [IR LED] ←──── │ PA8 (PWM)   │
+                   │             │
+    [IR RX]  ───→  │ PA0         │
+                   │             │
+    [IR RX]  ───→  │ PA6 (TIM3)  │ ← Input Capture 사용 시
+                   │             │
+    [On-board] ←── │ PA5 (LED)   │
+                   │             │
+    [Button]  ───→ │ PC13        │ ← 내장 버튼
+                   │             │
+    [USB VCP] ←──→ │ PA2/PA3     │ ← UART2
+                   │             │
+                   │     GND     │───── GND
+                   │    3.3V     │───── VCC
+                   └─────────────┘
+```
+
+## 개발 환경
+
+### 소프트웨어
+
+- STM32CubeIDE (권장)
+- 또는 STM32CubeMX + Keil/IAR/GCC
+- 시리얼 터미널 프로그램 (PuTTY, Tera Term 등)
+
+### 드라이버
+
+- STM32 HAL Library
+- CMSIS
+
+## 빠른 시작
+
+### 1. 저장소 클론
+
+```bash
+git clone https://github.com/your-username/stm32-ir-projects.git
+cd stm32-ir-projects
+```
+
+### 2. STM32CubeIDE에서 열기
+
+1. File → Import → General → Existing Projects
+2. 원하는 프로젝트 폴더 선택
+3. Finish
+
+### 3. 빌드 및 플래시
+
+```
+Build: Ctrl+B
+Flash: Ctrl+F11
+```
+
+### 4. 시리얼 모니터
+
+```
+Baud: 115200 | Data: 8 | Stop: 1 | Parity: None
+```
+
+## NEC 프로토콜 요약
+
+```
+프레임: Leader(9ms) + Space(4.5ms) + 32-bit Data + Stop
+비트 0: 560us pulse + 560us space
+비트 1: 560us pulse + 1690us space
+리피트: 9ms pulse + 2.25ms space + Stop
+```
+## 참고 자료
+
+- [NEC Protocol](https://www.sbprojects.net/knowledge/ir/nec.php)
+- [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008.pdf)
 
 
 
