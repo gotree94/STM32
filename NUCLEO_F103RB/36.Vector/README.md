@@ -21,6 +21,10 @@
 - GPIO Output: PA1, PA6, PB6
 - Clock: 64MHz
 
+<img width="945" height="920" alt="Vector_eyes" src="https://github.com/user-attachments/assets/53959064-5ec3-40ef-a595-a55f5119c4d2" />
+
+
+
 ---
 
 ### 2. SSD1306 I2C (0.96" 128x64 OLED)
@@ -39,6 +43,10 @@
 - Clock: 64MHz
 
 **주의:** I2C 주소가 안 맞으면 `SSD1306_I2C_ADDR`를 `0x7A`로 변경
+
+
+<img width="1006" height="1013" alt="Vector_eyes_i2c" src="https://github.com/user-attachments/assets/1ae23ead-18a3-42db-9aa8-1aeb8c7b910b" />
+
 
 ---
 
@@ -98,6 +106,10 @@ D3 = PB3    D7 = PA8
 | LOOK_RIGHT | 오른쪽 보기 |
 | LOOK_UP | 위 보기 |
 | LOOK_DOWN | 아래 보기 |
+
+
+<img width="1268" height="1194" alt="Vector_ili9341" src="https://github.com/user-attachments/assets/dd46cf44-fbfb-4fe1-b929-d7dd6334df94" />
+
 
 ---
 
