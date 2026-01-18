@@ -1,17 +1,20 @@
 /* ============================================================================
  * Vector Robot Eye Animation - ST7735S SPI Version (0.96" 160x80 LCD)
+ * ★ 핀 위쪽, 가로 모드 - 오프셋 수정 버전 ★
  * ============================================================================
- * 
+ *
  * 하드웨어 연결:
  *   - SPI1: PA5(SCK), PA7(MOSI)
  *   - GPIO: PA1(RES), PA6(DC), PB6(CS)
  *   - 전원: 3.3V, GND
- * 
+ *
+ * LCD 배치: 핀이 위쪽, 가로로 보기
+ *
  * CubeMX 설정:
- *   - SPI1: Mode=Transmit Only Master, Prescaler=4 (16MHz @ 64MHz clock)
+ *   - SPI1: Mode=Transmit Only Master, Prescaler=4
  *   - GPIO Output: PA1, PA6, PB6
  *   - System Clock: 64MHz
- * 
+ *
  * ============================================================================
  */
 
@@ -28,11 +31,17 @@ SPI_HandleTypeDef hspi1;
 #define LCD_WIDTH  160
 #define LCD_HEIGHT 80
 
+// ★ 오프셋 설정 (0.96" 160x80 LCD, 핀 위쪽) ★
+// 안 맞으면 다른 값 시도: (24,0), (26,1), (1,26), (0,24)
+#define X_OFFSET   0 //24
+#define Y_OFFSET   26
+
 // ST7735 Commands
 #define ST7735_SWRESET 0x01
 #define ST7735_SLPOUT  0x11
 #define ST7735_NORON   0x13
 #define ST7735_INVOFF  0x20
+#define ST7735_INVON   0x21
 #define ST7735_DISPON  0x29
 #define ST7735_CASET   0x2A
 #define ST7735_RASET   0x2B
@@ -52,30 +61,25 @@ SPI_HandleTypeDef hspi1;
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
-// Colors
+// Colors (RGB565)
 #define BLACK       0x0000
+#define WHITE       0xFFFF
+#define RED         0xF800
+#define GREEN       0x07E0
+#define BLUE        0x001F
 #define EYE_COLOR   0x07E0   // Green
 #define EYE_BRIGHT  0xAFE5
 #define EYE_DIM     0x0320
 
-// 눈 영역 정의
-#define EYE_AREA_X      10
-#define EYE_AREA_Y      20      // 위치 조정 가능
-#define EYE_AREA_W      140
-#define EYE_AREA_H      50
-
-// 눈 위치 (버퍼 내 좌표)
-#define LX              40
-#define RX              100
-#define CY              25
+// 눈 위치 (화면 좌표)
+#define LX              40      // 왼쪽 눈 중심 X
+#define RX              120     // 오른쪽 눈 중심 X
+#define CY              40      // 눈 중심 Y (화면 중앙)
 
 // 눈 크기
-#define EYE_W           32
-#define EYE_H           40
+#define EYE_W           30
+#define EYE_H           50
 #define EYE_R           10
-
-// 프레임버퍼
-static uint8_t eye_buffer[EYE_AREA_W * EYE_AREA_H * 2];
 
 // GPIO 매크로
 #define LCD_CS_LOW()   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
@@ -115,174 +119,111 @@ static void LCD_Data(uint8_t data) {
     LCD_CS_HIGH();
 }
 
-static void LCD_SetWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
+// ★ 오프셋 적용된 SetWindow ★
+static void LCD_SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
     LCD_Cmd(ST7735_CASET);
-    LCD_Data(0); LCD_Data(x0);
-    LCD_Data(0); LCD_Data(x1);
+    LCD_Data(0); LCD_Data(x0 + X_OFFSET);
+    LCD_Data(0); LCD_Data(x1 + X_OFFSET);
+
     LCD_Cmd(ST7735_RASET);
-    LCD_Data(0); LCD_Data(y0);
-    LCD_Data(0); LCD_Data(y1);
+    LCD_Data(0); LCD_Data(y0 + Y_OFFSET);
+    LCD_Data(0); LCD_Data(y1 + Y_OFFSET);
+
     LCD_Cmd(ST7735_RAMWR);
 }
 
-static void LCD_SendBuffer(uint8_t* buf, uint32_t len) {
-    LCD_DC_HIGH();
-    LCD_CS_LOW();
-    HAL_SPI_Transmit(&hspi1, buf, len, HAL_MAX_DELAY);
-    LCD_CS_HIGH();
-}
-
-static void LCD_Init(void) {
-    LCD_RES_LOW(); HAL_Delay(50);
-    LCD_RES_HIGH(); HAL_Delay(50);
-    
-    LCD_Cmd(ST7735_SWRESET); HAL_Delay(120);
-    LCD_Cmd(ST7735_SLPOUT); HAL_Delay(120);
-    
-    LCD_Cmd(ST7735_FRMCTR1);
-    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
-    LCD_Cmd(ST7735_FRMCTR2);
-    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
-    LCD_Cmd(ST7735_FRMCTR3);
-    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
-    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
-    
-    LCD_Cmd(ST7735_INVCTR); LCD_Data(0x07);
-    LCD_Cmd(ST7735_PWCTR1); LCD_Data(0xA2); LCD_Data(0x02); LCD_Data(0x84);
-    LCD_Cmd(ST7735_PWCTR2); LCD_Data(0xC5);
-    LCD_Cmd(ST7735_PWCTR3); LCD_Data(0x0A); LCD_Data(0x00);
-    LCD_Cmd(ST7735_PWCTR4); LCD_Data(0x8A); LCD_Data(0x2A);
-    LCD_Cmd(ST7735_PWCTR5); LCD_Data(0x8A); LCD_Data(0xEE);
-    LCD_Cmd(ST7735_VMCTR1); LCD_Data(0x0E);
-    
-    LCD_Cmd(ST7735_INVOFF);
-    LCD_Cmd(ST7735_MADCTL); LCD_Data(0x60);
-    LCD_Cmd(ST7735_COLMOD); LCD_Data(0x05);
-    
-    LCD_Cmd(ST7735_CASET);
-    LCD_Data(0); LCD_Data(0); LCD_Data(0); LCD_Data(159);
-    LCD_Cmd(ST7735_RASET);
-    LCD_Data(0); LCD_Data(0); LCD_Data(0); LCD_Data(79);
-    
-    LCD_Cmd(ST7735_GMCTRP1);
-    uint8_t gp[] = {0x0f,0x1a,0x0f,0x18,0x2f,0x28,0x20,0x22,0x1f,0x1b,0x23,0x37,0x00,0x07,0x02,0x10};
-    for(int i=0;i<16;i++) LCD_Data(gp[i]);
-    LCD_Cmd(ST7735_GMCTRN1);
-    uint8_t gn[] = {0x0f,0x1b,0x0f,0x17,0x33,0x2c,0x29,0x2e,0x30,0x30,0x39,0x3f,0x00,0x07,0x03,0x10};
-    for(int i=0;i<16;i++) LCD_Data(gn[i]);
-    
-    LCD_Cmd(ST7735_NORON); HAL_Delay(10);
-    LCD_Cmd(ST7735_DISPON); HAL_Delay(50);
-}
-
-static void LCD_ClearScreen(void) {
-    LCD_SetWindow(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
-    LCD_DC_HIGH();
-    LCD_CS_LOW();
-    uint8_t black[2] = {0, 0};
-    for(uint32_t i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++) {
-        HAL_SPI_Transmit(&hspi1, black, 2, HAL_MAX_DELAY);
-    }
-    LCD_CS_HIGH();
-}
-
-// ============================================================================
-// 버퍼 그리기 함수
-// ============================================================================
-
-static void Buf_Clear(void) {
-    memset(eye_buffer, 0, sizeof(eye_buffer));
-}
-
-static inline void Buf_SetPixel(int16_t x, int16_t y, uint16_t color) {
-    if(x < 0 || x >= EYE_AREA_W || y < 0 || y >= EYE_AREA_H) return;
-    uint32_t idx = (y * EYE_AREA_W + x) * 2;
-    eye_buffer[idx] = color >> 8;
-    eye_buffer[idx + 1] = color & 0xFF;
-}
-
-static void Buf_FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+// 고속 색상 출력
+static void LCD_WriteColorFast(uint16_t color, uint32_t count) {
     uint8_t hi = color >> 8;
     uint8_t lo = color & 0xFF;
-    for(int16_t j = y; j < y + h; j++) {
-        if(j < 0 || j >= EYE_AREA_H) continue;
-        for(int16_t i = x; i < x + w; i++) {
-            if(i < 0 || i >= EYE_AREA_W) continue;
-            uint32_t idx = (j * EYE_AREA_W + i) * 2;
-            eye_buffer[idx] = hi;
-            eye_buffer[idx + 1] = lo;
-        }
+
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+    while(count--) {
+        HAL_SPI_Transmit(&hspi1, &hi, 1, HAL_MAX_DELAY);
+        HAL_SPI_Transmit(&hspi1, &lo, 1, HAL_MAX_DELAY);
     }
+    LCD_CS_HIGH();
 }
 
-static void Buf_FillCircle(int16_t cx, int16_t cy, int16_t r, uint16_t color) {
+// 사각형 채우기
+static void LCD_FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+    if(x >= LCD_WIDTH || y >= LCD_HEIGHT || w <= 0 || h <= 0) return;
+    if(x < 0) { w += x; x = 0; }
+    if(y < 0) { h += y; y = 0; }
+    if(x + w > LCD_WIDTH) w = LCD_WIDTH - x;
+    if(y + h > LCD_HEIGHT) h = LCD_HEIGHT - y;
+    if(w <= 0 || h <= 0) return;
+
+    LCD_SetWindow(x, y, x + w - 1, y + h - 1);
+    LCD_WriteColorFast(color, (uint32_t)w * h);
+}
+
+// 수평선
+static void LCD_HLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
+    if(y < 0 || y >= LCD_HEIGHT || w <= 0) return;
+    if(x < 0) { w += x; x = 0; }
+    if(x + w > LCD_WIDTH) w = LCD_WIDTH - x;
+    if(w <= 0) return;
+
+    LCD_SetWindow(x, y, x + w - 1, y);
+    LCD_WriteColorFast(color, w);
+}
+
+// 채워진 원
+static void LCD_FillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color) {
     int16_t x = r, y = 0;
     int16_t err = 1 - r;
-    uint8_t hi = color >> 8;
-    uint8_t lo = color & 0xFF;
-    
+
     while(x >= y) {
-        for(int16_t i = cx - x; i <= cx + x; i++) {
-            if(i >= 0 && i < EYE_AREA_W) {
-                if(cy + y >= 0 && cy + y < EYE_AREA_H) {
-                    uint32_t idx = ((cy + y) * EYE_AREA_W + i) * 2;
-                    eye_buffer[idx] = hi; eye_buffer[idx + 1] = lo;
-                }
-                if(cy - y >= 0 && cy - y < EYE_AREA_H) {
-                    uint32_t idx = ((cy - y) * EYE_AREA_W + i) * 2;
-                    eye_buffer[idx] = hi; eye_buffer[idx + 1] = lo;
-                }
-            }
-        }
-        for(int16_t i = cx - y; i <= cx + y; i++) {
-            if(i >= 0 && i < EYE_AREA_W) {
-                if(cy + x >= 0 && cy + x < EYE_AREA_H) {
-                    uint32_t idx = ((cy + x) * EYE_AREA_W + i) * 2;
-                    eye_buffer[idx] = hi; eye_buffer[idx + 1] = lo;
-                }
-                if(cy - x >= 0 && cy - x < EYE_AREA_H) {
-                    uint32_t idx = ((cy - x) * EYE_AREA_W + i) * 2;
-                    eye_buffer[idx] = hi; eye_buffer[idx + 1] = lo;
-                }
-            }
-        }
+        LCD_HLine(x0 - x, y0 + y, x * 2 + 1, color);
+        LCD_HLine(x0 - x, y0 - y, x * 2 + 1, color);
+        LCD_HLine(x0 - y, y0 + x, y * 2 + 1, color);
+        LCD_HLine(x0 - y, y0 - x, y * 2 + 1, color);
+
         y++;
         if(err < 0) err += 2 * y + 1;
         else { x--; err += 2 * (y - x + 1); }
     }
 }
 
-static void Buf_RoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color) {
-    Buf_FillRect(x + r, y, w - 2*r, h, color);
-    Buf_FillRect(x, y + r, r, h - 2*r, color);
-    Buf_FillRect(x + w - r, y + r, r, h - 2*r, color);
-    Buf_FillCircle(x + r, y + r, r, color);
-    Buf_FillCircle(x + w - r - 1, y + r, r, color);
-    Buf_FillCircle(x + r, y + h - r - 1, r, color);
-    Buf_FillCircle(x + w - r - 1, y + h - r - 1, r, color);
+// 둥근 사각형
+static void LCD_RoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color) {
+    if(w > 2*r) LCD_FillRect(x + r, y, w - 2*r, h, color);
+    if(h > 2*r) {
+        LCD_FillRect(x, y + r, r, h - 2*r, color);
+        LCD_FillRect(x + w - r, y + r, r, h - 2*r, color);
+    }
+    LCD_FillCircle(x + r, y + r, r, color);
+    LCD_FillCircle(x + w - r - 1, y + r, r, color);
+    LCD_FillCircle(x + r, y + h - r - 1, r, color);
+    LCD_FillCircle(x + w - r - 1, y + h - r - 1, r, color);
 }
 
-static void Buf_HLine(int16_t x, int16_t y, int16_t w, int16_t thick, uint16_t color) {
-    Buf_FillRect(x, y - thick/2, w, thick, color);
-}
-
-static void Buf_ThickLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t t, uint16_t color) {
+// 두꺼운 선
+static void LCD_ThickLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t t, uint16_t color) {
     int16_t dx = (x1 > x0) ? (x1 - x0) : (x0 - x1);
     int16_t dy = (y1 > y0) ? (y1 - y0) : (y0 - y1);
-    
+
     if(dy <= 2) {
         int16_t minX = (x0 < x1) ? x0 : x1;
         int16_t maxX = (x0 > x1) ? x0 : x1;
-        Buf_FillRect(minX, (y0 + y1)/2 - t/2, maxX - minX + 1, t, color);
+        LCD_FillRect(minX, (y0 + y1)/2 - t/2, maxX - minX + 1, t, color);
         return;
     }
-    
+    if(dx <= 2) {
+        int16_t minY = (y0 < y1) ? y0 : y1;
+        int16_t maxY = (y0 > y1) ? y0 : y1;
+        LCD_FillRect((x0 + x1)/2 - t/2, minY, t, maxY - minY + 1, color);
+        return;
+    }
+
     int16_t sx = (x0 < x1) ? 1 : -1;
     int16_t sy = (y0 < y1) ? 1 : -1;
     int16_t err = dx - dy;
-    
+
     while(1) {
-        Buf_FillRect(x0 - t/2, y0 - t/2, t, t, color);
+        LCD_FillRect(x0 - t/2, y0 - t/2, t, t, color);
         if(x0 == x1 && y0 == y1) break;
         int16_t e2 = 2 * err;
         if(e2 > -dy) { err -= dy; x0 += sx; }
@@ -290,11 +231,55 @@ static void Buf_ThickLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_
     }
 }
 
-static void Buf_Flush(void) {
-    LCD_SetWindow(EYE_AREA_X, EYE_AREA_Y, 
-                  EYE_AREA_X + EYE_AREA_W - 1, 
-                  EYE_AREA_Y + EYE_AREA_H - 1);
-    LCD_SendBuffer(eye_buffer, sizeof(eye_buffer));
+// ============================================================================
+// LCD 초기화
+// ============================================================================
+
+static void LCD_Init(void) {
+    LCD_RES_LOW(); HAL_Delay(50);
+    LCD_RES_HIGH(); HAL_Delay(50);
+
+    LCD_Cmd(ST7735_SWRESET); HAL_Delay(150);
+    LCD_Cmd(ST7735_SLPOUT); HAL_Delay(150);
+
+    LCD_Cmd(ST7735_FRMCTR1);
+    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
+    LCD_Cmd(ST7735_FRMCTR2);
+    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
+    LCD_Cmd(ST7735_FRMCTR3);
+    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
+    LCD_Data(0x01); LCD_Data(0x2C); LCD_Data(0x2D);
+
+    LCD_Cmd(ST7735_INVCTR); LCD_Data(0x07);
+    LCD_Cmd(ST7735_PWCTR1); LCD_Data(0xA2); LCD_Data(0x02); LCD_Data(0x84);
+    LCD_Cmd(ST7735_PWCTR2); LCD_Data(0xC5);
+    LCD_Cmd(ST7735_PWCTR3); LCD_Data(0x0A); LCD_Data(0x00);
+    LCD_Cmd(ST7735_PWCTR4); LCD_Data(0x8A); LCD_Data(0x2A);
+    LCD_Cmd(ST7735_PWCTR5); LCD_Data(0x8A); LCD_Data(0xEE);
+    LCD_Cmd(ST7735_VMCTR1); LCD_Data(0x0E);
+
+    LCD_Cmd(ST7735_INVOFF);
+
+    // ★ MADCTL: 핀 위쪽, 가로 모드 ★
+    // 안 맞으면 0xC8, 0x60, 0x68, 0xA0, 0xA8 등 시도
+    LCD_Cmd(ST7735_MADCTL); LCD_Data(0x60); //C0);
+
+    LCD_Cmd(ST7735_COLMOD); LCD_Data(0x05);  // 16-bit color
+
+    LCD_Cmd(ST7735_GMCTRP1);
+    uint8_t gp[] = {0x02,0x1c,0x07,0x12,0x37,0x32,0x29,0x2d,0x29,0x25,0x2B,0x39,0x00,0x01,0x03,0x10};
+    for(int i=0;i<16;i++) LCD_Data(gp[i]);
+    LCD_Cmd(ST7735_GMCTRN1);
+    uint8_t gn[] = {0x03,0x1d,0x07,0x06,0x2E,0x2C,0x29,0x2D,0x2E,0x2E,0x37,0x3F,0x00,0x00,0x02,0x10};
+    for(int i=0;i<16;i++) LCD_Data(gn[i]);
+
+    LCD_Cmd(ST7735_NORON); HAL_Delay(10);
+    LCD_Cmd(ST7735_DISPON); HAL_Delay(100);
+}
+
+// 전체 화면 클리어
+static void LCD_Clear(uint16_t color) {
+    LCD_FillRect(0, 0, LCD_WIDTH, LCD_HEIGHT, color);
 }
 
 // ============================================================================
@@ -302,61 +287,66 @@ static void Buf_Flush(void) {
 // ============================================================================
 
 static void Eye_Normal(int16_t cx, int16_t ox, int16_t oy) {
-    Buf_RoundRect(cx - EYE_W/2, CY - EYE_H/2, EYE_W, EYE_H, EYE_R, EYE_COLOR);
-    Buf_FillCircle(cx - 3 + ox, CY - 5 + oy, 3, EYE_BRIGHT);
+    LCD_RoundRect(cx - EYE_W/2, CY - EYE_H/2, EYE_W, EYE_H, EYE_R, EYE_COLOR);
+    LCD_FillCircle(cx - 5 + ox, CY - 8 + oy, 4, EYE_BRIGHT);
 }
 
 static void Eye_Closed(int16_t cx) {
-    Buf_HLine(cx - EYE_W/2 + 3, CY, EYE_W - 6, 5, EYE_COLOR);
+    LCD_FillRect(cx - EYE_W/2 + 3, CY - 3, EYE_W - 6, 6, EYE_COLOR);
 }
 
 static void Eye_Half(int16_t cx, uint8_t pct) {
     int16_t h = (EYE_H * pct) / 100;
-    if(h < 8) { Eye_Closed(cx); return; }
+    if(h < 10) { Eye_Closed(cx); return; }
     int16_t top = CY + EYE_H/2 - h;
-    Buf_RoundRect(cx - EYE_W/2, top, EYE_W, h, EYE_R/2, EYE_COLOR);
+    LCD_RoundRect(cx - EYE_W/2, top, EYE_W, h, EYE_R/2, EYE_COLOR);
 }
 
 static void Eye_Happy(int16_t cx) {
     for(int16_t i = -EYE_W/2 + 2; i <= EYE_W/2 - 2; i++) {
         int32_t n = (int32_t)i * i * 100 / ((EYE_W/2) * (EYE_W/2));
-        int16_t y = CY + 3 - (8 * (100 - n) / 100);
-        Buf_FillRect(cx + i, y - 3, 1, 4, EYE_COLOR);
+        int16_t y = CY + 5 - (12 * (100 - n) / 100);
+        LCD_FillRect(cx + i, y - 3, 2, 5, EYE_COLOR);
     }
 }
 
 static void Eye_Sad(int16_t cx) {
-    Buf_RoundRect(cx - EYE_W/2, CY - EYE_H/2 + 5, EYE_W, EYE_H - 5, EYE_R, EYE_COLOR);
-    Buf_ThickLine(cx - EYE_W/2, CY - EYE_H/2 - 2, cx + EYE_W/2, CY - EYE_H/2 + 6, 3, EYE_COLOR);
+    LCD_RoundRect(cx - EYE_W/2, CY - EYE_H/2 + 6, EYE_W, EYE_H - 6, EYE_R, EYE_COLOR);
+    LCD_ThickLine(cx - EYE_W/2 - 2, CY - EYE_H/2 - 2,
+                  cx + EYE_W/2 + 2, CY - EYE_H/2 + 8, 4, EYE_COLOR);
 }
 
 static void Eye_Angry(int16_t cx, uint8_t is_left) {
-    Buf_RoundRect(cx - EYE_W/2, CY - EYE_H/2 + 6, EYE_W, EYE_H - 10, EYE_R - 2, EYE_COLOR);
-    if(is_left)
-        Buf_ThickLine(cx - EYE_W/2 - 2, CY - EYE_H/2 + 4, cx + EYE_W/2 + 2, CY - EYE_H/2 - 4, 4, EYE_COLOR);
-    else
-        Buf_ThickLine(cx - EYE_W/2 - 2, CY - EYE_H/2 - 4, cx + EYE_W/2 + 2, CY - EYE_H/2 + 4, 4, EYE_COLOR);
+    LCD_RoundRect(cx - EYE_W/2, CY - EYE_H/2 + 8, EYE_W, EYE_H - 12, EYE_R - 2, EYE_COLOR);
+    if(is_left) {
+        LCD_ThickLine(cx - EYE_W/2 - 3, CY - EYE_H/2 + 6,
+                      cx + EYE_W/2 + 3, CY - EYE_H/2 - 6, 5, EYE_COLOR);
+    } else {
+        LCD_ThickLine(cx - EYE_W/2 - 3, CY - EYE_H/2 - 6,
+                      cx + EYE_W/2 + 3, CY - EYE_H/2 + 6, 5, EYE_COLOR);
+    }
 }
 
 static void Eye_Surprised(int16_t cx) {
-    Buf_FillCircle(cx, CY, EYE_H/2, EYE_COLOR);
-    Buf_FillCircle(cx, CY, EYE_H/2 - 6, EYE_DIM);
-    Buf_FillCircle(cx - 3, CY - 4, 4, EYE_BRIGHT);
+    LCD_FillCircle(cx, CY, EYE_H/2 - 2, EYE_COLOR);
+    LCD_FillCircle(cx, CY, EYE_H/2 - 10, EYE_DIM);
+    LCD_FillCircle(cx - 5, CY - 6, 5, EYE_BRIGHT);
+    LCD_FillCircle(cx + 3, CY + 3, 3, EYE_BRIGHT);
 }
 
 static void Eye_Heart(int16_t cx) {
-    int16_t s = 10;
-    Buf_FillCircle(cx - s/2, CY - s/3, s/2, EYE_COLOR);
-    Buf_FillCircle(cx + s/2, CY - s/3, s/2, EYE_COLOR);
+    int16_t s = 14;
+    LCD_FillCircle(cx - s/2, CY - s/3, s/2, EYE_COLOR);
+    LCD_FillCircle(cx + s/2, CY - s/3, s/2, EYE_COLOR);
     for(int16_t r = 0; r < s; r++) {
-        Buf_FillRect(cx - (s - r), CY - s/3 + r, (s - r) * 2 + 1, 1, EYE_COLOR);
+        LCD_FillRect(cx - (s - r), CY - s/3 + r, (s - r) * 2 + 1, 1, EYE_COLOR);
     }
 }
 
 static void Eye_X(int16_t cx) {
-    int16_t s = EYE_H/2 - 5;
-    Buf_ThickLine(cx - s, CY - s, cx + s, CY + s, 4, EYE_COLOR);
-    Buf_ThickLine(cx + s, CY - s, cx - s, CY + s, 4, EYE_COLOR);
+    int16_t s = EYE_H/2 - 6;
+    LCD_ThickLine(cx - s, CY - s, cx + s, CY + s, 5, EYE_COLOR);
+    LCD_ThickLine(cx + s, CY - s, cx - s, CY + s, 5, EYE_COLOR);
 }
 
 // ============================================================================
@@ -364,8 +354,8 @@ static void Eye_X(int16_t cx) {
 // ============================================================================
 
 static void Draw_Expression(Expression_t expr, int16_t ox, int16_t oy) {
-    Buf_Clear();
-    
+    LCD_Clear(BLACK);
+
     switch(expr) {
         case EXPR_NORMAL:
             Eye_Normal(LX, ox, oy);
@@ -412,24 +402,22 @@ static void Draw_Expression(Expression_t expr, int16_t ox, int16_t oy) {
             Eye_X(RX);
             break;
         case EXPR_LOOK_LEFT:
-            Eye_Normal(LX, -5, 0);
-            Eye_Normal(RX, -5, 0);
+            Eye_Normal(LX, -6, 0);
+            Eye_Normal(RX, -6, 0);
             break;
         case EXPR_LOOK_RIGHT:
-            Eye_Normal(LX, 5, 0);
-            Eye_Normal(RX, 5, 0);
+            Eye_Normal(LX, 6, 0);
+            Eye_Normal(RX, 6, 0);
             break;
         case EXPR_LOOK_UP:
-            Eye_Normal(LX, 0, -5);
-            Eye_Normal(RX, 0, -5);
+            Eye_Normal(LX, 0, -6);
+            Eye_Normal(RX, 0, -6);
             break;
         case EXPR_LOOK_DOWN:
-            Eye_Normal(LX, 0, 5);
-            Eye_Normal(RX, 0, 5);
+            Eye_Normal(LX, 0, 6);
+            Eye_Normal(RX, 0, 6);
             break;
     }
-    
-    Buf_Flush();
 }
 
 static void Anim_SetExpr(Expression_t expr) {
@@ -442,65 +430,60 @@ static void Anim_SetExpr(Expression_t expr) {
 // ============================================================================
 
 static void Anim_Blink(void) {
-    Buf_Clear();
+    LCD_Clear(BLACK);
     Eye_Half(LX, 50);
     Eye_Half(RX, 50);
-    Buf_Flush();
-    
-    Buf_Clear();
+
+    LCD_Clear(BLACK);
     Eye_Closed(LX);
     Eye_Closed(RX);
-    Buf_Flush();
-    HAL_Delay(40);
-    
-    Buf_Clear();
+    HAL_Delay(50);
+
+    LCD_Clear(BLACK);
     Eye_Half(LX, 50);
     Eye_Half(RX, 50);
-    Buf_Flush();
-    
+
     Draw_Expression(current_expr, 0, 0);
 }
 
 static void Anim_WinkL(void) {
-    Buf_Clear();
+    LCD_Clear(BLACK);
     Eye_Closed(LX);
     Eye_Normal(RX, 0, 0);
-    Buf_Flush();
-    HAL_Delay(180);
+    HAL_Delay(200);
     Draw_Expression(EXPR_NORMAL, 0, 0);
 }
 
 static void Anim_WinkR(void) {
-    Buf_Clear();
+    LCD_Clear(BLACK);
     Eye_Normal(LX, 0, 0);
     Eye_Closed(RX);
-    Buf_Flush();
-    HAL_Delay(180);
+    HAL_Delay(200);
     Draw_Expression(EXPR_NORMAL, 0, 0);
 }
 
 static void Anim_LookAround(void) {
     Anim_SetExpr(EXPR_LOOK_LEFT);
-    HAL_Delay(250);
+    HAL_Delay(300);
     Anim_SetExpr(EXPR_NORMAL);
     HAL_Delay(100);
     Anim_SetExpr(EXPR_LOOK_RIGHT);
-    HAL_Delay(250);
+    HAL_Delay(300);
     Anim_SetExpr(EXPR_NORMAL);
 }
 
 static void Anim_Idle(void) {
     uint32_t t = HAL_GetTick();
-    
+
     if(t - last_blink > 2500 + (rand() % 2000)) {
         Anim_Blink();
         last_blink = t;
     }
-    
+
     if(t - last_action > 6000 + (rand() % 4000)) {
         switch(rand() % 5) {
-            case 0: Anim_SetExpr(EXPR_LOOK_LEFT); HAL_Delay(300); break;
-            case 1: Anim_SetExpr(EXPR_LOOK_RIGHT); HAL_Delay(300); break;
+            case 0: Anim_SetExpr(EXPR_LOOK_LEFT); HAL_Delay(350); break;
+            case 1: Anim_SetExpr(EXPR_LOOK_RIGHT); HAL_Delay(350); break;
             case 2: Anim_WinkL(); break;
             case 3: Anim_WinkR(); break;
             case 4: Anim_LookAround(); break;
@@ -539,19 +522,19 @@ int main(void)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_SPI1_Init();
-    
+
     LCD_Init();
-    LCD_ClearScreen();
-    
+    LCD_Clear(BLACK);
+
     srand(HAL_GetTick());
-    
+
     Anim_SetExpr(EXPR_NORMAL);
     HAL_Delay(500);
-    
+
     while(1) {
         // 데모 모드
         Anim_Demo();
-        
+
         // 또는 Idle 모드
         // Anim_Idle();
         // HAL_Delay(30);
@@ -605,17 +588,19 @@ static void MX_SPI1_Init(void) {
 
 static void MX_GPIO_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    
+
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    
+
+    // RES(PA1), DC(PA6) - High로 초기화
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_6, GPIO_PIN_SET);
     GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    
+
+    // CS(PB6) - High로 초기화
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
     GPIO_InitStruct.Pin = GPIO_PIN_6;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
