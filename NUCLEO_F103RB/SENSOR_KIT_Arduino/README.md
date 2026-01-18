@@ -65,6 +65,10 @@ NUCLEO-F103RB 보드를 아두이노 IDE 환경에서 사용하여 다양한 센
 | **Upload method** | STM32CubeProgrammer (SWD) |
 | **Port** | COM포트 선택 (ST-Link Virtual COM Port) |
 
+<img width="908" height="581" alt="014" src="https://github.com/user-attachments/assets/e004b61c-6cca-4e68-badf-172beba2b854" />
+<br>
+<img width="708" height="731" alt="015" src="https://github.com/user-attachments/assets/801133a5-ee28-4e47-9280-c3324c89bfea" />
+
 ### 5. STM32CubeProgrammer 설치 (필수)
 
 1. [STM32CubeProgrammer 다운로드](https://www.st.com/en/development-tools/stm32cubeprog.html)
