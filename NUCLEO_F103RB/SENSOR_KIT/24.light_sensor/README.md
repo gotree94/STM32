@@ -146,54 +146,173 @@ if (adc_value > LIGHT_DIM) {
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 및 다운로드
 
+<img width="1349" height="1035" alt="002" src="https://github.com/user-attachments/assets/c7dd90e7-6c2c-4ecd-9c6b-6c4c883deefa" />
+
+<img width="1349" height="1035" alt="003" src="https://github.com/user-attachments/assets/f5682ed9-945e-4d8e-8f35-79a0ead9fc87" />
+
 
 ```c
-
+/* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal.h"
+#include <string.h>
+#include <stdio.h>
+/* USER CODE END Includes */
 ```
 
 ```c
+/* USER CODE BEGIN PD */
+#define ADC_RESOLUTION      4096    /* 12-bit ADC */
+#define SAMPLES_TO_AVG      16      /* 평균 샘플 수 */
 
+/* 조도 레벨 임계값 (ADC 값 기준, 밝으면 값이 낮음) */
+#define LIGHT_VERY_BRIGHT   500
+#define LIGHT_BRIGHT        1500
+#define LIGHT_NORMAL        2500
+#define LIGHT_DIM           3200
+#define LIGHT_DARK          3800
+/* USER CODE END PD */
 ```
 
 ```c
-
+/* USER CODE BEGIN PV */
+volatile uint16_t adc_buffer[SAMPLES_TO_AVG];
+volatile uint8_t adc_complete = 0;
+/* USER CODE END PV */
 ```
 
 ```c
+/* USER CODE BEGIN PFP */
+uint16_t Get_Average_ADC(void);
+const char* Get_Light_Level_String(uint16_t adc_value);
+void Print_Light_Bar(uint16_t adc_value);
 
+/* Printf redirect -----------------------------------------------------------*/
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+
+/* DMA Complete Callback -----------------------------------------------------*/
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+    if (hadc->Instance == ADC1) {
+        adc_complete = 1;
+    }
+}
+/* USER CODE END PFP */
 ```
 
 ```c
+/* USER CODE BEGIN 0 */
+/**
+ * @brief Calculate average ADC value from DMA buffer
+ */
+uint16_t Get_Average_ADC(void) {
+    uint32_t sum = 0;
+    for (int i = 0; i < SAMPLES_TO_AVG; i++) {
+        sum += adc_buffer[i];
+    }
+    return (uint16_t)(sum / SAMPLES_TO_AVG);
+}
 
+/**
+ * @brief Convert ADC value to light level string
+ */
+const char* Get_Light_Level_String(uint16_t adc_value) {
+    if (adc_value < LIGHT_VERY_BRIGHT) return "Very Bright ☀☀";
+    if (adc_value < LIGHT_BRIGHT)      return "Bright ☀";
+    if (adc_value < LIGHT_NORMAL)      return "Normal 🌤";
+    if (adc_value < LIGHT_DIM)         return "Dim 🌥";
+    if (adc_value < LIGHT_DARK)        return "Dark 🌙";
+    return "Very Dark 🌑";
+}
+
+/**
+ * @brief Print graphical light bar
+ */
+void Print_Light_Bar(uint16_t adc_value) {
+    /* ADC 값을 0-20 범위로 변환 (밝으면 바가 김) */
+    int bar_length = 20 - (adc_value * 20 / ADC_RESOLUTION);
+    if (bar_length < 0) bar_length = 0;
+    if (bar_length > 20) bar_length = 20;
+
+    printf("[");
+    for (int i = 0; i < 20; i++) {
+        if (i < bar_length) {
+            printf("█");
+        } else {
+            printf("░");
+        }
+    }
+    printf("] %d%%", bar_length * 5);
+}
+/* USER CODE END 0 */
 ```
 
 ```c
+  /* USER CODE BEGIN 2 */
+  printf("\r\n========================================\r\n");
+  printf("  Light Sensor (LDR) Module Test\r\n");
+  printf("  Board: NUCLEO-F103RB\r\n");
+  printf("========================================\r\n\n");
+  printf("ADC Clock: 8MHz (PCLK2/2)\r\n");
+  printf("ADC Resolution: 12-bit (0-4095)\r\n");
+  printf("Samples averaged: %d\r\n\n", SAMPLES_TO_AVG);
 
+  /* ADC Calibration */
+  HAL_ADCEx_Calibration_Start(&hadc1);
+
+  /* Start DMA-based ADC conversion */
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, SAMPLES_TO_AVG);
+
+  uint16_t adc_value = 0;
+  uint16_t prev_adc_value = 0;
+  uint32_t last_print_time = 0;
+  /* USER CODE END 2 */
 ```
 
 ```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1) {
+      if (adc_complete) {
+          adc_complete = 0;
 
+          /* 평균값 계산 */
+          adc_value = Get_Average_ADC();
+
+          /* 500ms마다 또는 큰 변화 시 출력 */
+          if (HAL_GetTick() - last_print_time >= 500 ||
+              (adc_value > prev_adc_value + 100) ||
+              (prev_adc_value > adc_value + 100)) {
+
+              printf("\r\n[Light Sensor Reading]\r\n");
+              printf("  ADC Value: %4d / %d\r\n", adc_value, ADC_RESOLUTION - 1);
+              printf("  Voltage  : %.2f V\r\n", (float)adc_value * 3.3f / ADC_RESOLUTION);
+              printf("  Level    : %s\r\n", Get_Light_Level_String(adc_value));
+              printf("  ");
+              Print_Light_Bar(adc_value);
+              printf("\r\n");
+
+              last_print_time = HAL_GetTick();
+              prev_adc_value = adc_value;
+          }
+
+          /* LED 밝기에 따른 제어 */
+          if (adc_value > LIGHT_DIM) {
+              /* 어두우면 LED ON */
+              HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+          } else {
+              /* 밝으면 LED OFF */
+              HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+          }
+
+          /* 다음 DMA 변환 시작 */
+          HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, SAMPLES_TO_AVG);
+      }
+
+      HAL_Delay(10);
+    /* USER CODE END WHILE */
 ```
-
-```c
-
-```
-
-```c
-
-```
-
-```c
-
-```
-
-```c
-
-```
-
-
-
-
 
 ### 예상 출력
 
