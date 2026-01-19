@@ -1,6 +1,6 @@
-# Obstacle Detection Sensor Module - STM32F103 NUCLEO
+# IR-08H Obstacle Detection Sensor Module - STM32F103 NUCLEO
 
-적외선 장애물 감지센서 모듈을 STM32F103 NUCLEO 보드로 테스트하는 예제입니다.
+IR-08H 적외선 장애물 감지센서 모듈을 STM32F103 NUCLEO 보드로 테스트하는 예제입니다.
 
 ## 하드웨어 구성
 
@@ -8,43 +8,81 @@
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | STM32F103 NUCLEO | 1 | NUCLEO-F103RB |
-| 장애물 감지센서 모듈 | 1~2 | IR 반사형 |
-| 점퍼 와이어 | 4+ | M-F 타입 |
+| 장애물 감지센서 모듈 | 1~2 | IR-08H (4핀) |
+| 점퍼 와이어 | 6+ | M-F 타입 |
 
-### 센서 모듈 사양
+### 센서 모듈 사양 (IR-08H)
+- 모델명: IR-08H
 - 센서 타입: 적외선(IR) 반사 센서
 - 동작 전압: 3.3V ~ 5V
 - 감지 거리: 2cm ~ 30cm (가변저항으로 조절)
 - 출력: 디지털 (Active Low)
 - 감지 각도: 약 35°
+- 핀 구성: EM, VCC, OUT, GND (4핀)
+
+### 핀 설명
+| 센서 핀 | 기능 | 설명 |
+|---------|------|------|
+| EM | Enable | 센서 활성화 (LOW: 활성화, HIGH: 비활성화) |
+| VCC | Power | 전원 입력 (3.3V ~ 5V) |
+| OUT | Output | 감지 출력 (장애물 감지 시 LOW) |
+| GND | Ground | 접지 |
 
 ### 핀 연결
 
 ```
 장애물 감지센서        STM32F103 NUCLEO
 -----------------------------------------
+EM       ────────►  GND (CN7-20) - 항상 활성화
+                    또는 PA4 (CN7-32) - 제어용
 VCC      ────────►  3.3V (CN7-16)
-GND      ────────►  GND (CN7-20)
 OUT      ────────►  PA0 (CN7-28) - Sensor 1
-OUT      ────────►  PA1 (CN7-30) - Sensor 2 (옵션)
+GND      ────────►  GND (CN7-20)
+
+(2채널 구성 시)
+EM       ────────►  GND 또는 PA6 (CN10-13)
+VCC      ────────►  3.3V
+OUT      ────────►  PA1 (CN7-30) - Sensor 2
+GND      ────────►  GND
 ```
 
 ### 회로도
 
 ```
                      ┌───────────────────┐
-                     │  장애물 감지센서   │
+                     │      IR-08H       │
                      │     [POT]         │ ← 감지거리 조절
+    GND/PA4 ───────► │ EM               │ ← Enable (LOW=활성화)
+    3.3V ──────────► │ VCC              │
     PA0 ◄────────────┤ OUT              │
+    GND  ──────────► │ GND              │
                      │    ◯    ◯        │
                      │   TX    RX       │ ← IR LED + Receiver
-    3.3V ──────────► │ VCC              │
-    GND  ──────────► │ GND              │
                      └───────────────────┘
 
     (2채널 구성 시 PA1에 두 번째 센서 연결)
                      
     PA5 ──────────► LED (장애물 감지 시 ON)
+```
+
+### EM 핀 사용 방법
+
+**방법 1: 항상 활성화 (기본)**
+```
+EM 핀을 GND에 직접 연결 → 센서 항상 동작
+```
+
+**방법 2: GPIO 제어 (전력 절약/선택적 활성화)**
+```c
+// PA4를 EM 제어용으로 사용
+#define SENSOR1_EM_PIN    GPIO_PIN_4
+#define SENSOR1_EM_PORT   GPIOA
+
+// 센서 활성화
+HAL_GPIO_WritePin(SENSOR1_EM_PORT, SENSOR1_EM_PIN, GPIO_PIN_RESET);  // LOW
+
+// 센서 비활성화 (전력 절약)
+HAL_GPIO_WritePin(SENSOR1_EM_PORT, SENSOR1_EM_PIN, GPIO_PIN_SET);    // HIGH
 ```
 
 ## 센서 동작 원리
@@ -66,8 +104,12 @@ OUT      ────────►  PA1 (CN7-30) - Sensor 2 (옵션)
                               ▼
                          감지됨 (LOW 출력)
 
+    EM = LOW (활성화 상태)
     장애물 없음: HIGH 출력
     장애물 있음: LOW 출력 (Active Low)
+    
+    EM = HIGH (비활성화 상태)
+    출력 없음 (전력 절약 모드)
 ```
 
 ## 기능 설명
@@ -89,20 +131,27 @@ OUT      ────────►  PA1 (CN7-30) - Sensor 2 (옵션)
 4. **통계 기능**
    - 총 감지 횟수 카운트
 
+5. **전력 관리 (EM 핀 활용)**
+   - 필요시에만 센서 활성화
+   - 배터리 구동 시 유용
+
 ## 빌드 및 업로드
 
 ### STM32CubeIDE 사용 시
 1. 새 프로젝트 생성 (STM32F103RB 선택)
 2. PA0, PA1을 GPIO_Input으로 설정
-3. `main.c` 내용을 프로젝트에 복사
-4. 빌드 후 업로드
+3. (옵션) PA4, PA6을 GPIO_Output으로 설정 (EM 제어용)
+4. `main.c` 내용을 프로젝트에 복사
+5. 빌드 후 업로드
 
 ### CubeMX 설정
 ```
 Pinout:
-- PA0: GPIO_Input (Pull-up)
-- PA1: GPIO_Input (Pull-up)
-- PA5: GPIO_Output
+- PA0: GPIO_Input (Pull-up) - Sensor 1 OUT
+- PA1: GPIO_Input (Pull-up) - Sensor 2 OUT
+- PA4: GPIO_Output (옵션)   - Sensor 1 EM
+- PA6: GPIO_Output (옵션)   - Sensor 2 EM
+- PA5: GPIO_Output          - LED
 ```
 
 ## 시리얼 출력 예시
@@ -114,6 +163,7 @@ Pinout:
 ============================================
 PA0: Obstacle Sensor 1 (Left/Front)
 PA1: Obstacle Sensor 2 (Right, Optional)
+EM pins directly connected to GND (always enabled)
 Detection Range: 2cm ~ 30cm (adjustable)
 (0=Obstacle Detected, 1=Clear)
 
@@ -141,6 +191,59 @@ Sensors: [S1:O|S2:O] | State: CLEAR
 | 원거리 감지 | 20-30cm | 시계 |
 
 ## 응용 예제
+
+### EM 핀을 활용한 전력 관리
+```c
+typedef struct {
+    GPIO_TypeDef *out_port;
+    uint16_t out_pin;
+    GPIO_TypeDef *em_port;
+    uint16_t em_pin;
+    uint8_t enabled;
+    uint8_t state;
+} ObstacleSensorEx;
+
+ObstacleSensorEx sensor1 = {
+    .out_port = GPIOA, .out_pin = GPIO_PIN_0,
+    .em_port = GPIOA, .em_pin = GPIO_PIN_4,
+    .enabled = 0, .state = 1
+};
+
+void Sensor_Enable(ObstacleSensorEx *sensor)
+{
+    HAL_GPIO_WritePin(sensor->em_port, sensor->em_pin, GPIO_PIN_RESET);
+    sensor->enabled = 1;
+    HAL_Delay(1);  // 안정화 대기
+}
+
+void Sensor_Disable(ObstacleSensorEx *sensor)
+{
+    HAL_GPIO_WritePin(sensor->em_port, sensor->em_pin, GPIO_PIN_SET);
+    sensor->enabled = 0;
+}
+
+uint8_t Sensor_Read(ObstacleSensorEx *sensor)
+{
+    if (!sensor->enabled)
+    {
+        Sensor_Enable(sensor);
+    }
+    sensor->state = HAL_GPIO_ReadPin(sensor->out_port, sensor->out_pin);
+    return sensor->state;
+}
+
+// 주기적 스캔으로 전력 절약
+void Power_Saving_Scan(void)
+{
+    Sensor_Enable(&sensor1);
+    HAL_Delay(2);
+    uint8_t result = Sensor_Read(&sensor1);
+    Sensor_Disable(&sensor1);
+    
+    // 100ms 중 2ms만 센서 동작 → 약 98% 전력 절약
+    HAL_Delay(98);
+}
+```
 
 ### 로봇 장애물 회피
 ```c
@@ -296,10 +399,16 @@ float ADC_To_Distance(uint16_t adc_value)
 |------|------|----------|
 | 항상 감지됨 | 감도 과다 | 가변저항 반시계방향 조절 |
 | 감지 안됨 | 감도 부족 | 가변저항 시계방향 조절 |
+| 감지 안됨 | EM 핀 미연결 | EM을 GND에 연결 확인 |
 | 감지 불안정 | 햇빛 간섭 | 실내에서 테스트 또는 차광 |
 | 특정 물체만 안됨 | 표면 반사율 | 검은색/투명 물체는 감지 어려움 |
 
 ## 주의사항
+
+⚠️ **EM 핀 연결 필수**
+- EM 핀을 연결하지 않으면 센서가 동작하지 않음
+- 간단한 사용: EM을 GND에 직접 연결
+- 전력 관리: EM을 GPIO로 제어
 
 ⚠️ **센서 특성**
 - 검은색 물체는 IR을 흡수하여 감지 어려움
@@ -314,8 +423,5 @@ float ADC_To_Distance(uint16_t adc_value)
 ## 참고 자료
 
 - [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
-- [IR Obstacle Sensor Datasheet](https://components101.com/sensors/ir-sensor-module)
+- [IR-08H Obstacle Sensor Module](https://www.electronicoscaldas.com/datasheet/IR-08H_Steren.pdf)
 
-## 라이선스
-
-MIT License
