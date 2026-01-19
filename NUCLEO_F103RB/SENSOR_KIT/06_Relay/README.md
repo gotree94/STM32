@@ -21,6 +21,8 @@ GND      ────────►  GND (CN7-20)
 IN/SIG   ────────►  PA5 (CN10-11)
 ```
 
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/d084e623-5b9c-4724-855e-e72b6bb1ac7b" />
+
 ### 회로도
 
 ```
@@ -46,15 +48,6 @@ IN/SIG   ────────►  PA5 (CN10-11)
 1. 새 프로젝트 생성 (STM32F103RB 선택)
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 후 업로드
-
-### 명령줄 빌드 (arm-none-eabi-gcc)
-```bash
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -DSTM32F103xB \
-    -I<HAL_INCLUDE_PATH> \
-    main.c <startup.s> <HAL_sources> \
-    -T <linker_script.ld> \
-    -o relay_test.elf
-```
 
 ## 시리얼 출력 예시
 
