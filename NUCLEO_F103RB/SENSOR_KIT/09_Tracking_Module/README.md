@@ -85,6 +85,160 @@ OUT      ────────►  PA0 (CN7-28)
 4. `main.c` 내용을 프로젝트에 복사
 5. 빌드 후 업로드
 
+```c
+/* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal.h"
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define SENSOR_PIN          GPIO_PIN_0
+#define SENSOR_PORT         GPIOA
+#define LED_PIN             GPIO_PIN_5
+#define LED_PORT            GPIOA
+
+/* Sensor state macros */
+#define LINE_DETECTED       0   // Active Low (흑색 라인 감지)
+#define LINE_NOT_DETECTED   1   // 백색 바닥
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+/* Statistics */
+uint32_t detect_count = 0;
+uint32_t total_samples = 0;
+uint32_t last_transition_time = 0;
+uint8_t prev_state = LINE_NOT_DETECTED;
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+uint8_t Read_Sensor(void);
+void Print_Sensor_Bar(uint8_t state);
+
+/* Printf redirect */
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+/**
+ * @brief  Read Tracking Sensor
+ * @retval LINE_DETECTED (0) or LINE_NOT_DETECTED (1)
+ */
+uint8_t Read_Sensor(void)
+{
+    return HAL_GPIO_ReadPin(SENSOR_PORT, SENSOR_PIN);
+}
+
+/**
+ * @brief  Print visual sensor bar
+ */
+void Print_Sensor_Bar(uint8_t state)
+{
+    if (state == LINE_DETECTED)
+    {
+        printf("[##########]  <- LINE DETECTED");
+    }
+    else
+    {
+        printf("[----------]  <- NO LINE");
+    }
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  printf("\r\n============================================\r\n");
+  printf("  Line Tracking Sensor Test (Single Channel)\r\n");
+  printf("  STM32F103 NUCLEO\r\n");
+  printf("============================================\r\n");
+  printf("Module: 3-Pin (VCC, GND, OUT)\r\n");
+  printf("PA0: Sensor Output\r\n");
+  printf("(0=Black Line, 1=White Surface)\r\n\r\n");
+
+  uint8_t sensor_state;
+  uint32_t last_print_time = 0;
+  uint32_t stats_time = 0;
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      /* 센서 읽기 */
+      sensor_state = Read_Sensor();
+      total_samples++;
+
+      /* 라인 감지 시 LED ON */
+      if (sensor_state == LINE_DETECTED)
+      {
+          HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+          detect_count++;
+      }
+      else
+      {
+          HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
+      }
+
+      /* 상태 전환 감지 */
+      if (sensor_state != prev_state)
+      {
+          uint32_t current_time = HAL_GetTick();
+          uint32_t duration = current_time - last_transition_time;
+
+          printf("[TRANSITION] %s -> %s (after %lu ms)\r\n",
+                 prev_state == LINE_DETECTED ? "BLACK" : "WHITE",
+                 sensor_state == LINE_DETECTED ? "BLACK" : "WHITE",
+                 duration);
+
+          last_transition_time = current_time;
+          prev_state = sensor_state;
+      }
+
+      /* 100ms마다 상태 출력 */
+      if (HAL_GetTick() - last_print_time >= 100)
+      {
+          last_print_time = HAL_GetTick();
+
+          printf("Sensor: [%s] ",
+                 sensor_state == LINE_DETECTED ? "BLACK ###" : "WHITE ---");
+          Print_Sensor_Bar(sensor_state);
+          printf("\r\n");
+      }
+
+      /* 5초마다 통계 출력 */
+      if (HAL_GetTick() - stats_time >= 5000)
+      {
+          stats_time = HAL_GetTick();
+          uint32_t detect_percent = (detect_count * 100) / total_samples;
+
+          printf("\r\n--- Statistics (5s) ---\r\n");
+          printf("Total samples: %lu\r\n", total_samples);
+          printf("Line detected: %lu (%lu%%)\r\n", detect_count, detect_percent);
+          printf("------------------------\r\n\r\n");
+
+          detect_count = 0;
+          total_samples = 0;
+      }
+
+      HAL_Delay(10);
+    /* USER CODE END WHILE */
+```
+
 ### CubeMX 설정
 ```
 Pinout:
