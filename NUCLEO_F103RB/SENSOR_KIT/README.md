@@ -14,29 +14,29 @@ NUCLEO-F103RB 보드를 이용한 다양한 LED 모듈 테스트 프로젝트 �
 * [X] 08_Sound_Sensor_Small
 * [X] 09_Tracking_Module
 * [X] 10_Obstacle_Sensor
-* 11_Flame_Sensor
-* 12_Linear_Hall_Sensor
-* 13_Touch_Sensor
-* 14_Digital_Temperature_Sensor
-* 15_Reed_Switch
-* 16.mini_reed
-* 17.heartbeat
+* [ ] 11_Flame_Sensor
+* [ ] 12_Linear_Hall_Sensor
+* [ ] 13_Touch_Sensor
+* [ ] 14_Digital_Temperature_Sensor
+* [ ] 15_Reed_Switch
+* [ ] 16.mini_reed
+* [ ] 17.heartbeat
 * [X] 18.laser
 * [X] 19.button_switch
-* 20.shock_sensor
-* 21.magic_light
-* 22.angle_switch
-* 23.ball_switch
+* [ ] 20.shock_sensor
+* [ ] 21.magic_light
+* [ ] 22.angle_switch
+* [ ] 23.ball_switch
 * [X] 24.light_sensor
-* 25.analog_hall
-* 26.Hall_Magnetic
-* 27.Temperature_Sensor
-* 28.Analog_Light_Sensor
-* 29.Knock_Sensor
-* 30.Photo_Interrupter
-* 31.IR_Transmitter
-* 32.IR_Receiver
-* 33.IR_Remote_Decoder
+* [ ] 25.analog_hall
+* [ ] 26.Hall_Magnetic
+* [ ] 27.Temperature_Sensor
+* [ ] 28.Analog_Light_Sensor
+* [ ] 29.Knock_Sensor
+* [ ] 30.Photo_Interrupter
+* [ ] 31.IR_Transmitter
+* [ ] 32.IR_Receiver
+* [ ] 33.IR_Remote_Decoder
 
 
 
