@@ -50,6 +50,11 @@ KY-034 Module           NUCLEO-F103RB
 └─────────────┘        └─────────────┘
 ```
 
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/b1069af5-5147-49d5-99d3-212665834cd7" />
+
+
+
+
 ### 회로도
 
 ```
