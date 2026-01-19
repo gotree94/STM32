@@ -112,7 +112,7 @@ S = ・・・ (짧음 3회)
 3. **타이머 설정**
    ```
    TIM2 Configuration:
-   - Prescaler: 71 (72MHz / 72 = 1MHz)
+   - Prescaler: 63 (64MHz / 64 = 1MHz)
    - Counter Period: 999 (1MHz / 1000 = 1kHz PWM)
    - PWM Mode: PWM Mode 1
    ```
