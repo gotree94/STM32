@@ -8,7 +8,7 @@ NUCLEO-F103RB 보드를 이용한 다양한 LED 모듈 테스트 프로젝트 �
 * [X] 02_SMD_LED
 * [X] 03_Dual_Color_LED
 * [X] 04_Mini_Dual_Color_LED
-* [ ] 05_Seven_Color_LED
+* [X] 05_Seven_Color_LED
 * [X] 06_Relay
 * [X] 07_Sound_Sensor_High
 * [X] 08_Sound_Sensor_Small
