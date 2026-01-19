@@ -177,6 +177,311 @@ void SevenColorLED_Toggle(void)
 3. `main.c` 내용을 프로젝트에 복사
 4. 빌드 후 보드에 플래시
 
+```c
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal.h"
+#include <string.h>
+#include <stdio.h>
+
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define LED_PIN         GPIO_PIN_0
+#define LED_PORT        GPIOB
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+/* UART printf 리다이렉션 */
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+/**
+ * @brief LED ON (내장 IC 자동 색상 변환 시작)
+ */
+void SevenColorLED_On(void)
+{
+    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+}
+
+/**
+ * @brief LED OFF
+ */
+void SevenColorLED_Off(void)
+{
+    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
+}
+
+/**
+ * @brief LED 토글
+ */
+void SevenColorLED_Toggle(void)
+{
+    HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+}
+
+/**
+ * @brief 자동 색상 변환 관찰
+ *        내장 IC가 자동으로 색상을 변환하므로 전원만 공급하면 됨
+ */
+void SevenColorLED_AutoCycleDemo(void)
+{
+    printf("  Observing auto color cycle for 10 seconds...\r\n");
+    printf("  Colors: Red -> Orange -> Yellow -> Green -> Cyan -> Blue -> Purple\r\n");
+
+    SevenColorLED_On();
+
+    /* 색상 변화 관찰 */
+    for (int i = 0; i < 10; i++) {
+        printf("  [%d sec]\r\n", i + 1);
+        HAL_Delay(1000);
+    }
+
+    SevenColorLED_Off();
+}
+
+/**
+ * @brief 스트로브 효과 (ON/OFF 반복)
+ */
+void SevenColorLED_StrobeDemo(void)
+{
+    /* 느린 스트로브 */
+    printf("  Slow strobe (500ms)...\r\n");
+    for (int i = 0; i < 6; i++) {
+        SevenColorLED_On();
+        HAL_Delay(500);
+        SevenColorLED_Off();
+        HAL_Delay(500);
+    }
+
+    HAL_Delay(300);
+
+    /* 빠른 스트로브 */
+    printf("  Fast strobe (100ms)...\r\n");
+    for (int i = 0; i < 20; i++) {
+        SevenColorLED_On();
+        HAL_Delay(100);
+        SevenColorLED_Off();
+        HAL_Delay(100);
+    }
+
+    HAL_Delay(300);
+
+    /* 점점 빨라지는 스트로브 */
+    printf("  Accelerating strobe...\r\n");
+    for (int delay = 500; delay >= 50; delay -= 50) {
+        SevenColorLED_On();
+        HAL_Delay(delay);
+        SevenColorLED_Off();
+        HAL_Delay(delay);
+    }
+
+    SevenColorLED_Off();
+}
+
+/**
+ * @brief 다양한 패턴 데모 (ON/OFF 타이밍 기반)
+ */
+void SevenColorLED_PatternDemo(void)
+{
+    /* 패턴 1: 심박 효과 (두 번 빠르게, 긴 휴식) */
+    printf("  Heartbeat pattern...\r\n");
+    for (int beat = 0; beat < 5; beat++) {
+        /* 첫 번째 박동 */
+        SevenColorLED_On();
+        HAL_Delay(100);
+        SevenColorLED_Off();
+        HAL_Delay(100);
+
+        /* 두 번째 박동 */
+        SevenColorLED_On();
+        HAL_Delay(100);
+        SevenColorLED_Off();
+        HAL_Delay(500);
+    }
+
+    HAL_Delay(500);
+
+    /* 패턴 2: SOS 패턴 */
+    printf("  SOS pattern...\r\n");
+    for (int sos = 0; sos < 2; sos++) {
+        /* S: 짧게 3번 */
+        for (int i = 0; i < 3; i++) {
+            SevenColorLED_On();
+            HAL_Delay(200);
+            SevenColorLED_Off();
+            HAL_Delay(200);
+        }
+        HAL_Delay(300);
+
+        /* O: 길게 3번 */
+        for (int i = 0; i < 3; i++) {
+            SevenColorLED_On();
+            HAL_Delay(500);
+            SevenColorLED_Off();
+            HAL_Delay(200);
+        }
+        HAL_Delay(300);
+
+        /* S: 짧게 3번 */
+        for (int i = 0; i < 3; i++) {
+            SevenColorLED_On();
+            HAL_Delay(200);
+            SevenColorLED_Off();
+            HAL_Delay(200);
+        }
+        HAL_Delay(1000);
+    }
+
+    HAL_Delay(500);
+
+    /* 패턴 3: 카운트다운 */
+    printf("  Countdown pattern (5 to 1)...\r\n");
+    for (int count = 5; count >= 1; count--) {
+        printf("    %d\r\n", count);
+        for (int i = 0; i < count; i++) {
+            SevenColorLED_On();
+            HAL_Delay(150);
+            SevenColorLED_Off();
+            HAL_Delay(150);
+        }
+        HAL_Delay(500);
+    }
+
+    /* 완료 표시: 길게 점등 */
+    SevenColorLED_On();
+    HAL_Delay(1000);
+    SevenColorLED_Off();
+}
+
+/**
+ * @brief 알림 패턴 데모
+ */
+void SevenColorLED_NotificationDemo(void)
+{
+    /* 알림 1: 새 메시지 (부드러운 펄스 3회) */
+    printf("  New message notification...\r\n");
+    for (int i = 0; i < 3; i++) {
+        SevenColorLED_On();
+        HAL_Delay(300);
+        SevenColorLED_Off();
+        HAL_Delay(300);
+    }
+
+    HAL_Delay(500);
+
+    /* 알림 2: 경고 (빠른 점멸 6회) */
+    printf("  Warning notification...\r\n");
+    for (int i = 0; i < 6; i++) {
+        SevenColorLED_On();
+        HAL_Delay(100);
+        SevenColorLED_Off();
+        HAL_Delay(100);
+    }
+
+    HAL_Delay(500);
+
+    /* 알림 3: 대기 중 (느린 점멸) */
+    printf("  Standby notification...\r\n");
+    for (int i = 0; i < 3; i++) {
+        SevenColorLED_On();
+        HAL_Delay(1000);
+        SevenColorLED_Off();
+        HAL_Delay(1000);
+    }
+
+    HAL_Delay(500);
+
+    /* 알림 4: 완료 (길게 점등) */
+    printf("  Completion notification...\r\n");
+    SevenColorLED_On();
+    HAL_Delay(300);
+    SevenColorLED_Off();
+    HAL_Delay(200);
+    SevenColorLED_On();
+    HAL_Delay(300);
+    SevenColorLED_Off();
+    HAL_Delay(200);
+    SevenColorLED_On();
+    HAL_Delay(1500);
+
+    SevenColorLED_Off();
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  printf("\r\n=============================================\r\n");
+  printf("  7-Color LED Module Test - NUCLEO-F103RB\r\n");
+  printf("=============================================\r\n");
+  printf("  Module: KY-034 (Auto Color Cycling)\r\n");
+  printf("  Control: GPIO ON/OFF (No PWM)\r\n");
+  printf("  Pin: PB0\r\n");
+  printf("\r\n");
+
+  /* 초기 테스트 */
+  printf("[Init] Quick LED test...\r\n");
+  SevenColorLED_On();
+  HAL_Delay(1000);
+  SevenColorLED_Off();
+  HAL_Delay(500);
+  printf("[Init] LED test complete.\r\n\r\n");
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      /* Test 1: 기본 ON/OFF */
+      printf("[Test 1] Basic ON/OFF Control\r\n");
+
+      printf("  LED ON (5 seconds - watch color changes)...\r\n");
+      SevenColorLED_On();
+      HAL_Delay(5000);
+
+      printf("  LED OFF...\r\n");
+      SevenColorLED_Off();
+      HAL_Delay(1000);
+
+      /* Test 2: 자동 색상 변환 관찰 */
+      printf("\r\n[Test 2] Auto Color Cycle Observation\r\n");
+      SevenColorLED_AutoCycleDemo();
+      HAL_Delay(500);
+
+      /* Test 3: 스트로브 효과 */
+      printf("\r\n[Test 3] Strobe Effect\r\n");
+      SevenColorLED_StrobeDemo();
+      HAL_Delay(500);
+
+      /* Test 4: 패턴 데모 */
+      printf("\r\n[Test 4] Pattern Demo\r\n");
+      SevenColorLED_PatternDemo();
+      HAL_Delay(500);
+
+      /* Test 5: 알림 데모 */
+      printf("\r\n[Test 5] Notification Patterns\r\n");
+      SevenColorLED_NotificationDemo();
+
+      SevenColorLED_Off();
+
+      printf("\r\n--- Cycle Complete ---\r\n\r\n");
+      HAL_Delay(2000);
+    /* USER CODE END WHILE */
+```
+
 ### STM32CubeMX 설정
 
 ```
