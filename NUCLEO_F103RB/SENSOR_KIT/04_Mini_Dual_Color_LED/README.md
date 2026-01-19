@@ -192,8 +192,6 @@ int __io_putchar(int ch) {
 ```c
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-   {
     while (1)
     {
         printf("\r\n[Test 1] Basic Colors\r\n");
