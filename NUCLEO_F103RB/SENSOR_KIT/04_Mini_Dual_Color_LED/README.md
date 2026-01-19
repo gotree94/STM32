@@ -122,6 +122,7 @@ Channels: CH3(PB0)=Red, CH4(PB1)=Green
 ```c
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+/* Private defines */
 #define RED_PIN         GPIO_PIN_0
 #define GREEN_PIN       GPIO_PIN_1
 #define LED_PORT        GPIOB
@@ -148,6 +149,7 @@ typedef enum {
     STATUS_BUSY,
     STATUS_STANDBY
 } SystemStatus_t;
+/* USER CODE END PTD */
 ```
 
 ```c
@@ -174,16 +176,16 @@ int __io_putchar(int ch) {
 
 ```c
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-  
-  printf("\r\n================================================\r\n");
-  printf("  Mini Dual Color LED Module Test - NUCLEO-F103RB\r\n");
-  printf("================================================\r\n\n");
-  
-  printf("[Boot] Starting...\r\n");
-  MiniLED_BootSequence();
-  HAL_Delay(500);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+    
+    printf("\r\n================================================\r\n");
+    printf("  Mini Dual Color LED Module Test - NUCLEO-F103RB\r\n");
+    printf("================================================\r\n\n");
+    
+    printf("[Boot] Starting...\r\n");
+    MiniLED_BootSequence();
+    HAL_Delay(500);
   /* USER CODE END 2 */
 ```
 
@@ -192,64 +194,66 @@ int __io_putchar(int ch) {
   /* USER CODE BEGIN WHILE */
   while (1)
    {
-       printf("\r\n[Test 1] Basic Colors\r\n");
-       
-       printf("  OFF\r\n");
-       MiniLED_SetState(LED_OFF);
-       HAL_Delay(800);
-       
-       printf("  RED\r\n");
-       MiniLED_SetState(LED_RED);
-       HAL_Delay(800);
-       
-       printf("  GREEN\r\n");
-       MiniLED_SetState(LED_GREEN);
-       HAL_Delay(800);
-       
-       printf("  YELLOW\r\n");
-       MiniLED_SetState(LED_YELLOW);
-       HAL_Delay(800);
-       
-       printf("  ORANGE\r\n");
-       MiniLED_SetState(LED_ORANGE);
-       HAL_Delay(800);
-       
-       printf("  LIME\r\n");
-       MiniLED_SetState(LED_LIME);
-       HAL_Delay(800);
-       
-       MiniLED_SetState(LED_OFF);
-       HAL_Delay(500);
-       
-       printf("\r\n[Test 2] Pulse Patterns\r\n");
-       
-       printf("  Red pulse x3\r\n");
-       MiniLED_Pulse(LED_RED, 3);
-       HAL_Delay(500);
-       
-       printf("  Green pulse x3\r\n");
-       MiniLED_Pulse(LED_GREEN, 3);
-       HAL_Delay(500);
-       
-       printf("  Yellow pulse x2\r\n");
-       MiniLED_Pulse(LED_YELLOW, 2);
-       HAL_Delay(500);
-       
-       printf("\r\n[Test 3] System Status Indicators\r\n");
-       MiniLED_StatusDemo();
-       HAL_Delay(500);
-       
-       printf("\r\n[Test 4] Data Transfer Simulation\r\n");
-       MiniLED_DataTransfer();
-       HAL_Delay(500);
-       
-       printf("\r\n[Test 5] Battery Charging Simulation\r\n");
-       MiniLED_BatteryCharging();
-       
-       MiniLED_SetState(LED_OFF);
-       
-       printf("\r\n--- Cycle Complete ---\r\n");
-       HAL_Delay(2000);
+    while (1)
+    {
+        printf("\r\n[Test 1] Basic Colors\r\n");
+        
+        printf("  OFF\r\n");
+        MiniLED_SetState(LED_OFF);
+        HAL_Delay(800);
+        
+        printf("  RED\r\n");
+        MiniLED_SetState(LED_RED);
+        HAL_Delay(800);
+        
+        printf("  GREEN\r\n");
+        MiniLED_SetState(LED_GREEN);
+        HAL_Delay(800);
+        
+        printf("  YELLOW\r\n");
+        MiniLED_SetState(LED_YELLOW);
+        HAL_Delay(800);
+        
+        printf("  ORANGE\r\n");
+        MiniLED_SetState(LED_ORANGE);
+        HAL_Delay(800);
+        
+        printf("  LIME\r\n");
+        MiniLED_SetState(LED_LIME);
+        HAL_Delay(800);
+        
+        MiniLED_SetState(LED_OFF);
+        HAL_Delay(500);
+        
+        printf("\r\n[Test 2] Pulse Patterns\r\n");
+        
+        printf("  Red pulse x3\r\n");
+        MiniLED_Pulse(LED_RED, 3);
+        HAL_Delay(500);
+        
+        printf("  Green pulse x3\r\n");
+        MiniLED_Pulse(LED_GREEN, 3);
+        HAL_Delay(500);
+        
+        printf("  Yellow pulse x2\r\n");
+        MiniLED_Pulse(LED_YELLOW, 2);
+        HAL_Delay(500);
+        
+        printf("\r\n[Test 3] System Status Indicators\r\n");
+        MiniLED_StatusDemo();
+        HAL_Delay(500);
+        
+        printf("\r\n[Test 4] Data Transfer Simulation\r\n");
+        MiniLED_DataTransfer();
+        HAL_Delay(500);
+        
+        printf("\r\n[Test 5] Battery Charging Simulation\r\n");
+        MiniLED_BatteryCharging();
+        
+        MiniLED_SetState(LED_OFF);
+        
+        printf("\r\n--- Cycle Complete ---\r\n");
+        HAL_Delay(2000);
     /* USER CODE END WHILE */
 ```
 
