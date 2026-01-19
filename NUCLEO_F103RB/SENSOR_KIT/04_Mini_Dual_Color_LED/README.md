@@ -19,6 +19,8 @@
 
 ### 핀 연결
 
+<img width="396" height="360" alt="F103RB-pin" src="https://github.com/user-attachments/assets/18da491e-c129-4a8c-b8b2-d2ffaeaae9bb" />
+
 ```
 Mini Dual Color LED     NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
@@ -110,13 +112,16 @@ Channels: CH3(PB0)=Red, CH4(PB1)=Green
 3. 빌드 후 보드에 플래시
 
 ```c
+/* USER CODE BEGIN Includes */
 #include "stm32f1xx_hal.h"
 #include <string.h>
 #include <stdio.h>
+/* USER CODE END Includes */
 ```
 
 ```c
-/* Private defines */
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
 #define RED_PIN         GPIO_PIN_0
 #define GREEN_PIN       GPIO_PIN_1
 #define LED_PORT        GPIOB
