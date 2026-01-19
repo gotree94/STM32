@@ -79,6 +79,175 @@ DO       ────────►  PA0 (CN7-28)
 4. `main.c` 내용을 프로젝트에 복사
 5. 빌드 후 업로드
 
+```c
+/* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal.h"
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define SOUND_DO_PIN        GPIO_PIN_0
+#define SOUND_DO_PORT       GPIOA
+#define LED_PIN             GPIO_PIN_5
+#define LED_PORT            GPIOA
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+volatile uint32_t sound_event_count = 0;
+volatile uint32_t last_sound_time = 0;
+volatile uint8_t new_sound_detected = 0;
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void LED_Blink(uint8_t count, uint32_t delay_ms);
+void Process_Sound_Event(void);
+/* Printf redirect */
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+/**
+ * @brief  EXTI Callback (Interrupt Handler)
+ */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == SOUND_DO_PIN)
+    {
+        uint32_t current_time = HAL_GetTick();
+
+        /* Debounce: 50ms 이내 재발생 무시 */
+        if (current_time - last_sound_time > 50)
+        {
+            sound_event_count++;
+            last_sound_time = current_time;
+            new_sound_detected = 1;
+
+            /* LED 켜기 */
+            HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+        }
+    }
+}
+
+/**
+ * @brief  Process sound event (pattern detection)
+ */
+void Process_Sound_Event(void)
+{
+    static uint32_t event_times[5] = {0};
+    static uint8_t event_index = 0;
+
+    /* 이벤트 시간 기록 */
+    event_times[event_index] = HAL_GetTick();
+    event_index = (event_index + 1) % 5;
+
+    /* 패턴 분석: 1초 내 3번 이상 감지 */
+    uint8_t recent_count = 0;
+    uint32_t current_time = HAL_GetTick();
+
+    for (int i = 0; i < 5; i++)
+    {
+        if (current_time - event_times[i] < 1000)
+        {
+            recent_count++;
+        }
+    }
+
+    if (recent_count >= 3)
+    {
+        printf("  >> Rapid sound pattern detected! (%d events/sec)\r\n", recent_count);
+    }
+}
+
+/**
+ * @brief  LED Blink
+ */
+void LED_Blink(uint8_t count, uint32_t delay_ms)
+{
+    for (uint8_t i = 0; i < count; i++)
+    {
+        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+        HAL_Delay(delay_ms);
+        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
+        HAL_Delay(delay_ms);
+    }
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  printf("\r\n============================================\r\n");
+  printf("  Small Sound Sensor Module Test\r\n");
+  printf("  STM32F103 NUCLEO\r\n");
+  printf("============================================\r\n");
+  printf("PA0: Digital Output (Interrupt)\r\n");
+  printf("PA5: LED Indicator\r\n");
+  printf("Waiting for sound...\r\n\r\n");
+
+  uint32_t last_status_time = 0;
+  uint32_t led_off_time = 0;
+  uint8_t led_on = 0;
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      /* 소리 감지 이벤트 처리 */
+      if (new_sound_detected)
+      {
+          new_sound_detected = 0;
+          led_on = 1;
+          led_off_time = HAL_GetTick() + 200;  // 200ms 동안 LED 유지
+
+          printf("[%lu] Sound Detected! Total Count: %lu\r\n",
+                 HAL_GetTick(), sound_event_count);
+
+          Process_Sound_Event();
+      }
+
+      /* LED 자동 끄기 */
+      if (led_on && HAL_GetTick() >= led_off_time)
+      {
+          HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
+          led_on = 0;
+      }
+
+      /* 폴링 방식으로도 상태 확인 (백업) */
+      if (HAL_GPIO_ReadPin(SOUND_DO_PORT, SOUND_DO_PIN) == GPIO_PIN_RESET)
+      {
+          /* Active Low: 소리 감지됨 */
+          if (!led_on)
+          {
+              HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+          }
+      }
+
+      /* 5초마다 상태 출력 */
+      if (HAL_GetTick() - last_status_time >= 5000)
+      {
+          last_status_time = HAL_GetTick();
+          printf("--- Status: %lu events detected ---\r\n", sound_event_count);
+      }
+
+      HAL_Delay(10);
+    /* USER CODE END WHILE */
+```
+
 ### CubeMX 설정
 ```
 Pinout:
@@ -250,6 +419,4 @@ HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);  // 최고 우선순위
 - [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 - [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 
-## 라이선스
 
-MIT License
