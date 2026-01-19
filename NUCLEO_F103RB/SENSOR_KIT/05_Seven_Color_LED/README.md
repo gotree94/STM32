@@ -94,7 +94,7 @@ void SevenColorLED_NotificationDemo(void); // 알림 패턴
 ```c
 Timer: TIM8
 Channel: CH3 (PC8)
-Prescaler: 71 (72MHz / 72 = 1MHz)
+Prescaler: 63 (64MHz / 64 = 1MHz)
 Period: 999 (1kHz PWM)
 ```
 
