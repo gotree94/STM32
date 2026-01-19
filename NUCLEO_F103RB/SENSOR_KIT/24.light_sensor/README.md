@@ -62,19 +62,19 @@ Light Sensor Module          NUCLEO-F103RB
 ### 클럭 설정
 
 ```
-HSI RC (8MHz) → PLL (x4) → SYSCLK (32MHz)
-                               ↓
-                         AHB Prescaler (/2)
-                               ↓
-                         HCLK (16MHz)
-                               ↓
-                         APB2 Prescaler (/1)
-                               ↓
-                         PCLK2 (16MHz)
-                               ↓
-                         ADC Prescaler (/2)
-                               ↓
-                         ADC Clock (8MHz)
+HSI RC (8MHz) → /2 → PLL (×4) → SYSCLK (16MHz)
+                                     ↓
+                               AHB Prescaler (/1)
+                                     ↓
+                               HCLK (16MHz)
+                                     ↓
+                               APB2 Prescaler (/1)
+                                     ↓
+                               PCLK2 (16MHz)
+                                     ↓
+                               ADC Prescaler (/2)
+                                     ↓
+                               ADC Clock (8MHz)
 ```
 
 ### ADC 설정
@@ -82,8 +82,8 @@ HSI RC (8MHz) → PLL (x4) → SYSCLK (32MHz)
 | 파라미터 | 값 | 설명 |
 |----------|-----|------|
 | Resolution | 12-bit | 0~4095 |
-| System Clock | 32MHz | HSI(8MHz) × PLL(x4) |
-| HCLK | 16MHz | SYSCLK / 2 |
+| System Clock | 16MHz | HSI(8MHz) / 2 × PLL(4) |
+| HCLK | 16MHz | SYSCLK / 1 |
 | PCLK2 | 16MHz | HCLK / 1 |
 | ADC Prescaler | /2 | PCLK2 / 2 |
 | ADC Clock | 8MHz | 최대 14MHz 이내 |
@@ -146,6 +146,55 @@ if (adc_value > LIGHT_DIM) {
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 및 다운로드
 
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+
+
+
+
 ### 예상 출력
 
 ```
@@ -154,6 +203,7 @@ if (adc_value > LIGHT_DIM) {
   Board: NUCLEO-F103RB
 ========================================
 
+ADC Clock: 8MHz (PCLK2/2)
 ADC Resolution: 12-bit (0-4095)
 Samples averaged: 16
 
@@ -273,4 +323,3 @@ float ewma_filter(float new_value, float prev_filtered) {
 - [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 - [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 - [KY-018 Photoresistor Module](https://arduinomodules.info/ky-018-photoresistor-module/)
-
