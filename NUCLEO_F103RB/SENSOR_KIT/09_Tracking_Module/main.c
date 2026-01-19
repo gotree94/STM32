@@ -8,13 +8,11 @@
  * @description
  * 라인 트래킹(추적) 모듈 테스트 (TCRT5000 기반)
  * - 적외선 센서를 이용한 흑/백 라인 감지
- * - 디지털 출력으로 라인 위치 확인
- * - 3채널/5채널 센서 어레이 지원
+ * - 단일 채널 디지털 출력
+ * - 3핀 모듈 (VCC, GND, OUT)
  * 
- * @pinout (3채널 기준)
- * - PA0  : Left Sensor (Digital)
- * - PA1  : Center Sensor (Digital)
- * - PA4  : Right Sensor (Digital)
+ * @pinout
+ * - PA0  : Sensor Output (Digital Input)
  * - PA5  : LED Indicator (Output)
  * - PA2  : USART2 TX (Debug)
  * - PA3  : USART2 RX (Debug)
@@ -26,9 +24,7 @@
 #include <string.h>
 
 /* Private defines */
-#define SENSOR_LEFT_PIN     GPIO_PIN_0
-#define SENSOR_CENTER_PIN   GPIO_PIN_1
-#define SENSOR_RIGHT_PIN    GPIO_PIN_4
+#define SENSOR_PIN          GPIO_PIN_0
 #define SENSOR_PORT         GPIOA
 #define LED_PIN             GPIO_PIN_5
 #define LED_PORT            GPIOA
@@ -37,32 +33,21 @@
 #define LINE_DETECTED       0   // Active Low (흑색 라인 감지)
 #define LINE_NOT_DETECTED   1   // 백색 바닥
 
-/* Line position definitions */
-typedef enum {
-    POS_UNKNOWN = 0,
-    POS_LEFT,
-    POS_CENTER,
-    POS_RIGHT,
-    POS_LOST,
-    POS_ALL_BLACK,
-    POS_SLIGHT_LEFT,
-    POS_SLIGHT_RIGHT
-} LinePosition;
-
 /* Private variables */
 UART_HandleTypeDef huart2;
+
+/* Statistics */
+uint32_t detect_count = 0;
+uint32_t total_samples = 0;
+uint32_t last_transition_time = 0;
+uint8_t prev_state = LINE_NOT_DETECTED;
 
 /* Private function prototypes */
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-uint8_t Read_Sensor_Left(void);
-uint8_t Read_Sensor_Center(void);
-uint8_t Read_Sensor_Right(void);
-LinePosition Get_Line_Position(void);
-const char* Position_To_String(LinePosition pos);
-void Print_Sensor_Status(uint8_t left, uint8_t center, uint8_t right);
-void Print_Direction_Arrow(LinePosition pos);
+uint8_t Read_Sensor(void);
+void Print_Sensor_Bar(uint8_t state);
 
 /* Printf redirect */
 int __io_putchar(int ch) {
@@ -81,50 +66,73 @@ int main(void)
     MX_USART2_UART_Init();
 
     printf("\r\n============================================\r\n");
-    printf("  Line Tracking Module Test\r\n");
+    printf("  Line Tracking Sensor Test (Single Channel)\r\n");
     printf("  STM32F103 NUCLEO\r\n");
     printf("============================================\r\n");
-    printf("PA0: Left Sensor\r\n");
-    printf("PA1: Center Sensor\r\n");
-    printf("PA4: Right Sensor\r\n");
-    printf("(0=Line Detected, 1=No Line)\r\n\r\n");
+    printf("Module: 3-Pin (VCC, GND, OUT)\r\n");
+    printf("PA0: Sensor Output\r\n");
+    printf("(0=Black Line, 1=White Surface)\r\n\r\n");
 
-    uint8_t left, center, right;
-    LinePosition position, prev_position = POS_UNKNOWN;
+    uint8_t sensor_state;
     uint32_t last_print_time = 0;
+    uint32_t stats_time = 0;
 
     while (1)
     {
         /* 센서 읽기 */
-        left = Read_Sensor_Left();
-        center = Read_Sensor_Center();
-        right = Read_Sensor_Right();
+        sensor_state = Read_Sensor();
+        total_samples++;
 
-        /* 라인 위치 계산 */
-        position = Get_Line_Position();
-
-        /* 상태 표시 LED */
-        if (position == POS_CENTER)
+        /* 라인 감지 시 LED ON */
+        if (sensor_state == LINE_DETECTED)
         {
             HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+            detect_count++;
         }
         else
         {
             HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
         }
 
-        /* 100ms마다 또는 위치 변경 시 출력 */
-        if (HAL_GetTick() - last_print_time >= 100 || position != prev_position)
+        /* 상태 전환 감지 */
+        if (sensor_state != prev_state)
+        {
+            uint32_t current_time = HAL_GetTick();
+            uint32_t duration = current_time - last_transition_time;
+            
+            printf("[TRANSITION] %s -> %s (after %lu ms)\r\n",
+                   prev_state == LINE_DETECTED ? "BLACK" : "WHITE",
+                   sensor_state == LINE_DETECTED ? "BLACK" : "WHITE",
+                   duration);
+            
+            last_transition_time = current_time;
+            prev_state = sensor_state;
+        }
+
+        /* 100ms마다 상태 출력 */
+        if (HAL_GetTick() - last_print_time >= 100)
         {
             last_print_time = HAL_GetTick();
-            
-            printf("Sensors: ");
-            Print_Sensor_Status(left, center, right);
-            printf(" | Position: %-12s | ", Position_To_String(position));
-            Print_Direction_Arrow(position);
+
+            printf("Sensor: [%s] ", 
+                   sensor_state == LINE_DETECTED ? "BLACK ###" : "WHITE ---");
+            Print_Sensor_Bar(sensor_state);
             printf("\r\n");
+        }
+
+        /* 5초마다 통계 출력 */
+        if (HAL_GetTick() - stats_time >= 5000)
+        {
+            stats_time = HAL_GetTick();
+            uint32_t detect_percent = (detect_count * 100) / total_samples;
             
-            prev_position = position;
+            printf("\r\n--- Statistics (5s) ---\r\n");
+            printf("Total samples: %lu\r\n", total_samples);
+            printf("Line detected: %lu (%lu%%)\r\n", detect_count, detect_percent);
+            printf("------------------------\r\n\r\n");
+            
+            detect_count = 0;
+            total_samples = 0;
         }
 
         HAL_Delay(10);
@@ -132,155 +140,26 @@ int main(void)
 }
 
 /**
- * @brief  Read Left Sensor
+ * @brief  Read Tracking Sensor
+ * @retval LINE_DETECTED (0) or LINE_NOT_DETECTED (1)
  */
-uint8_t Read_Sensor_Left(void)
+uint8_t Read_Sensor(void)
 {
-    return HAL_GPIO_ReadPin(SENSOR_PORT, SENSOR_LEFT_PIN);
+    return HAL_GPIO_ReadPin(SENSOR_PORT, SENSOR_PIN);
 }
 
 /**
- * @brief  Read Center Sensor
+ * @brief  Print visual sensor bar
  */
-uint8_t Read_Sensor_Center(void)
+void Print_Sensor_Bar(uint8_t state)
 {
-    return HAL_GPIO_ReadPin(SENSOR_PORT, SENSOR_CENTER_PIN);
-}
-
-/**
- * @brief  Read Right Sensor
- */
-uint8_t Read_Sensor_Right(void)
-{
-    return HAL_GPIO_ReadPin(SENSOR_PORT, SENSOR_RIGHT_PIN);
-}
-
-/**
- * @brief  Calculate line position
- */
-LinePosition Get_Line_Position(void)
-{
-    uint8_t left = Read_Sensor_Left();
-    uint8_t center = Read_Sensor_Center();
-    uint8_t right = Read_Sensor_Right();
-    
-    /* 
-     * 센서 조합에 따른 위치 판단
-     * 0 = 라인 감지 (검은색)
-     * 1 = 라인 없음 (흰색)
-     */
-    
-    // 모든 센서가 라인 감지 (넓은 라인 또는 교차점)
-    if (left == LINE_DETECTED && center == LINE_DETECTED && right == LINE_DETECTED)
+    if (state == LINE_DETECTED)
     {
-        return POS_ALL_BLACK;
+        printf("[##########]  <- LINE DETECTED");
     }
-    
-    // 중앙만 감지 - 정확히 중앙
-    if (left == LINE_NOT_DETECTED && center == LINE_DETECTED && right == LINE_NOT_DETECTED)
+    else
     {
-        return POS_CENTER;
-    }
-    
-    // 왼쪽만 감지 - 크게 왼쪽으로 치우침
-    if (left == LINE_DETECTED && center == LINE_NOT_DETECTED && right == LINE_NOT_DETECTED)
-    {
-        return POS_LEFT;
-    }
-    
-    // 오른쪽만 감지 - 크게 오른쪽으로 치우침
-    if (left == LINE_NOT_DETECTED && center == LINE_NOT_DETECTED && right == LINE_DETECTED)
-    {
-        return POS_RIGHT;
-    }
-    
-    // 왼쪽 + 중앙 감지 - 약간 왼쪽
-    if (left == LINE_DETECTED && center == LINE_DETECTED && right == LINE_NOT_DETECTED)
-    {
-        return POS_SLIGHT_LEFT;
-    }
-    
-    // 중앙 + 오른쪽 감지 - 약간 오른쪽
-    if (left == LINE_NOT_DETECTED && center == LINE_DETECTED && right == LINE_DETECTED)
-    {
-        return POS_SLIGHT_RIGHT;
-    }
-    
-    // 왼쪽 + 오른쪽 감지 (중앙 없음) - 이상한 상황
-    if (left == LINE_DETECTED && center == LINE_NOT_DETECTED && right == LINE_DETECTED)
-    {
-        return POS_UNKNOWN;
-    }
-    
-    // 모든 센서가 라인 없음 - 라인 이탈
-    if (left == LINE_NOT_DETECTED && center == LINE_NOT_DETECTED && right == LINE_NOT_DETECTED)
-    {
-        return POS_LOST;
-    }
-    
-    return POS_UNKNOWN;
-}
-
-/**
- * @brief  Convert position to string
- */
-const char* Position_To_String(LinePosition pos)
-{
-    switch (pos)
-    {
-        case POS_LEFT:         return "LEFT";
-        case POS_CENTER:       return "CENTER";
-        case POS_RIGHT:        return "RIGHT";
-        case POS_SLIGHT_LEFT:  return "SLIGHT LEFT";
-        case POS_SLIGHT_RIGHT: return "SLIGHT RIGHT";
-        case POS_LOST:         return "LINE LOST!";
-        case POS_ALL_BLACK:    return "ALL BLACK";
-        default:               return "UNKNOWN";
-    }
-}
-
-/**
- * @brief  Print sensor status with visual representation
- */
-void Print_Sensor_Status(uint8_t left, uint8_t center, uint8_t right)
-{
-    printf("[%c|%c|%c]", 
-           left == LINE_DETECTED ? '#' : '_',
-           center == LINE_DETECTED ? '#' : '_',
-           right == LINE_DETECTED ? '#' : '_');
-}
-
-/**
- * @brief  Print direction arrow
- */
-void Print_Direction_Arrow(LinePosition pos)
-{
-    switch (pos)
-    {
-        case POS_LEFT:
-            printf("<<<---");
-            break;
-        case POS_SLIGHT_LEFT:
-            printf(" <<-- ");
-            break;
-        case POS_CENTER:
-            printf("--||--");
-            break;
-        case POS_SLIGHT_RIGHT:
-            printf(" -->> ");
-            break;
-        case POS_RIGHT:
-            printf("--->>>");
-            break;
-        case POS_LOST:
-            printf("??????");
-            break;
-        case POS_ALL_BLACK:
-            printf("######");
-            break;
-        default:
-            printf("  ??  ");
-            break;
+        printf("[----------]  <- NO LINE");
     }
 }
 
@@ -325,8 +204,8 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
 
-    /* Sensor Pins - Input with Pull-up */
-    GPIO_InitStruct.Pin = SENSOR_LEFT_PIN | SENSOR_CENTER_PIN | SENSOR_RIGHT_PIN;
+    /* Sensor Pin - Input with Pull-up */
+    GPIO_InitStruct.Pin = SENSOR_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(SENSOR_PORT, &GPIO_InitStruct);
@@ -359,3 +238,4 @@ static void MX_USART2_UART_Init(void)
     huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     HAL_UART_Init(&huart2);
 }
+```
