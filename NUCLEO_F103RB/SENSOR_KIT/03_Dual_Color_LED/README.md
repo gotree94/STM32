@@ -87,7 +87,7 @@ void DualLED_Alternating(void);      // 교대 점멸
 
 ```c
 Timer: TIM3
-Prescaler: 71 (72MHz / 72 = 1MHz)
+Prescaler: 63 (64MHz / 64 = 1MHz)
 Period: 999 (1MHz / 1000 = 1kHz PWM)
 Channels: CH1(PA6)=Red, CH2(PA7)=Green
 ```
