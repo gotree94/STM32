@@ -3,7 +3,9 @@
 라인 트래킹(추적) 모듈(TCRT5000 기반)을 STM32F103 NUCLEO 보드로 테스트하는 예제입니다.
 
 ![1-PCS-Tracking-Sensor-IR-font-b-TCRT5000-b-font-Infrared-Obstacle-Avoidance-sensor-for-Arduino jpg_220x220](https://github.com/user-attachments/assets/c51873be-8cad-44ed-9694-152831172743)
-![TCRT5000-1024x429](https://github.com/user-attachments/assets/f9e3fd06-be98-42f3-956b-a71110d328f1)
+
+<img width="300" height="100" alt="TCRT5000-1024x429" src="https://github.com/user-attachments/assets/80092496-d9a3-4c4b-97f5-1be8c25851fa" />
+
 
 ## 하드웨어 구성
 
