@@ -18,6 +18,10 @@
 
 ### 핀 연결
 
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/3ffe9cd0-13b4-44e3-9f31-411c800873a4" />
+
+
+
 ```
 Light Sensor Module          NUCLEO-F103RB
 ===================          ===============
