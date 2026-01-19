@@ -17,6 +17,9 @@
 
 ### 핀 연결
 
+<img width="396" height="360" alt="F103RB-pin" src="https://github.com/user-attachments/assets/749a9813-04b0-4d6c-a094-9f79497adc88" />
+
+
 ```
 7-Color LED Module      NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
@@ -112,6 +115,38 @@ Period: 999 (1kHz PWM)
 1. 새 STM32 프로젝트 생성 (NUCLEO-F103RB 선택)
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 후 보드에 플래시
+
+
+```c
+
+```
+
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+```c
+
+```
+
+
 
 ## 📊 시리얼 출력 예시
 
