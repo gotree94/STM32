@@ -17,6 +17,9 @@ RGB LED 모듈은 Red, Green, Blue 세 가지 색상의 LED가 하나의 패키�
 
 ### 핀 연결
 
+<img width="396" height="360" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5ddb0229-cd65-4ab0-bf9a-e17849d2af06" />
+
+
 ```
 RGB LED Module          NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
