@@ -59,6 +59,42 @@ Light Sensor Module          NUCLEO-F103RB
 4. **조도 레벨 분류**: 6단계 밝기 분류
 5. **자동 조명 제어**: 어두우면 LED 자동 점등
 
+### 클럭 설정
+
+```
+HSI RC (8MHz) → PLL (x4) → SYSCLK (32MHz)
+                               ↓
+                         AHB Prescaler (/2)
+                               ↓
+                         HCLK (16MHz)
+                               ↓
+                         APB2 Prescaler (/1)
+                               ↓
+                         PCLK2 (16MHz)
+                               ↓
+                         ADC Prescaler (/2)
+                               ↓
+                         ADC Clock (8MHz)
+```
+
+### ADC 설정
+
+| 파라미터 | 값 | 설명 |
+|----------|-----|------|
+| Resolution | 12-bit | 0~4095 |
+| System Clock | 32MHz | HSI(8MHz) × PLL(x4) |
+| HCLK | 16MHz | SYSCLK / 2 |
+| PCLK2 | 16MHz | HCLK / 1 |
+| ADC Prescaler | /2 | PCLK2 / 2 |
+| ADC Clock | 8MHz | 최대 14MHz 이내 |
+| Sampling Time | 239.5 cycles | 고임피던스 소스 대응 |
+| Conversion Time | 252 cycles | 샘플링(239.5) + 변환(12.5) |
+| Total Conversion | 31.5μs | 252 cycles / 8MHz |
+| Conversion Mode | Continuous | 연속 변환 |
+| DMA Mode | Normal | 버퍼 채움 후 인터럽트 |
+
+> **참고**: 조도 센서(LDR) 응답 시간이 20~30ms이므로 31.5μs 변환 주기는 충분합니다.
+
 ### 조도 레벨 분류
 
 | ADC 값 범위 | 레벨 | 대략적 환경 |
@@ -92,16 +128,6 @@ if (adc_value > LIGHT_DIM) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); /* LED OFF */
 }
 ```
-
-### ADC 설정
-
-| 파라미터 | 값 | 설명 |
-|----------|-----|------|
-| Resolution | 12-bit | 0~4095 |
-| Clock | 8MHz | 64MHz / 8 |
-| Sampling Time | 239.5 cycles | 최대 안정성 |
-| Conversion Mode | Continuous | 연속 변환 |
-| DMA Mode | Normal | 버퍼 채움 후 인터럽트 |
 
 ## 📁 프로젝트 구조
 
@@ -248,6 +274,3 @@ float ewma_filter(float new_value, float prev_filtered) {
 - [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 - [KY-018 Photoresistor Module](https://arduinomodules.info/ky-018-photoresistor-module/)
 
-## 📝 라이선스
-
-MIT License - 자유롭게 사용, 수정, 배포 가능
