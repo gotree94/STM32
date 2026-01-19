@@ -196,8 +196,12 @@ GPIO:
 =============================================
   7-Color LED Module Test - NUCLEO-F103RB
 =============================================
-  Module Type: Auto Color Cycling (KY-034)
+  Module: KY-034 (Auto Color Cycling)
   Control: GPIO ON/OFF (No PWM)
+  Pin: PB0
+
+[Init] Quick LED test...
+[Init] LED test complete.
 
 [Test 1] Basic ON/OFF Control
   LED ON (5 seconds - watch color changes)...
@@ -208,7 +212,14 @@ GPIO:
   Colors: Red -> Orange -> Yellow -> Green -> Cyan -> Blue -> Purple
   [1 sec]
   [2 sec]
-  ...
+  [3 sec]
+  [4 sec]
+  [5 sec]
+  [6 sec]
+  [7 sec]
+  [8 sec]
+  [9 sec]
+  [10 sec]
 
 [Test 3] Strobe Effect
   Slow strobe (500ms)...
@@ -218,10 +229,18 @@ GPIO:
 [Test 4] Pattern Demo
   Heartbeat pattern...
   SOS pattern...
+  Countdown pattern (5 to 1)...
+    5
+    4
+    3
+    2
+    1
 
 [Test 5] Notification Patterns
-  Alert notification...
-  Complete notification...
+  New message notification...
+  Warning notification...
+  Standby notification...
+  Completion notification...
 
 --- Cycle Complete ---
 ```
