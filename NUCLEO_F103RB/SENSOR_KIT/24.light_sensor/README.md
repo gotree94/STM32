@@ -98,7 +98,7 @@ if (adc_value > LIGHT_DIM) {
 | 파라미터 | 값 | 설명 |
 |----------|-----|------|
 | Resolution | 12-bit | 0~4095 |
-| Clock | 12MHz | 72MHz / 6 |
+| Clock | 8MHz | 64MHz / 8 |
 | Sampling Time | 239.5 cycles | 최대 안정성 |
 | Conversion Mode | Continuous | 연속 변환 |
 | DMA Mode | Normal | 버퍼 채움 후 인터럽트 |
