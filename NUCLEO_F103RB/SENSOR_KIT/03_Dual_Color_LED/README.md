@@ -108,13 +108,16 @@ Channels: CH1(PA6)=Red, CH2(PA7)=Green
 3. 빌드 후 보드에 플래시
 
 ```c
+/* USER CODE BEGIN Includes */
 #include "stm32f1xx_hal.h"
 #include <string.h>
 #include <stdio.h>
+/* USER CODE END Includes */
 ```
 
 ```c
-/* Private defines */
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
 #define RED_PIN         GPIO_PIN_6
 #define GREEN_PIN       GPIO_PIN_7
 #define LED_PORT        GPIOA
@@ -128,10 +131,11 @@ typedef enum {
     COLOR_YELLOW,    // Red + Green
     COLOR_ORANGE     // Red 많이 + Green 조금
 } LED_Color_t;
+/* USER CODE END PTD */
 ```
 
 ```c
-/* Private function prototypes */
+/* USER CODE BEGIN PFP */
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM3_Init(void);
@@ -148,74 +152,82 @@ int __io_putchar(int ch) {
     HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
     return ch;
 }
+/* USER CODE END PFP */
 ```
 
 ```c
-    /* PWM 시작 */
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);  // Red
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);  // Green
-    
-    printf("\r\n============================================\r\n");
-    printf("  Dual Color LED Module Test - NUCLEO-F103RB\r\n");
-    printf("============================================\r\n\n");
+  /* USER CODE BEGIN 2 */
+  /* PWM 시작 */
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);  // Red
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);  // Green
+  
+  printf("\r\n============================================\r\n");
+  printf("  Dual Color LED Module Test - NUCLEO-F103RB\r\n");
+  printf("============================================\r\n\n");
+  /* USER CODE END 2 */
 ```
 
 ```c
     while (1)
     {
-        /* Test 1: 기본 색상 테스트 */
-        printf("[Test 1] Basic Colors\r\n");
-        
-        printf("  OFF...\r\n");
-        DualLED_SetColor(COLOR_OFF);
-        HAL_Delay(1000);
-        
-        printf("  RED...\r\n");
-        DualLED_SetColor(COLOR_RED);
-        HAL_Delay(1000);
-        
-        printf("  GREEN...\r\n");
-        DualLED_SetColor(COLOR_GREEN);
-        HAL_Delay(1000);
-        
-        printf("  YELLOW (R+G)...\r\n");
-        DualLED_SetColor(COLOR_YELLOW);
-        HAL_Delay(1000);
-        
-        printf("  ORANGE (R+g)...\r\n");
-        DualLED_SetColor(COLOR_ORANGE);
-        HAL_Delay(1000);
-        
-        DualLED_SetColor(COLOR_OFF);
-        HAL_Delay(500);
-        
-        /* Test 2: 신호등 시뮬레이션 */
-        printf("\r\n[Test 2] Traffic Light Simulation\r\n");
-        DualLED_TrafficLight();
-        HAL_Delay(500);
-        
-        /* Test 3: 상태 표시기 */
-        printf("\r\n[Test 3] Status Indicator\r\n");
-        DualLED_StatusIndicator();
-        HAL_Delay(500);
-        
-        /* Test 4: 색상 그라데이션 */
-        printf("\r\n[Test 4] Color Gradient (Red -> Yellow -> Green)\r\n");
-        DualLED_ColorMix();
-        HAL_Delay(500);
-        
-        /* Test 5: 교대 점멸 */
-        printf("\r\n[Test 5] Alternating Blink\r\n");
-        DualLED_Alternating();
-        
-        DualLED_SetColor(COLOR_OFF);
-        
-        printf("\r\n--- Cycle Complete ---\r\n\n");
-        HAL_Delay(2000);
-    }
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      /* Test 1: 기본 색상 테스트 */
+      printf("[Test 1] Basic Colors\r\n");
+      
+      printf("  OFF...\r\n");
+      DualLED_SetColor(COLOR_OFF);
+      HAL_Delay(1000);
+      
+      printf("  RED...\r\n");
+      DualLED_SetColor(COLOR_RED);
+      HAL_Delay(1000);
+      
+      printf("  GREEN...\r\n");
+      DualLED_SetColor(COLOR_GREEN);
+      HAL_Delay(1000);
+      
+      printf("  YELLOW (R+G)...\r\n");
+      DualLED_SetColor(COLOR_YELLOW);
+      HAL_Delay(1000);
+      
+      printf("  ORANGE (R+g)...\r\n");
+      DualLED_SetColor(COLOR_ORANGE);
+      HAL_Delay(1000);
+      
+      DualLED_SetColor(COLOR_OFF);
+      HAL_Delay(500);
+      
+      /* Test 2: 신호등 시뮬레이션 */
+      printf("\r\n[Test 2] Traffic Light Simulation\r\n");
+      DualLED_TrafficLight();
+      HAL_Delay(500);
+      
+      /* Test 3: 상태 표시기 */
+      printf("\r\n[Test 3] Status Indicator\r\n");
+      DualLED_StatusIndicator();
+      HAL_Delay(500);
+      
+      /* Test 4: 색상 그라데이션 */
+      printf("\r\n[Test 4] Color Gradient (Red -> Yellow -> Green)\r\n");
+      DualLED_ColorMix();
+      HAL_Delay(500);
+      
+      /* Test 5: 교대 점멸 */
+      printf("\r\n[Test 5] Alternating Blink\r\n");
+      DualLED_Alternating();
+      
+      DualLED_SetColor(COLOR_OFF);
+      
+      printf("\r\n--- Cycle Complete ---\r\n\n");
+      HAL_Delay(2000);	  
+    /* USER CODE END WHILE */
 ```
 
 ```c
+/* USER CODE BEGIN 0 */
 /**
  * @brief 사전 정의 색상 설정
  */
@@ -392,6 +404,7 @@ void DualLED_Alternating(void)
         }
     }
 }
+/* USER CODE END 0 */
 ```
 
 
