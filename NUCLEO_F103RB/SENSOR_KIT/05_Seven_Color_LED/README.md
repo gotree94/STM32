@@ -4,7 +4,14 @@
 
 ## 📌 개요
 
-7색 LED 모듈(KY-034)은 내장된 IC가 자동으로 Red, Orange, Yellow, Green, Cyan, Blue, Purple 색상을 순환합니다. 외부에서는 전원 ON/OFF와 PWM을 통한 밝기 조절만 가능하며, 색상 변화는 내장 IC가 자동으로 처리합니다.
+7색 LED 모듈(KY-034)은 내장된 IC가 자동으로 Red, Orange, Yellow, Green, Cyan, Blue, Purple 색상을 순환합니다. 외부에서는 **GPIO ON/OFF 제어만 가능**하며, 색상 변화 속도와 패턴은 내장 IC가 자동으로 처리합니다.
+
+### 모듈 특성
+
+- **제어 방식**: GPIO ON/OFF (PWM 불필요)
+- **색상 제어**: 불가능 (내장 IC 자동 순환)
+- **밝기 제어**: 불가능 (내장 IC 고정)
+- **패턴 제어**: 불가능 (내장 IC 고정)
 
 ## 🛠 하드웨어 구성
 
@@ -12,51 +19,72 @@
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | NUCLEO-F103RB | 1 | STM32F103RB 탑재 |
-| 7색 LED 모듈 | 1 | KY-034 또는 유사 모듈 |
-| 점퍼 와이어 | 3 | Female-Female |
+| 7색 LED 모듈 | 1 | KY-034 |
+| 점퍼 와이어 | 2 | Female-Female |
+
+### KY-034 핀 배치
+
+```
+┌─────────────────────────┐
+│      KY-034 Module      │
+│                         │
+│  [Pin 1]  [Pin 2]  [Pin 3]
+│   GND      N.C    Signal
+└─────────────────────────┘
+```
+
+| 핀 번호 | 명칭 | 설명 |
+|--------|------|------|
+| 1 | GND | 그라운드 |
+| 2 | N.C | 미사용 (No Connection) |
+| 3 | Signal | 전원 입력 (VCC/GPIO) |
 
 ### 핀 연결
 
-<img width="396" height="360" alt="F103RB-pin" src="https://github.com/user-attachments/assets/749a9813-04b0-4d6c-a094-9f79497adc88" />
-
-
 ```
-7-Color LED Module      NUCLEO-F103RB
+KY-034 Module           NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
-│     S  ─────┼────────┤ PB0 (TIM3_CH3)
-│    NC  ─────┼────────┤ NC
-│   GND  ─────┼────────┤ GND
+│  GND (Pin1) ┼────────┤ GND         │
+│  N.C (Pin2) ┼────────┤ (연결 안함)  │
+│  S   (Pin3) ┼────────┤ PB0 (GPIO)  │
 └─────────────┘        └─────────────┘
 ```
 
 ### 회로도
 
 ```
-        3.3V
-         │
-    ┌────┴────────────────┐
-    │   7-Color LED       │
-    │   ┌─────────────┐   │
-    │   │ Auto Color  │   │
-    │   │   Cycle IC  │   │
-    │   └──────┬──────┘   │
-    │          │          │
-    │   ┌──────┴──────┐   │
-    │   │  RGB LED    │   │
-    │   └──────┬──────┘   │
-    │          │          │
-    └──────────┼──────────┘
-               │
-               S ──────── PC8
-               │
-              GND
+                    STM32F103RB
+                   ┌───────────┐
+                   │           │
+    ┌──────────────┤ PB0       │
+    │              │           │
+    │              │           │
+    ▼              │           │
+┌───────────┐      │           │
+│  KY-034   │      │           │
+│ ┌───────┐ │      │           │
+│ │Auto IC│ │      │           │
+│ └───┬───┘ │      │           │
+│ ┌───┴───┐ │      │           │
+│ │RGB LED│ │      │           │
+│ └───┬───┘ │      │           │
+│     │     │      │           │
+│    GND────┼──────┤ GND       │
+└───────────┘      └───────────┘
 ```
 
 ## 💻 소프트웨어
 
-### 모듈 특성
+### 제어 원리
 
-7색 LED 모듈은 내장 IC에 의해 자동으로 색상이 변환됩니다:
+KY-034는 Signal 핀에 전원(HIGH)이 공급되면 내장 IC가 자동으로 동작합니다:
+
+1. **GPIO HIGH** → LED 동작 (자동 색상 변환 시작)
+2. **GPIO LOW** → LED 정지
+
+**PWM은 불필요합니다.** 단순 GPIO ON/OFF로 제어합니다.
+
+### 색상 순환 (자동)
 
 | 순서 | 색상 | 영문 |
 |------|------|------|
@@ -68,37 +96,64 @@
 | 6 | 파랑 | Blue |
 | 7 | 보라 | Purple |
 
-### 제어 방법
-
-1. **ON/OFF 제어**: GPIO로 전원 공급 제어
-2. **밝기 조절**: PWM 듀티비로 전체 밝기 조절
-3. **색상 선택**: 불가능 (내장 IC가 자동 순환)
-
 ### 주요 함수
 
 ```c
-// 기본 제어
-void SevenColorLED_On(void);              // LED 켜기
-void SevenColorLED_Off(void);             // LED 끄기
-void SevenColorLED_SetBrightness(uint8_t brightness);  // 밝기 (0~255)
-void SevenColorLED_Toggle(void);          // ON/OFF 토글
+// 기본 제어 (GPIO 방식)
+void SevenColorLED_On(void);    // LED 켜기 (자동 색상 변환 시작)
+void SevenColorLED_Off(void);   // LED 끄기
+void SevenColorLED_Toggle(void); // ON/OFF 토글
 
-// 효과 데모
+// 효과 데모 (ON/OFF 타이밍 제어)
 void SevenColorLED_AutoCycleDemo(void);   // 자동 색상 순환 관찰
-void SevenColorLED_StrobeDemo(void);      // 스트로브 효과
-void SevenColorLED_PatternDemo(void);     // 다양한 패턴
-void SevenColorLED_BrightnessDemo(void);  // 밝기 조절
+void SevenColorLED_StrobeDemo(void);      // 스트로브 효과 (ON/OFF 반복)
+void SevenColorLED_PatternDemo(void);     // 다양한 점멸 패턴
 void SevenColorLED_PartyMode(void);       // 파티 모드
 void SevenColorLED_NotificationDemo(void); // 알림 패턴
 ```
 
-### PWM 설정
+### GPIO 설정
 
 ```c
-Timer: TIM8
-Channel: CH3 (PC8)
-Prescaler: 63 (64MHz / 64 = 1MHz)
-Period: 999 (1kHz PWM)
+GPIO Pin: PB0
+Mode: GPIO_MODE_OUTPUT_PP
+Speed: GPIO_SPEED_FREQ_LOW
+```
+
+### 코드 예시
+
+```c
+// GPIO 초기화
+static void MX_GPIO_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+    
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+// LED 제어 함수
+void SevenColorLED_On(void)
+{
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+}
+
+void SevenColorLED_Off(void)
+{
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+}
+
+void SevenColorLED_Toggle(void)
+{
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+}
 ```
 
 ## 📂 프로젝트 구조
@@ -113,40 +168,22 @@ Period: 999 (1kHz PWM)
 
 ### STM32CubeIDE 사용 시
 1. 새 STM32 프로젝트 생성 (NUCLEO-F103RB 선택)
-2. `main.c` 내용을 프로젝트에 복사
-3. 빌드 후 보드에 플래시
+2. PB0를 GPIO_Output으로 설정
+3. `main.c` 내용을 프로젝트에 복사
+4. 빌드 후 보드에 플래시
 
-
-```c
-
-```
-
-
-```c
+### STM32CubeMX 설정
 
 ```
+Pinout:
+  - PB0: GPIO_Output
 
-```c
-
+GPIO:
+  - PB0: 
+    - Mode: Output Push Pull
+    - Pull: No pull-up and no pull-down
+    - Speed: Low
 ```
-
-```c
-
-```
-
-```c
-
-```
-
-```c
-
-```
-
-```c
-
-```
-
-
 
 ## 📊 시리얼 출력 예시
 
@@ -155,132 +192,174 @@ Period: 999 (1kHz PWM)
   7-Color LED Module Test - NUCLEO-F103RB
 =============================================
   Module Type: Auto Color Cycling (KY-034)
+  Control: GPIO ON/OFF (No PWM)
 
 [Test 1] Basic ON/OFF Control
   LED ON (5 seconds - watch color changes)...
   LED OFF...
 
-[Test 2] Brightness Control (PWM)
-  Brightness levels: 25% 50% 75% 100%
-  Fade in/out...
-
-[Test 3] Auto Color Cycle Observation
+[Test 2] Auto Color Cycle Observation
   Observing auto color cycle for 10 seconds...
   Colors: Red -> Orange -> Yellow -> Green -> Cyan -> Blue -> Purple
   [1 sec]
   [2 sec]
   ...
 
-[Test 4] Strobe Effect
-  Slow strobe...
-  Fast strobe...
+[Test 3] Strobe Effect
+  Slow strobe (500ms)...
+  Fast strobe (100ms)...
   Accelerating strobe...
 
-[Test 5] Pattern Demo
+[Test 4] Pattern Demo
   Heartbeat pattern...
-  Candle flicker effect...
-  Pulse effect...
+  SOS pattern...
 
-[Test 6] Party Mode
-  Party mode active for 10 seconds...
-
-[Test 7] Notification Patterns
-  New message notification...
-  Warning notification...
-  Charging notification...
-  Completion notification...
+[Test 5] Notification Patterns
+  Alert notification...
+  Complete notification...
 
 --- Cycle Complete ---
 ```
 
 ## 📝 효과 패턴 상세
 
+### 스트로브 효과
+
+```c
+// 느린 스트로브
+for (int i = 0; i < 10; i++) {
+    SevenColorLED_On();
+    HAL_Delay(500);
+    SevenColorLED_Off();
+    HAL_Delay(500);
+}
+
+// 빠른 스트로브
+for (int i = 0; i < 20; i++) {
+    SevenColorLED_On();
+    HAL_Delay(100);
+    SevenColorLED_Off();
+    HAL_Delay(100);
+}
+```
+
 ### 심박 효과 (Heartbeat)
-```
-첫 번째 박동: 밝기 0 → 255 → 0 (빠르게)
-짧은 휴식: 80ms
-두 번째 박동: 밝기 0 → 180 → 0 (약하게)
-긴 휴식: 350ms
+
+```c
+// 두 번 빠르게 점멸 후 긴 휴식
+SevenColorLED_On();
+HAL_Delay(100);
+SevenColorLED_Off();
+HAL_Delay(100);
+SevenColorLED_On();
+HAL_Delay(100);
+SevenColorLED_Off();
+HAL_Delay(500);
 ```
 
-### 캔들 효과 (Candle Flicker)
-```
-불규칙한 밝기 변화 (150~250)
-불규칙한 시간 간격 (50~130ms)
-```
+### SOS 패턴
 
-### 파티 모드
-```
-1. 빠른 점멸 (30ms ON/OFF)
-2. 호흡 효과 (부드러운 밝기 변화)
-3. 스트로브 (20ms ON/OFF)
-4. 랜덤 밝기 변화
-→ 4가지 패턴 순환
+```c
+// S: 짧게 3번
+for (int i = 0; i < 3; i++) {
+    SevenColorLED_On();
+    HAL_Delay(200);
+    SevenColorLED_Off();
+    HAL_Delay(200);
+}
+HAL_Delay(300);
+
+// O: 길게 3번
+for (int i = 0; i < 3; i++) {
+    SevenColorLED_On();
+    HAL_Delay(500);
+    SevenColorLED_Off();
+    HAL_Delay(200);
+}
+HAL_Delay(300);
+
+// S: 짧게 3번
+for (int i = 0; i < 3; i++) {
+    SevenColorLED_On();
+    HAL_Delay(200);
+    SevenColorLED_Off();
+    HAL_Delay(200);
+}
 ```
 
 ### 알림 패턴
-| 패턴 | 설명 |
-|------|------|
-| 새 메시지 | 부드러운 펄스 3회 |
-| 경고 | 빠른 점멸 6회 |
-| 충전 중 | 느린 호흡 효과 |
-| 완료 | 긴 점등 후 유지 |
+
+| 패턴 | 설명 | 코드 |
+|------|------|------|
+| 알림 | 짧은 점멸 3회 | 200ms ON, 200ms OFF × 3 |
+| 경고 | 빠른 점멸 6회 | 100ms ON, 100ms OFF × 6 |
+| 완료 | 긴 점등 | 1000ms ON |
 
 ## 🔍 트러블슈팅
 
 | 증상 | 원인 | 해결 방법 |
 |------|------|----------|
-| LED가 켜지지 않음 | 배선 오류 | VCC/GND 확인 |
-| 색상이 안 바뀜 | 모듈 불량 | 다른 모듈로 테스트 |
-| 밝기 조절 안됨 | PWM 설정 오류 | TIM8 설정 확인 |
-| 깜빡임이 심함 | PWM 주파수 낮음 | Period 값 감소 |
+| LED가 켜지지 않음 | 배선 오류 | GND/Signal 핀 확인 |
+| LED가 계속 켜져있음 | Signal에 VCC 직결 | GPIO 핀에 연결 |
+| 색상이 안 바뀜 | 모듈 불량 | Signal에 5V 직접 연결하여 테스트 |
+| GPIO 제어 안됨 | GPIO 설정 오류 | Output 모드 확인 |
+
+### 모듈 테스트 방법
+
+MCU 없이 모듈 자체 테스트:
+
+```
+1. Signal 핀 → 5V 연결
+2. GND 핀 → GND 연결
+3. LED가 자동으로 색상 변환되면 정상
+```
 
 ## 💡 응용 예제
 
-### 분위기 조명
+### 간단한 상태 표시기
+
 ```c
-void MoodLight(void) {
-    SevenColorLED_On();  // 자동 색상 변환
-    
-    // 호흡 효과로 분위기 연출
-    while (1) {
-        for (int b = 100; b <= 255; b += 2) {
-            SevenColorLED_SetBrightness(b);
-            HAL_Delay(20);
-        }
-        for (int b = 255; b >= 100; b -= 2) {
-            SevenColorLED_SetBrightness(b);
-            HAL_Delay(20);
-        }
+void ShowStatus(uint8_t status) {
+    switch (status) {
+        case STATUS_IDLE:
+            SevenColorLED_Off();
+            break;
+            
+        case STATUS_RUNNING:
+            SevenColorLED_On();  // 자동 색상 변환
+            break;
+            
+        case STATUS_ERROR:
+            // 빠른 점멸
+            for (int i = 0; i < 10; i++) {
+                SevenColorLED_Toggle();
+                HAL_Delay(100);
+            }
+            break;
     }
 }
 ```
 
-### 이벤트 알림기
+### 타이머 알림
+
 ```c
-void NotifyEvent(uint8_t event_type) {
-    switch (event_type) {
-        case EVENT_INFO:
-            SevenColorLED_SetBrightness(150);
-            HAL_Delay(1000);
-            SevenColorLED_Off();
-            break;
-        case EVENT_WARNING:
-            for (int i = 0; i < 5; i++) {
-                SevenColorLED_On();
-                HAL_Delay(200);
-                SevenColorLED_Off();
-                HAL_Delay(200);
-            }
-            break;
-        case EVENT_ERROR:
-            for (int i = 0; i < 10; i++) {
-                SevenColorLED_On();
-                HAL_Delay(100);
-                SevenColorLED_Off();
-                HAL_Delay(100);
-            }
-            break;
+void TimerAlert(void) {
+    // 10초 동안 점멸
+    for (int i = 0; i < 20; i++) {
+        SevenColorLED_On();
+        HAL_Delay(250);
+        SevenColorLED_Off();
+        HAL_Delay(250);
+    }
+}
+```
+
+### 버튼 반응
+
+```c
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == B1_Pin) {
+        SevenColorLED_Toggle();
     }
 }
 ```
@@ -288,14 +367,22 @@ void NotifyEvent(uint8_t event_type) {
 ## ⚠️ 주의사항
 
 1. **색상 제어 불가**: 내장 IC가 자동으로 색상을 변환하므로 특정 색상 선택 불가
-2. **변환 속도 고정**: 색상 변환 속도는 내장 IC에 의해 고정됨
-3. **수동 RGB 모듈**: 개별 색상 제어가 필요하면 RGB LED 모듈(KY-016) 사용
+2. **밝기 제어 불가**: PWM으로 밝기 조절 시 내장 IC 동작에 영향을 줄 수 있음
+3. **변환 속도 고정**: 색상 변환 속도는 내장 IC에 의해 고정됨
+4. **핀 배치 주의**: PCB에 따라 핀 순서가 다를 수 있으므로 데이터시트 확인 필요
+
+## 🔄 대안 모듈
+
+개별 색상 제어가 필요한 경우:
+
+| 모듈 | 핀 수 | 특징 |
+|------|-------|------|
+| KY-016 | 4핀 (R,G,B,GND) | 개별 색상 PWM 제어 가능 |
+| WS2812B | 1핀 (Data) | 단선 통신, 개별 LED 제어 |
+| Common Cathode RGB | 4핀 | 기본 RGB LED |
 
 ## 📚 참고 자료
 
 - [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
-- [KY-034 7-Color Flash LED Module](https://arduinomodules.info/ky-034-7-color-auto-flash-led-module/)
-
-## 📜 라이선스
-
-MIT License
+- [KY-034 7-Color Flash LED Module](https://arduinomodules.info/ky-034-automatic-flashing-color-led/)
+- [Joy-IT KY-034 Datasheet](https://sensorkit.joy-it.net/en/sensors/ky-034)
