@@ -49,6 +49,121 @@ IN/SIG   ────────►  PA5 (CN10-11)
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 후 업로드
 
+```c
+/* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal.h"
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define RELAY_PIN           GPIO_PIN_5
+#define RELAY_PORT          GPIOA
+#define USER_BUTTON_PIN     GPIO_PIN_13
+#define USER_BUTTON_PORT    GPIOC
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+volatile uint8_t relay_state = 0;
+volatile uint8_t button_pressed = 0;
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void Relay_On(void);
+void Relay_Off(void);
+void Relay_Toggle(void);
+
+/* Printf redirect */
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+
+/**
+ * @brief  Relay ON
+ */
+void Relay_On(void)
+{
+    HAL_GPIO_WritePin(RELAY_PORT, RELAY_PIN, GPIO_PIN_SET);
+    relay_state = 1;
+}
+
+/**
+ * @brief  Relay OFF
+ */
+void Relay_Off(void)
+{
+    HAL_GPIO_WritePin(RELAY_PORT, RELAY_PIN, GPIO_PIN_RESET);
+    relay_state = 0;
+}
+
+/**
+ * @brief  Relay Toggle
+ */
+void Relay_Toggle(void)
+{
+    HAL_GPIO_TogglePin(RELAY_PORT, RELAY_PIN);
+    relay_state = !relay_state;
+}
+/* USER CODE END PFP */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  printf("\r\n========================================\r\n");
+  printf("  Relay Module Test - STM32F103 NUCLEO\r\n");
+  printf("========================================\r\n");
+  printf("PA5: Relay Signal Output\r\n");
+  printf("PC13: User Button (Manual Control)\r\n\r\n");
+
+  uint32_t last_toggle_time = 0;
+  uint32_t toggle_interval = 1000;  // 1초 간격
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      /* 자동 토글 모드 (1초 간격) */
+      if (HAL_GetTick() - last_toggle_time >= toggle_interval)
+      {
+          last_toggle_time = HAL_GetTick();
+          Relay_Toggle();
+          printf("Relay State: %s\r\n", relay_state ? "ON" : "OFF");
+      }
+
+      /* 버튼 수동 제어 */
+      if (HAL_GPIO_ReadPin(USER_BUTTON_PORT, USER_BUTTON_PIN) == GPIO_PIN_RESET)
+      {
+          HAL_Delay(50);  // Debounce
+          if (HAL_GPIO_ReadPin(USER_BUTTON_PORT, USER_BUTTON_PIN) == GPIO_PIN_RESET)
+          {
+              if (!button_pressed)
+              {
+                  button_pressed = 1;
+                  Relay_Toggle();
+                  printf("[BUTTON] Relay State: %s\r\n", relay_state ? "ON" : "OFF");
+              }
+          }
+      }
+      else
+      {
+          button_pressed = 0;
+      }
+
+      HAL_Delay(10);
+    /* USER CODE END WHILE */
+```
+
 ## 시리얼 출력 예시
 
 ```
@@ -119,6 +234,3 @@ void Relay_PWM(uint8_t duty, uint32_t period_ms)
 - [STM32F103 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 - [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 
-## 라이선스
-
-MIT License
