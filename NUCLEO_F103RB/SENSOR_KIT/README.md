@@ -4,39 +4,39 @@ NUCLEO-F103RB 보드를 이용한 다양한 LED 모듈 테스트 프로젝트 �
 
 <img width="797" height="515" alt="016" src="https://github.com/user-attachments/assets/9171c78e-659c-459f-9610-1c25bbe0b4fc" />
 
-	* [X] 01_RGB_LED
-	* [X] 02_SMD_LED
-	* [X] 03_Dual_Color_LED
-	* [X] 04_Mini_Dual_Color_LED
-	* [ ] 05_Seven_Color_LED
-	* [X] 06_Relay
-	* [X] 07_Sound_Sensor_High
-	* [X] 08_Sound_Sensor_Small
-	* [X] 09_Tracking_Module
-	* [X] 10_Obstacle_Sensor
-	* 11_Flame_Sensor
-	* 12_Linear_Hall_Sensor
-	* 13_Touch_Sensor
-	* 14_Digital_Temperature_Sensor
-	* 15_Reed_Switch
-	* 16.mini_reed
-	* 17.heartbeat
-	* [X] 18.laser
-	* [X] 19.button_switch
-	* 20.shock_sensor
-	* 21.magic_light
-	* 22.angle_switch
-	* 23.ball_switch
-	* [X] 24.light_sensor
-	* 25.analog_hall
-	* 26.Hall_Magnetic
-	* 27.Temperature_Sensor
-	* 28.Analog_Light_Sensor
-	* 29.Knock_Sensor
-	* 30.Photo_Interrupter
-	* 31.IR_Transmitter
-	* 32.IR_Receiver
-	* 33.IR_Remote_Decoder
+* [X] 01_RGB_LED
+* [X] 02_SMD_LED
+* [X] 03_Dual_Color_LED
+* [X] 04_Mini_Dual_Color_LED
+* [ ] 05_Seven_Color_LED
+* [X] 06_Relay
+* [X] 07_Sound_Sensor_High
+* [X] 08_Sound_Sensor_Small
+* [X] 09_Tracking_Module
+* [X] 10_Obstacle_Sensor
+* 11_Flame_Sensor
+* 12_Linear_Hall_Sensor
+* 13_Touch_Sensor
+* 14_Digital_Temperature_Sensor
+* 15_Reed_Switch
+* 16.mini_reed
+* 17.heartbeat
+* [X] 18.laser
+* [X] 19.button_switch
+* 20.shock_sensor
+* 21.magic_light
+* 22.angle_switch
+* 23.ball_switch
+* [X] 24.light_sensor
+* 25.analog_hall
+* 26.Hall_Magnetic
+* 27.Temperature_Sensor
+* 28.Analog_Light_Sensor
+* 29.Knock_Sensor
+* 30.Photo_Interrupter
+* 31.IR_Transmitter
+* 32.IR_Receiver
+* 33.IR_Remote_Decoder
 
 
 
