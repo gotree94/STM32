@@ -18,6 +18,8 @@
 
 ### 핀 연결
 
+<img width="396" height="360" alt="F103RB-pin" src="https://github.com/user-attachments/assets/00a21beb-28dd-4c5b-ab50-18be45ad950a" />
+
 ```
 Dual Color LED          NUCLEO-F103RB
 ┌─────────────┐        ┌─────────────┐
