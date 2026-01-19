@@ -89,7 +89,7 @@ void MiniLED_BatteryCharging(void);    // 충전 시뮬레이션
 
 ```c
 Timer: TIM3
-Prescaler: 71 (72MHz / 72 = 1MHz)
+Prescaler: 63 (64MHz / 64 = 1MHz)
 Period: 999 (1kHz PWM)
 Channels: CH3(PB0)=Red, CH4(PB1)=Green
 ```
