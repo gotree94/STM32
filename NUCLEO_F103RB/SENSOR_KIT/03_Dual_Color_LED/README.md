@@ -170,8 +170,6 @@ int __io_putchar(int ch) {
 ```
 
 ```c
-    while (1)
-    {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
