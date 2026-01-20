@@ -6,6 +6,16 @@
 
 ## 📁 프로젝트 구성
 
+| 핀 | 표준 SPI 명칭 | 일치 여부 | 기능 설명| 
+|------|------|------|------|
+| PA5 | (SCK)SCK / SCLK| ✅ 일치| Serial Clock - 마스터가 생성하는 동기화 클럭 신호. 데이터 전송 타이밍 결정 | 
+| PA7 | (MOSI)MOSI | ✅ 일치 | Master Out Slave In - 마스터→슬레이브 데이터 전송 라인 | 
+| PB6 | (CS)CS / SS / NSS | ✅ 일치 | Chip Select - 슬레이브 장치 선택 (Active Low). 통신 대상 지정 |
+| PA1 | (RES)- | ❌ 비표준 | Reset - 디스플레이 하드웨어 리셋. SPI 표준 아닌 디스플레이 전용 신호 | 
+| PA6 | (DC)-❌ 비표준 | Data/Command - 전송 데이터가 명령(0)인지 데이터(1)인지 구분. 디스플레이 전용 신호 | 
+|   |  MISO(Master In Slave Out) | 디스플레이가 단방향 통신(쓰기 전용)만 사용하기 때문 |
+
+
 ### 1. ST7735S SPI (0.96" 160x80 컬러 LCD)
 **폴더:** `01_ST7735S_SPI_160x80/`
 
