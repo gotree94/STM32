@@ -1,8 +1,12 @@
 # 조도 센서 모듈 (Light Sensor / Photoresistor Module) - STM32F103
 
+<img width="200" height="200" alt="s-l400" src="https://github.com/user-attachments/assets/066e86cf-3ec6-4243-bbc3-5371debe9936" />
+
+
 ## 📋 개요
 
-조도 센서 모듈(KY-018)은 CdS(황화카드뮴) 광저항(LDR, Light Dependent Resistor)을 사용하여 주변 밝기를 아날로그 값으로 측정합니다. 빛이 밝으면 저항이 낮아지고, 어두우면 저항이 높아지는 특성을 이용합니다.
+* 조도 센서 모듈(KY-018)은 CdS(황화카드뮴) 광저항(LDR, Light Dependent Resistor)을 사용하여 주변 밝기를 아날로그 값으로 측정합니다. 
+* 빛이 밝으면 저항이 낮아지고, 어두우면 저항이 높아지는 특성을 이용합니다.
 
 ## 🔧 하드웨어 구성
 
