@@ -1,11 +1,20 @@
 # 각도 스위치 모듈 (Tilt Switch Module) - STM32F103
 
+![SW0105](https://github.com/user-attachments/assets/ac71a3dc-ebe9-480b-9f1e-4262b89d2551)
+<br>
+![SW0105-1](https://github.com/user-attachments/assets/5ebfe81a-5b1e-4234-bbc8-7174aac17d47)
+<br>
+![SW0105-2](https://github.com/user-attachments/assets/6554589b-2d2f-4b4a-ad64-4a0a439d6ff5)
+<br>
+
 ## 📋 개요
 
 * 각도 스위치 모듈(KY-020)은 내부의 금속 볼이 기울기에 따라 두 접점을 연결하거나 분리하는 디지털 센서입니다. 
 * 특정 임계 각도 이상 기울어지면 스위치가 ON 상태가 됩니다.
 
 ## 🔧 하드웨어 구성
+
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/8b4d4802-87c9-4cb4-bd2b-a39b72d026eb" />
 
 ### 센서 모듈 사양
 
