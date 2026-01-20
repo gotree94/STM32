@@ -1,10 +1,8 @@
 # 각도 스위치 모듈 (Tilt Switch Module) - STM32F103
 
-![SW0105](https://github.com/user-attachments/assets/ac71a3dc-ebe9-480b-9f1e-4262b89d2551)
-<br>
-![SW0105-1](https://github.com/user-attachments/assets/5ebfe81a-5b1e-4234-bbc8-7174aac17d47)
-<br>
-![SW0105-2](https://github.com/user-attachments/assets/6554589b-2d2f-4b4a-ad64-4a0a439d6ff5)
+<img width="200" height="200" alt="SW0105" src="https://github.com/user-attachments/assets/ba78d66d-c490-467d-b138-47ee7a0ebaa6" />
+<img width="200" height="200" alt="SW0105-1" src="https://github.com/user-attachments/assets/5e6f37d1-6a7b-446b-983b-a26ee511a581" />
+<img width="200" height="200" alt="SW0105-2" src="https://github.com/user-attachments/assets/e25011a1-d00e-4b1f-af94-09aeab7c401b" />
 <br>
 
 ## 📋 개요
