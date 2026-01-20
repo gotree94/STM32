@@ -2,6 +2,9 @@
 
 STM32F103 NUCLEO 보드를 이용한 포토 인터럽터(광차단) 센서 모듈 테스트 프로젝트
 
+<img width="200" height="200" alt="photo_interrupt" src="https://github.com/user-attachments/assets/60c24318-2a60-4d78-8139-6b009af9ab61" />
+
+
 ## 📌 개요
 
 슬롯형 광센서를 이용하여 물체의 통과를 감지하고, 펄스 카운팅 및 RPM 측정을 수행하는 프로젝트입니다.
@@ -15,6 +18,9 @@ STM32F103 NUCLEO 보드를 이용한 포토 인터럽터(광차단) 센서 모�
 | Photo Interrupter Module | 1 | KY-010 또는 호환 모듈 |
 | 점퍼 와이어 | 3 | F-F 타입 |
 | 엔코더 디스크 | 1 | RPM 측정용 (선택) |
+
+<img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/8d79c009-095f-4cb5-bfa3-9c50a0d1bcf6" />
+
 
 ### 핀 연결
 ```
