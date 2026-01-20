@@ -100,6 +100,96 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 2. `main.c` 내용을 프로젝트에 복사
 3. 빌드 및 다운로드
 
+```c
+/* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal.h"
+#include <string.h>
+#include <stdio.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define TILT_PIN            GPIO_PIN_0
+#define TILT_PORT           GPIOA
+#define DEBOUNCE_DELAY_MS   50
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+volatile uint8_t tilt_changed = 0;
+volatile uint8_t tilt_state = 0;
+volatile uint32_t last_interrupt_time = 0;
+uint32_t tilt_count = 0;
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+/* Printf redirect -----------------------------------------------------------*/
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+
+/* Interrupt callback --------------------------------------------------------*/
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == TILT_PIN) {
+        uint32_t current_time = HAL_GetTick();
+
+        /* 디바운싱: 50ms 이내 재트리거 무시 */
+        if ((current_time - last_interrupt_time) > DEBOUNCE_DELAY_MS) {
+            tilt_state = HAL_GPIO_ReadPin(TILT_PORT, TILT_PIN);
+            tilt_changed = 1;
+            last_interrupt_time = current_time;
+        }
+    }
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  printf("\r\n========================================\r\n");
+  printf("  Tilt/Angle Switch Module Test\r\n");
+  printf("  Board: NUCLEO-F103RB\r\n");
+  printf("========================================\r\n\n");
+  printf("Tilt the module to detect angle changes.\r\n");
+  printf("Using external interrupt with debouncing.\r\n\n");
+
+  /* 초기 상태 읽기 */
+  tilt_state = HAL_GPIO_ReadPin(TILT_PORT, TILT_PIN);
+  printf("Initial state: %s\r\n\n", tilt_state ? "TILTED" : "LEVEL");
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      /* 인터럽트에서 상태 변화 감지 시 처리 */
+      if (tilt_changed) {
+          tilt_changed = 0;
+          tilt_count++;
+
+          printf("[%5lu] ", tilt_count);
+
+          if (tilt_state == GPIO_PIN_SET) {
+              printf(">>> TILTED - Module is angled\r\n");
+              HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);  /* LED ON */
+          } else {
+              printf("=== LEVEL - Module is horizontal\r\n");
+              HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);  /* LED OFF */
+          }
+      }
+
+      /* 메인 루프에서 다른 작업 수행 가능 */
+      HAL_Delay(10);
+    /* USER CODE END WHILE */
+```
+
 ### 터미널 확인
 
 ```bash
@@ -117,11 +207,25 @@ screen /dev/ttyACM0 115200
 Tilt the module to detect angle changes.
 Using external interrupt with debouncing.
 
-Initial state: LEVEL
+Initial state: TILTED
 
-[    1] >>> TILTED - Module is angled
+[    1] === LEVEL - Module is horizontal
 [    2] === LEVEL - Module is horizontal
 [    3] >>> TILTED - Module is angled
+[    4] >>> TILTED - Module is angled
+[    5] === LEVEL - Module is horizontal
+[    6] >>> TILTED - Module is angled
+[    7] >>> TILTED - Module is angled
+[    8] === LEVEL - Module is horizontal
+[    9] >>> TILTED - Module is angled
+[   10] === LEVEL - Module is horizontal
+[   11] >>> TILTED - Module is angled
+[   12] === LEVEL - Module is horizontal
+[   13] >>> TILTED - Module is angled
+[   14] === LEVEL - Module is horizontal
+[   15] >>> TILTED - Module is angled
+[   16] >>> TILTED - Module is angled
+[   17] >>> TILTED - Module is angled
 ...
 ```
 
@@ -209,6 +313,4 @@ if ((current_time - last_interrupt_time) > DEBOUNCE_DELAY_MS) {
 - [NUCLEO-F103RB User Manual](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
 - [KY-020 Tilt Switch Datasheet](https://arduinomodules.info/ky-020-tilt-switch-module/)
 
-## 📝 라이선스
 
-MIT License - 자유롭게 사용, 수정, 배포 가능
