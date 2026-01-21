@@ -915,50 +915,141 @@ Project Properties → C/C++ Build → Settings → MCU Settings
 ### 시리얼 출력 예시
 
 ```
-========================================
-   IR Receiver Module Test - STM32F103
-========================================
-IR Receiver Pin: PA0
-Status LED: PA5 (On-board)
-----------------------------------------
+╔════════════════════════════════════════╗
+║   IR Receiver & NEC Decoder - STM32    ║
+╠════════════════════════════════════════╣
+║ System Clock : 64 MHz                  ║
+║ IR Input     : PA0 (Pull-up)           ║
+║ Status LED   : PA5                     ║
+║ Protocol     : NEC / Extended NEC      ║
+╚════════════════════════════════════════╝
+
 Waiting for IR signals...
 
-[1] IR Signal Detected!
-       Total Pulses: 34
-       Pulse Width: 560 ~ 9000 us
-       Signal burst ended
+────────────────────────────────────────
+[1] IR Signal Received
+    Pulses captured: 33
+    ┌──────────────────────────────────┐
+    │         NEC Decoded Data         │
+    ├──────────────────────────────────┤
+    │ Raw Data   : 0xE916FF00           │
+    ├──────────────────────────────────┤
+    │ Address    : 0x00 (  0)         │
+    │ Address~   : 0xFF (255)         │
+    │ Command    : 0x16 ( 22)         │
+    │ Command~   : 0xE9 (233)         │
+    ├──────────────────────────────────┤
+    │ ✓ Standard NEC Protocol         │
+    │   Device : 0x00                  │
+    │   Key    : 0x16                  │
+    └──────────────────────────────────┘
+    Binary: 11101001 00010110 11111111 00000000
+            CMD~     CMD      ADDR~    ADDR
 
-[2] IR Signal Detected!
-       Total Pulses: 34
-       Pulse Width: 560 ~ 9000 us
-       Signal burst ended
+────────────────────────────────────────
+[2] IR Signal Received
+    Pulses captured: 2
+    ◆ REPEAT Code
+
+────────────────────────────────────────
+[3] IR Signal Received
+    Pulses captured: 33
+    ┌──────────────────────────────────┐
+    │         NEC Decoded Data         │
+    ├──────────────────────────────────┤
+    │ Raw Data   : 0xA25D10EF           │
+    ├──────────────────────────────────┤
+    │ Address    : 0xEF (239)         │
+    │ Address~   : 0x10 ( 16)         │
+    │ Command    : 0x5D ( 93)         │
+    │ Command~   : 0xA2 (162)         │
+    ├──────────────────────────────────┤
+    │ ✓ Extended NEC Protocol         │
+    │   Device : 0x10EF                │
+    │   Key    : 0x5D                  │
+    └──────────────────────────────────┘
+    Binary: 10100010 01011101 00010000 11101111
+            CMD~     CMD      ADDR~    ADDR
 ```
 
 ---
 
 ## 출력 해석
 
+### 디코딩된 데이터 필드
+
 | 항목 | 설명 |
 |------|------|
-| Total Pulses | 수신된 IR 펄스 총 개수 |
-| Pulse Width Min | 가장 짧은 펄스 폭 (보통 비트 펄스) |
-| Pulse Width Max | 가장 긴 펄스 폭 (보통 리더 펄스) |
+| Raw Data | 32비트 원시 데이터 (Hex) |
+| Address | 8비트 주소 (장치 식별) |
+| Address~ | 8비트 반전 주소 (또는 Extended 주소 상위 바이트) |
+| Command | 8비트 명령 (버튼 코드) |
+| Command~ | 8비트 반전 명령 (검증용) |
 
-### NEC 프로토콜 참고
+### 프로토콜 구분
+
+| 프로토콜 | 조건 | 주소 형식 |
+|----------|------|-----------|
+| Standard NEC | Address ^ Address~ = 0xFF | 8비트 |
+| Extended NEC | Address ^ Address~ ≠ 0xFF, Command ^ Command~ = 0xFF | 16비트 |
+
+### NEC 프로토콜 상세
+
+#### 프레임 구조
 
 ```
-NEC 프레임 = 34 펄스
-- Leader: 1 pulse (9000us)
-- Address: 8 bits = 8 pulses
-- Address Inv: 8 bits = 8 pulses  
-- Command: 8 bits = 8 pulses
-- Command Inv: 8 bits = 8 pulses
-- Stop: 1 pulse
-
-Repeat 프레임 = 2 펄스
-- Leader: 1 pulse (9000us pulse + 2250us space)
-- Stop: 1 pulse
+Standard NEC Frame (32 bits, LSB first):
+┌─────────┬─────────┬──────────┬──────────┬─────────┬─────────┬──────┐
+│ Leader  │ Leader  │ Address  │ Address  │ Command │ Command │ Stop │
+│ Pulse   │ Space   │ (8 bits) │ Inverted │ (8 bits)│ Inverted│ Bit  │
+│ 9ms     │ 4.5ms   │          │ (8 bits) │         │ (8 bits)│      │
+└─────────┴─────────┴──────────┴──────────┴─────────┴─────────┴──────┘
+     │         │         │           │          │          │
+     ▼         ▼         ▼           ▼          ▼          ▼
+  ┌─────┐  ┌─────┐                                     
+  │█████│  │     │   LSB ◄────────── 32 bits ──────────► MSB
+  │█████│  │     │
+  └──┬──┘  └──┬──┘
+   9000us   4500us
 ```
+
+#### 비트 인코딩
+
+```
+Bit 0:                          Bit 1:
+┌─────┐                         ┌─────┐
+│█████│                         │█████│
+│█████│     ┌─────┐             │█████│           ┌─────┐
+└──┬──┘     │     │             └──┬──┘           │     │
+ 562.5us    562.5us               562.5us         1687.5us
+ (pulse)    (space)               (pulse)         (space)
+ 
+Total: 1.125ms                  Total: 2.25ms
+```
+
+#### Repeat Code
+
+```
+버튼을 계속 누르고 있으면 108ms 간격으로 Repeat 코드 전송:
+
+┌─────┐     ┌─────┐
+│█████│     │     │     ┌─┐
+│█████│     │     │     │█│
+└──┬──┘     └──┬──┘     └┬┘
+ 9000us     2250us    562.5us
+ (pulse)    (space)   (stop)
+```
+
+#### 타이밍 허용 오차
+
+| 항목 | 표준값 | 허용 범위 |
+|------|--------|-----------|
+| Leader Pulse | 9000 µs | 8000 ~ 10000 µs |
+| Leader Space | 4500 µs | 4000 ~ 5000 µs |
+| Repeat Space | 2250 µs | 2000 ~ 2500 µs |
+| Bit Pulse | 562.5 µs | 400 ~ 750 µs |
+| Bit 0 Space | 562.5 µs | 400 ~ 750 µs |
+| Bit 1 Space | 1687.5 µs | 1400 ~ 1900 µs |
 
 ---
 
