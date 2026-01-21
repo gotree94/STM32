@@ -278,9 +278,7 @@ void LCD_PUTS(char *str) {
 
 # 사용자 문자 
 
-![CLCD](https://github.com/user-attachments/assets/1f1e5482-9e28-4fdb-aeee-41385e28646c)
-
-
+<img width="400" height="150" alt="CLCD2" src="https://github.com/user-attachments/assets/e141bd32-a068-44bf-be73-fc8db24823bb" />
 
 * /* USER CODE BEGIN 0 */ 섹션에 아래 함수를 추가ㅊ
 
