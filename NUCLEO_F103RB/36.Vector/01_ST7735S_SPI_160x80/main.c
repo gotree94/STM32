@@ -37,29 +37,29 @@ SPI_HandleTypeDef hspi1;
 #define Y_OFFSET   26
 
 // ST7735 Commands
-#define ST7735_SWRESET 0x01
-#define ST7735_SLPOUT  0x11
-#define ST7735_NORON   0x13
-#define ST7735_INVOFF  0x20
-#define ST7735_INVON   0x21
-#define ST7735_DISPON  0x29
-#define ST7735_CASET   0x2A
-#define ST7735_RASET   0x2B
-#define ST7735_RAMWR   0x2C
-#define ST7735_COLMOD  0x3A
-#define ST7735_MADCTL  0x36
-#define ST7735_FRMCTR1 0xB1
-#define ST7735_FRMCTR2 0xB2
-#define ST7735_FRMCTR3 0xB3
-#define ST7735_INVCTR  0xB4
-#define ST7735_PWCTR1  0xC0
-#define ST7735_PWCTR2  0xC1
-#define ST7735_PWCTR3  0xC2
-#define ST7735_PWCTR4  0xC3
-#define ST7735_PWCTR5  0xC4
-#define ST7735_VMCTR1  0xC5
-#define ST7735_GMCTRP1 0xE0
-#define ST7735_GMCTRN1 0xE1
+#define ST7735_SWRESET 0x01  // Software Reset - 디스플레이 소프트웨어 리셋
+#define ST7735_SLPOUT  0x11  // Sleep Out - 슬립 모드 해제, 정상 동작 모드 진입
+#define ST7735_NORON   0x13  // Normal Display Mode On - 일반 디스플레이 모드 활성화
+#define ST7735_INVOFF  0x20  // Display Inversion Off - 색상 반전 비활성화
+#define ST7735_INVON   0x21  // Display Inversion On - 색상 반전 활성화
+#define ST7735_DISPON  0x29  // Display On - 디스플레이 출력 활성화
+#define ST7735_CASET   0x2A  // Column Address Set - X축(열) 주소 범위 설정
+#define ST7735_RASET   0x2B  // Row Address Set - Y축(행) 주소 범위 설정
+#define ST7735_RAMWR   0x2C  // Memory Write - 디스플레이 RAM에 픽셀 데이터 쓰기 시작
+#define ST7735_COLMOD  0x3A  // Interface Pixel Format - 픽셀 포맷 설정 (12/16/18bit)
+#define ST7735_MADCTL  0x36  // Memory Access Control - 화면 방향, RGB/BGR 순서 설정
+#define ST7735_FRMCTR1 0xB1  // Frame Rate Control 1 - Normal 모드 프레임 레이트 설정
+#define ST7735_FRMCTR2 0xB2  // Frame Rate Control 2 - Idle 모드 프레임 레이트 설정
+#define ST7735_FRMCTR3 0xB3  // Frame Rate Control 3 - Partial 모드 프레임 레이트 설정
+#define ST7735_INVCTR  0xB4  // Display Inversion Control - 반전 모드 제어
+#define ST7735_PWCTR1  0xC0  // Power Control 1 - GVDD 전압 설정 (화면 밝기 관련)
+#define ST7735_PWCTR2  0xC1  // Power Control 2 - VGH/VGL 승압 회로 설정
+#define ST7735_PWCTR3  0xC2  // Power Control 3 - Normal 모드 Op-Amp 전류 설정
+#define ST7735_PWCTR4  0xC3  // Power Control 4 - Idle 모드 Op-Amp 전류 설정
+#define ST7735_PWCTR5  0xC4  // Power Control 5 - Partial 모드 Op-Amp 전류 설정
+#define ST7735_VMCTR1  0xC5  // VCOM Control 1 - VCOM 전압 설정 (대비/명암 관련)
+#define ST7735_GMCTRP1 0xE0  // Gamma '+' Polarity Correction - 양극성 감마 보정 (밝은 영역)
+#define ST7735_GMCTRN1 0xE1  // Gamma '-' Polarity Correction - 음극성 감마 보정 (어두운 영역)
 
 // Colors (RGB565)
 #define BLACK       0x0000
