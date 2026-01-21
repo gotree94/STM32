@@ -90,7 +90,7 @@ void I2C_ScanAddresses(void) {
 CLCD "Hello World!"
 ---
 
-<img width="800" height="600" alt="CLCD" src="https://github.com/user-attachments/assets/a590d783-9ded-40ba-b23d-ce6f93a5b430" />
+<img width="400" height="300" alt="CLCD" src="https://github.com/user-attachments/assets/a590d783-9ded-40ba-b23d-ce6f93a5b430" />
 
 ```c
 /* USER CODE BEGIN Includes */
@@ -278,7 +278,7 @@ void LCD_PUTS(char *str) {
 
 # 사용자 문자 
 
-![CLCD](https://github.com/user-attachments/assets/1f1e5482-9e28-4fdb-aeee-41385e28646c)
+![CLCD](img width="400" height="300" https://github.com/user-attachments/assets/1f1e5482-9e28-4fdb-aeee-41385e28646c)
 
 
 
