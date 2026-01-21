@@ -3,12 +3,11 @@
  * @file    main.c
  * @brief   IR Receiver Module Test for STM32F103 NUCLEO
  * @author  Embedded Systems Lab
- * @version V2.0.0
+ * @version V2.1.0
  * @date    2025-01-22
  ******************************************************************************
  * @details
  * 이 프로젝트는 IR 수신 모듈을 테스트하고 NEC 프로토콜을 디코딩합니다.
- * IR 신호를 감지하면 LED를 토글하고 수신된 값을 시리얼로 출력합니다.
  * 
  * System Clock: 64MHz (HSI + PLL)
  * 
@@ -16,14 +15,6 @@
  * - IR Receiver (TSOP1838/VS1838B): PA0 (Digital Input with Pull-up)
  * - LED: PA5 (On-board LED on NUCLEO)
  * - UART2: PA2(TX), PA3(RX) - USB Virtual COM Port @ 115200 baud
- * 
- * Supported Protocol: NEC (Extended NEC도 지원)
- * 
- * NEC Protocol Timing:
- * - Leader: 9ms pulse + 4.5ms space
- * - Bit 0: 562.5us pulse + 562.5us space
- * - Bit 1: 562.5us pulse + 1687.5us space
- * - Repeat: 9ms pulse + 2.25ms space + 562.5us pulse
  ******************************************************************************
  */
 
@@ -38,64 +29,58 @@
 #define LED_GPIO_Port       GPIOA
 
 /* System Clock defines */
-#define SYSCLK_FREQ_HZ      64000000UL  // 64MHz
-#define APB1_TIMER_FREQ_HZ  64000000UL  // APB1 Timer Clock (APB1×2)
+#define SYSCLK_FREQ_HZ      64000000UL
 
-/* NEC Protocol Timing (in microseconds) */
-#define NEC_LEADER_PULSE_MIN    8000    // 9ms - tolerance
-#define NEC_LEADER_PULSE_MAX    10000   // 9ms + tolerance
-#define NEC_LEADER_SPACE_MIN    4000    // 4.5ms - tolerance
-#define NEC_LEADER_SPACE_MAX    5000    // 4.5ms + tolerance
-#define NEC_REPEAT_SPACE_MIN    2000    // 2.25ms - tolerance
-#define NEC_REPEAT_SPACE_MAX    2500    // 2.25ms + tolerance
-#define NEC_BIT_PULSE_MIN       400     // 562.5us - tolerance
-#define NEC_BIT_PULSE_MAX       750     // 562.5us + tolerance
-#define NEC_BIT_0_SPACE_MIN     400     // 562.5us - tolerance
-#define NEC_BIT_0_SPACE_MAX     750     // 562.5us + tolerance
-#define NEC_BIT_1_SPACE_MIN     1400    // 1687.5us - tolerance
-#define NEC_BIT_1_SPACE_MAX     1900    // 1687.5us + tolerance
+/* NEC Protocol Timing (in microseconds) - 더 넓은 허용 오차 */
+#define NEC_LEADER_PULSE_MIN    8000
+#define NEC_LEADER_PULSE_MAX    10000
+#define NEC_LEADER_SPACE_MIN    4000
+#define NEC_LEADER_SPACE_MAX    5000
+#define NEC_REPEAT_SPACE_MIN    2000
+#define NEC_REPEAT_SPACE_MAX    2800
+#define NEC_BIT_THRESHOLD       1000    // Space > 1000us = '1', Space < 1000us = '0'
 
 /* IR Receiver parameters */
-#define MAX_PULSES              68      // NEC: 1 leader + 32 bits + 1 stop = 34 edges × 2
-#define SIGNAL_TIMEOUT_MS       100     // Timeout for signal detection
-#define NOISE_FILTER_US         200     // Minimum pulse width to filter noise
+#define MAX_EDGES               100
+#define SIGNAL_TIMEOUT_MS       80
+#define MIN_PULSE_US            300     // 최소 유효 펄스
 
-/* NEC Decoder states */
+/* Edge type */
 typedef enum {
-    IR_IDLE,
-    IR_LEADER_PULSE,
-    IR_LEADER_SPACE,
-    IR_DATA_PULSE,
-    IR_DATA_SPACE,
-    IR_COMPLETE,
-    IR_REPEAT,
-    IR_ERROR
-} IR_State_t;
+    EDGE_FALLING = 0,   // HIGH -> LOW (IR 신호 시작)
+    EDGE_RISING = 1     // LOW -> HIGH (IR 신호 끝)
+} EdgeType_t;
+
+/* Edge record */
+typedef struct {
+    uint32_t time_us;
+    EdgeType_t type;
+} EdgeRecord_t;
 
 /* IR Data structure */
 typedef struct {
-    uint8_t address;        // 8-bit address
-    uint8_t address_inv;    // 8-bit inverted address (or extended address)
-    uint8_t command;        // 8-bit command
-    uint8_t command_inv;    // 8-bit inverted command
-    uint32_t raw_data;      // 32-bit raw data
-    uint8_t is_repeat;      // Repeat flag
-    uint8_t is_valid;       // Valid data flag
+    uint8_t address;
+    uint8_t address_inv;
+    uint8_t command;
+    uint8_t command_inv;
+    uint32_t raw_data;
+    uint8_t bit_count;
+    uint8_t is_repeat;
+    uint8_t is_valid;
 } IR_Data_t;
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htim2;
 
-/* IR Reception variables */
-volatile uint32_t pulse_times[MAX_PULSES];
-volatile uint32_t space_times[MAX_PULSES];
-volatile uint8_t pulse_index = 0;
+/* Edge recording */
+volatile EdgeRecord_t edges[MAX_EDGES];
+volatile uint8_t edge_count = 0;
 volatile uint8_t receiving = 0;
 volatile uint32_t last_edge_time = 0;
 volatile uint8_t last_pin_state = 1;
 
-/* IR Decoded data */
+/* Decoded data */
 IR_Data_t ir_data;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -106,10 +91,10 @@ static void MX_USART2_UART_Init(void);
 uint32_t GetMicros(void);
 void Error_Handler(void);
 
-/* IR Processing functions */
 void IR_Reset(void);
-uint8_t IR_Decode_NEC(void);
+uint8_t IR_Decode(void);
 void IR_Print_Result(void);
+void IR_Print_Raw_Timing(void);
 
 /* Printf redirect to UART ---------------------------------------------------*/
 int __io_putchar(int ch) {
@@ -121,98 +106,80 @@ int __io_putchar(int ch) {
  * @brief  Main function
  */
 int main(void) {
-    /* MCU Configuration */
     HAL_Init();
     SystemClock_Config();
     
-    /* Initialize peripherals */
     MX_GPIO_Init();
     MX_TIM2_Init();
     MX_USART2_UART_Init();
     
-    /* Start microsecond timer */
     HAL_TIM_Base_Start(&htim2);
     
     printf("\r\n");
-    printf("╔════════════════════════════════════════╗\r\n");
-    printf("║   IR Receiver & NEC Decoder - STM32    ║\r\n");
-    printf("╠════════════════════════════════════════╣\r\n");
-    printf("║ System Clock : 64 MHz                  ║\r\n");
-    printf("║ IR Input     : PA0 (Pull-up)           ║\r\n");
-    printf("║ Status LED   : PA5                     ║\r\n");
-    printf("║ Protocol     : NEC / Extended NEC      ║\r\n");
-    printf("╚════════════════════════════════════════╝\r\n");
+    printf("========================================\r\n");
+    printf("   IR Receiver & NEC Decoder - STM32   \r\n");
+    printf("========================================\r\n");
+    printf(" System Clock : 64 MHz\r\n");
+    printf(" IR Input     : PA0 (Pull-up)\r\n");
+    printf(" Status LED   : PA5\r\n");
+    printf(" Protocol     : NEC / Extended NEC\r\n");
+    printf("========================================\r\n");
     printf("\r\nWaiting for IR signals...\r\n\n");
     
-    /* Initialize IR receiver state */
     IR_Reset();
     
     uint32_t signal_count = 0;
     uint32_t last_activity_time = 0;
+    uint32_t signal_start_time = 0;
     
     while (1) {
         uint8_t ir_state = HAL_GPIO_ReadPin(IR_RECV_GPIO_Port, IR_RECV_Pin);
         uint32_t current_us = GetMicros();
         uint32_t current_ms = HAL_GetTick();
         
-        /* Detect edges */
+        /* Edge detection */
         if (ir_state != last_pin_state) {
-            uint32_t duration = current_us - last_edge_time;
-            
-            /* Filter noise */
-            if (duration > NOISE_FILTER_US || !receiving) {
-                
+            if (!receiving) {
+                /* 새 신호 시작 - Falling edge만 시작으로 인식 */
                 if (last_pin_state == 1 && ir_state == 0) {
-                    /* Falling edge - Start of pulse (IR signal active) */
-                    if (!receiving) {
-                        /* Start of new signal */
-                        receiving = 1;
-                        pulse_index = 0;
-                        signal_count++;
-                        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-                    } else if (pulse_index > 0 && pulse_index < MAX_PULSES) {
-                        /* Record space duration */
-                        space_times[pulse_index - 1] = duration;
-                    }
+                    receiving = 1;
+                    edge_count = 0;
+                    signal_start_time = current_us;
+                    signal_count++;
+                    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+                    
+                    /* 첫 번째 falling edge 기록 */
+                    edges[edge_count].time_us = 0;  // 상대 시간 0
+                    edges[edge_count].type = EDGE_FALLING;
+                    edge_count++;
                 }
-                else if (last_pin_state == 0 && ir_state == 1) {
-                    /* Rising edge - End of pulse */
-                    if (receiving && pulse_index < MAX_PULSES) {
-                        pulse_times[pulse_index] = duration;
-                        pulse_index++;
-                    }
-                }
+            }
+            else if (edge_count < MAX_EDGES) {
+                /* 상대 시간 계산 (오버플로우 처리) */
+                uint32_t rel_time = current_us - signal_start_time;
                 
-                last_edge_time = current_us;
-                last_activity_time = current_ms;
+                edges[edge_count].time_us = rel_time;
+                edges[edge_count].type = (ir_state == 0) ? EDGE_FALLING : EDGE_RISING;
+                edge_count++;
             }
             
+            last_activity_time = current_ms;
             last_pin_state = ir_state;
         }
         
-        /* Check for signal timeout (end of transmission) */
+        /* Signal timeout check */
         if (receiving && (current_ms - last_activity_time > SIGNAL_TIMEOUT_MS)) {
             receiving = 0;
             
-            printf("────────────────────────────────────────\r\n");
-            printf("[%lu] IR Signal Received\r\n", signal_count);
-            printf("    Pulses captured: %d\r\n", pulse_index);
+            printf("----------------------------------------\r\n");
+            printf("[%lu] IR Signal Received (%d edges)\r\n", signal_count, edge_count);
             
-            /* Try to decode NEC protocol */
-            if (IR_Decode_NEC()) {
+            /* Decode attempt */
+            if (IR_Decode()) {
                 IR_Print_Result();
             } else {
-                printf("    Decode: Failed (Not NEC or corrupted)\r\n");
-                
-                /* Print raw timing for debugging */
-                printf("    Raw timing (first 10 pulses):\r\n");
-                for (int i = 0; i < pulse_index && i < 10; i++) {
-                    printf("      [%d] P:%lu us", i, pulse_times[i]);
-                    if (i < pulse_index - 1) {
-                        printf(", S:%lu us", space_times[i]);
-                    }
-                    printf("\r\n");
-                }
+                printf("    Status: Decode failed\r\n");
+                IR_Print_Raw_Timing();
             }
             printf("\r\n");
             
@@ -225,93 +192,118 @@ int main(void) {
  * @brief Reset IR receiver state
  */
 void IR_Reset(void) {
-    pulse_index = 0;
+    edge_count = 0;
     receiving = 0;
-    memset((void*)pulse_times, 0, sizeof(pulse_times));
-    memset((void*)space_times, 0, sizeof(space_times));
+    memset((void*)edges, 0, sizeof(edges));
     memset(&ir_data, 0, sizeof(ir_data));
 }
 
 /**
- * @brief Decode NEC protocol from captured timing data
- * @retval 1 if decode successful, 0 if failed
- * 
- * NEC Protocol Frame:
- * ┌─────────┬─────────┬──────────┬──────────┬─────────┬─────────┬──────┐
- * │ Leader  │ Leader  │ Address  │ Address  │ Command │ Command │ Stop │
- * │ Pulse   │ Space   │ (8 bits) │ Inverted │ (8 bits)│ Inverted│ Bit  │
- * │ 9ms     │ 4.5ms   │          │ (8 bits) │         │ (8 bits)│      │
- * └─────────┴─────────┴──────────┴──────────┴─────────┴─────────┴──────┘
- * 
- * Repeat Frame:
- * ┌─────────┬─────────┬──────┐
- * │ Leader  │ Leader  │ Stop │
- * │ Pulse   │ Space   │ Bit  │
- * │ 9ms     │ 2.25ms  │      │
- * └─────────┴─────────┴──────┘
+ * @brief Calculate duration between two edges
  */
-uint8_t IR_Decode_NEC(void) {
-    /* Need at least leader pulse */
-    if (pulse_index < 2) {
+uint32_t GetDuration(uint8_t start_idx, uint8_t end_idx) {
+    if (end_idx <= start_idx || end_idx >= edge_count) {
+        return 0;
+    }
+    return edges[end_idx].time_us - edges[start_idx].time_us;
+}
+
+/**
+ * @brief Decode NEC protocol from edge timing
+ * @retval 1 if successful, 0 if failed
+ */
+uint8_t IR_Decode(void) {
+    /* 최소 edge 수 체크: Leader(2) + 32bits(64) + stop(1) = 67 edges */
+    /* 하지만 실제로는 노이즈로 인해 더 많거나 적을 수 있음 */
+    if (edge_count < 4) {
         return 0;
     }
     
-    /* Check leader pulse (9ms) */
-    if (pulse_times[0] < NEC_LEADER_PULSE_MIN || pulse_times[0] > NEC_LEADER_PULSE_MAX) {
+    /* Edge 0: Falling (leader pulse start)
+     * Edge 1: Rising (leader pulse end)
+     * Edge 2: Falling (leader space end / first bit start)
+     */
+    
+    /* Leader pulse duration: edge[0] -> edge[1] */
+    uint32_t leader_pulse = GetDuration(0, 1);
+    
+    if (leader_pulse < NEC_LEADER_PULSE_MIN || leader_pulse > NEC_LEADER_PULSE_MAX) {
         return 0;
     }
     
-    /* Check for repeat code (2.25ms space after leader) */
-    if (space_times[0] >= NEC_REPEAT_SPACE_MIN && space_times[0] <= NEC_REPEAT_SPACE_MAX) {
-        if (pulse_index >= 2) {
-            ir_data.is_repeat = 1;
-            ir_data.is_valid = 1;
-            return 1;
-        }
+    /* Leader space duration: edge[1] -> edge[2] */
+    uint32_t leader_space = GetDuration(1, 2);
+    
+    /* Check for repeat code */
+    if (leader_space >= NEC_REPEAT_SPACE_MIN && leader_space <= NEC_REPEAT_SPACE_MAX) {
+        ir_data.is_repeat = 1;
+        ir_data.is_valid = 1;
+        return 1;
+    }
+    
+    /* Check normal leader space */
+    if (leader_space < NEC_LEADER_SPACE_MIN || leader_space > NEC_LEADER_SPACE_MAX) {
         return 0;
     }
     
-    /* Check leader space (4.5ms) */
-    if (space_times[0] < NEC_LEADER_SPACE_MIN || space_times[0] > NEC_LEADER_SPACE_MAX) {
-        return 0;
-    }
+    /* Decode 32 bits
+     * 각 비트는 다음과 같이 구성:
+     * - Falling edge (bit pulse start)
+     * - Rising edge (bit pulse end)
+     * - 다음 Falling edge까지의 시간이 space
+     * 
+     * Space 시간으로 0/1 구분:
+     * - Space < 1000us: bit 0
+     * - Space >= 1000us: bit 1
+     */
     
-    /* Need 33 pulses for full NEC frame (1 leader + 32 data bits) */
-    if (pulse_index < 33) {
-        return 0;
-    }
-    
-    /* Decode 32 bits of data */
     uint32_t raw_data = 0;
+    uint8_t bit_count = 0;
     
-    for (int i = 0; i < 32; i++) {
-        uint32_t pulse = pulse_times[i + 1];
-        uint32_t space = space_times[i + 1];
+    /* 데이터 비트는 edge index 2부터 시작 */
+    /* 각 비트: falling(i) -> rising(i+1) -> falling(i+2) */
+    /* Space = edge[i+2].time - edge[i+1].time */
+    
+    for (uint8_t i = 2; i + 2 < edge_count && bit_count < 32; i += 2) {
+        /* Validate: edge[i] should be falling, edge[i+1] should be rising */
+        if (edges[i].type != EDGE_FALLING || edges[i + 1].type != EDGE_RISING) {
+            continue;  // Skip invalid edges
+        }
         
-        /* Validate pulse width */
-        if (pulse < NEC_BIT_PULSE_MIN || pulse > NEC_BIT_PULSE_MAX) {
-            return 0;
+        /* Bit pulse duration */
+        uint32_t bit_pulse = GetDuration(i, i + 1);
+        
+        /* 유효한 비트 펄스인지 확인 (약 560us) */
+        if (bit_pulse < MIN_PULSE_US || bit_pulse > 1000) {
+            continue;
+        }
+        
+        /* Space duration (to next falling edge) */
+        uint32_t space;
+        if (i + 2 < edge_count) {
+            space = GetDuration(i + 1, i + 2);
+        } else {
+            /* 마지막 비트는 space가 없을 수 있음 - 기본값 0 */
+            space = 500;  // Assume bit 0
         }
         
         /* Decode bit based on space duration */
-        if (space >= NEC_BIT_1_SPACE_MIN && space <= NEC_BIT_1_SPACE_MAX) {
-            /* Bit 1 */
-            raw_data |= (1UL << i);  // LSB first
+        if (space >= NEC_BIT_THRESHOLD) {
+            raw_data |= (1UL << bit_count);  // Bit 1 (LSB first)
         }
-        else if (space >= NEC_BIT_0_SPACE_MIN && space <= NEC_BIT_0_SPACE_MAX) {
-            /* Bit 0 - already 0 */
-        }
-        else if (i == 31) {
-            /* Last bit might have no space measurement, use pulse only */
-            /* This is okay, we already have the bit from pulse presence */
-        }
-        else {
-            /* Invalid space duration */
-            return 0;
-        }
+        /* else: Bit 0 (already 0) */
+        
+        bit_count++;
     }
     
-    /* Extract fields (LSB first transmission) */
+    ir_data.bit_count = bit_count;
+    
+    /* 최소 비트 수 확인 */
+    if (bit_count < 16) {  // 최소 16비트는 있어야 함
+        return 0;
+    }
+    
+    /* Extract fields */
     ir_data.raw_data = raw_data;
     ir_data.address = (raw_data >> 0) & 0xFF;
     ir_data.address_inv = (raw_data >> 8) & 0xFF;
@@ -333,70 +325,150 @@ void IR_Print_Result(void) {
     }
     
     if (ir_data.is_repeat) {
-        printf("    ◆ REPEAT Code\r\n");
+        printf("    >> REPEAT Code <<\r\n");
         return;
     }
     
-    printf("    ┌──────────────────────────────────┐\r\n");
-    printf("    │         NEC Decoded Data         │\r\n");
-    printf("    ├──────────────────────────────────┤\r\n");
-    printf("    │ Raw Data   : 0x%08lX           │\r\n", ir_data.raw_data);
-    printf("    ├──────────────────────────────────┤\r\n");
-    printf("    │ Address    : 0x%02X (%3d)         │\r\n", ir_data.address, ir_data.address);
-    printf("    │ Address~   : 0x%02X (%3d)         │\r\n", ir_data.address_inv, ir_data.address_inv);
-    printf("    │ Command    : 0x%02X (%3d)         │\r\n", ir_data.command, ir_data.command);
-    printf("    │ Command~   : 0x%02X (%3d)         │\r\n", ir_data.command_inv, ir_data.command_inv);
-    printf("    ├──────────────────────────────────┤\r\n");
+    printf("\r\n");
+    printf("    +----------------------------------+\r\n");
+    printf("    |        NEC Decoded Data          |\r\n");
+    printf("    +----------------------------------+\r\n");
+    printf("    | Bits decoded : %-2d                |\r\n", ir_data.bit_count);
+    printf("    | Raw Data     : 0x%08lX        |\r\n", ir_data.raw_data);
+    printf("    +----------------------------------+\r\n");
+    printf("    | Address      : 0x%02X  (%3d)      |\r\n", ir_data.address, ir_data.address);
+    printf("    | Address~     : 0x%02X  (%3d)      |\r\n", ir_data.address_inv, ir_data.address_inv);
+    printf("    | Command      : 0x%02X  (%3d)      |\r\n", ir_data.command, ir_data.command);
+    printf("    | Command~     : 0x%02X  (%3d)      |\r\n", ir_data.command_inv, ir_data.command_inv);
+    printf("    +----------------------------------+\r\n");
     
-    /* Validate standard NEC (address and command should be inverted) */
+    /* Validate */
     uint8_t addr_valid = ((ir_data.address ^ ir_data.address_inv) == 0xFF);
     uint8_t cmd_valid = ((ir_data.command ^ ir_data.command_inv) == 0xFF);
     
     if (addr_valid && cmd_valid) {
-        printf("    │ ✓ Standard NEC Protocol         │\r\n");
-        printf("    │   Device : 0x%02X                  │\r\n", ir_data.address);
-        printf("    │   Key    : 0x%02X                  │\r\n", ir_data.command);
+        printf("    | Protocol: Standard NEC          |\r\n");
+        printf("    | Device  : 0x%02X                   |\r\n", ir_data.address);
+        printf("    | Key Code: 0x%02X                   |\r\n", ir_data.command);
     }
     else if (cmd_valid) {
-        /* Extended NEC - 16-bit address */
-        uint16_t ext_address = ir_data.address | (ir_data.address_inv << 8);
-        printf("    │ ✓ Extended NEC Protocol         │\r\n");
-        printf("    │   Device : 0x%04X                │\r\n", ext_address);
-        printf("    │   Key    : 0x%02X                  │\r\n", ir_data.command);
+        uint16_t ext_addr = ir_data.address | (ir_data.address_inv << 8);
+        printf("    | Protocol: Extended NEC          |\r\n");
+        printf("    | Device  : 0x%04X                 |\r\n", ext_addr);
+        printf("    | Key Code: 0x%02X                   |\r\n", ir_data.command);
     }
     else {
-        printf("    │ ⚠ Checksum Error                │\r\n");
-        printf("    │   Addr check: %s              │\r\n", addr_valid ? "OK" : "FAIL");
-        printf("    │   Cmd check : %s              │\r\n", cmd_valid ? "OK" : "FAIL");
+        printf("    | Protocol: Unknown/Checksum Err  |\r\n");
     }
+    printf("    +----------------------------------+\r\n");
     
-    printf("    └──────────────────────────────────┘\r\n");
+    /* Binary representation */
+    printf("\r\n    Binary (LSB first):\r\n");
+    printf("    ADDR     : ");
+    for (int i = 7; i >= 0; i--) printf("%d", (ir_data.address >> i) & 1);
+    printf(" (0x%02X)\r\n", ir_data.address);
     
-    /* Print binary representation */
-    printf("    Binary: ");
-    for (int i = 31; i >= 0; i--) {
-        printf("%c", (ir_data.raw_data & (1UL << i)) ? '1' : '0');
-        if (i == 24 || i == 16 || i == 8) printf(" ");
-    }
-    printf("\r\n");
-    printf("            CMD~     CMD      ADDR~    ADDR\r\n");
+    printf("    ADDR~    : ");
+    for (int i = 7; i >= 0; i--) printf("%d", (ir_data.address_inv >> i) & 1);
+    printf(" (0x%02X)\r\n", ir_data.address_inv);
+    
+    printf("    CMD      : ");
+    for (int i = 7; i >= 0; i--) printf("%d", (ir_data.command >> i) & 1);
+    printf(" (0x%02X)\r\n", ir_data.command);
+    
+    printf("    CMD~     : ");
+    for (int i = 7; i >= 0; i--) printf("%d", (ir_data.command_inv >> i) & 1);
+    printf(" (0x%02X)\r\n", ir_data.command_inv);
 }
 
 /**
- * @brief  Get microseconds from TIM2
+ * @brief Print raw timing data for debugging
+ */
+void IR_Print_Raw_Timing(void) {
+    printf("\r\n    Raw Edge Timing:\r\n");
+    
+    uint8_t print_count = (edge_count > 20) ? 20 : edge_count;
+    
+    for (uint8_t i = 0; i < print_count; i++) {
+        char edge_char = (edges[i].type == EDGE_FALLING) ? 'F' : 'R';
+        uint32_t duration = 0;
+        
+        if (i > 0) {
+            duration = edges[i].time_us - edges[i-1].time_us;
+        }
+        
+        printf("    [%2d] %c @ %7lu us", i, edge_char, edges[i].time_us);
+        if (i > 0) {
+            printf(" (delta: %5lu us)", duration);
+        }
+        printf("\r\n");
+    }
+    
+    if (edge_count > 20) {
+        printf("    ... (%d more edges)\r\n", edge_count - 20);
+    }
+    
+    /* 간단한 비트 해석 시도 */
+    printf("\r\n    Bit interpretation (space-based):\r\n    ");
+    
+    uint8_t bit_idx = 0;
+    for (uint8_t i = 2; i + 2 < edge_count && bit_idx < 32; i += 2) {
+        if (edges[i].type == EDGE_FALLING && edges[i + 1].type == EDGE_RISING) {
+            uint32_t space = edges[i + 2].time_us - edges[i + 1].time_us;
+            
+            if (space >= NEC_BIT_THRESHOLD) {
+                printf("1");
+            } else {
+                printf("0");
+            }
+            bit_idx++;
+            
+            if (bit_idx == 8 || bit_idx == 16 || bit_idx == 24) {
+                printf(" ");
+            }
+        }
+    }
+    printf(" (%d bits)\r\n", bit_idx);
+    
+    /* 비트를 바이트로 변환해서 표시 */
+    if (bit_idx >= 8) {
+        printf("    Hex values: ");
+        uint32_t val = 0;
+        uint8_t b = 0;
+        
+        for (uint8_t i = 2; i + 2 < edge_count && b < 32; i += 2) {
+            if (edges[i].type == EDGE_FALLING && edges[i + 1].type == EDGE_RISING) {
+                uint32_t space = edges[i + 2].time_us - edges[i + 1].time_us;
+                
+                if (space >= NEC_BIT_THRESHOLD) {
+                    val |= (1UL << b);
+                }
+                b++;
+            }
+        }
+        
+        printf("0x%02lX ", (val >> 0) & 0xFF);
+        if (bit_idx >= 16) printf("0x%02lX ", (val >> 8) & 0xFF);
+        if (bit_idx >= 24) printf("0x%02lX ", (val >> 16) & 0xFF);
+        if (bit_idx >= 32) printf("0x%02lX", (val >> 24) & 0xFF);
+        printf("\r\n");
+    }
+}
+
+/**
+ * @brief Get microseconds from TIM2
  */
 uint32_t GetMicros(void) {
     return __HAL_TIM_GET_COUNTER(&htim2);
 }
 
 /**
- * @brief System Clock Configuration - 64MHz from HSI with PLL
+ * @brief System Clock Configuration - 64MHz
  */
 void SystemClock_Config(void) {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-    /* HSI + PLL Configuration */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -408,7 +480,6 @@ void SystemClock_Config(void) {
         Error_Handler();
     }
 
-    /* Bus Clock Configuration */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
                                 | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -429,13 +500,11 @@ static void MX_GPIO_Init(void) {
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
-    /* IR Receiver Input - PA0 */
     GPIO_InitStruct.Pin = IR_RECV_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(IR_RECV_GPIO_Port, &GPIO_InitStruct);
 
-    /* LED Output - PA5 */
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
     GPIO_InitStruct.Pin = LED_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -450,7 +519,7 @@ static void MX_TIM2_Init(void) {
     __HAL_RCC_TIM2_CLK_ENABLE();
 
     htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 63;              // 64MHz / 64 = 1MHz
+    htim2.Init.Prescaler = 63;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim2.Init.Period = 0xFFFFFFFF;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -470,13 +539,11 @@ static void MX_USART2_UART_Init(void) {
     __HAL_RCC_USART2_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
-    /* PA2 - TX */
     GPIO_InitStruct.Pin = GPIO_PIN_2;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
     
-    /* PA3 - RX */
     GPIO_InitStruct.Pin = GPIO_PIN_3;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
