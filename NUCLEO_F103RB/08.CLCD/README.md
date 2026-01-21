@@ -278,7 +278,7 @@ void LCD_PUTS(char *str) {
 
 # 사용자 문자 
 
-![CLCD](img width="400" height="300" https://github.com/user-attachments/assets/1f1e5482-9e28-4fdb-aeee-41385e28646c)
+![CLCD](https://github.com/user-attachments/assets/1f1e5482-9e28-4fdb-aeee-41385e28646c)
 
 
 
