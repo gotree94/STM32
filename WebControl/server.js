@@ -107,11 +107,25 @@ async function findSerialPort() {
 }
 
 async function connectSerial(portPath, baudRate) {
-    // 기존 연결 종료
-    if (serialPort && serialPort.isOpen) {
+    // 기존 연결 완전히 종료
+    if (serialPort) {
         try {
-            serialPort.close();
-        } catch (e) {}
+            if (serialPort.isOpen) {
+                await new Promise((resolve, reject) => {
+                    serialPort.close((err) => {
+                        if (err) {
+                            console.log('기존 포트 닫기 오류 (무시):', err.message);
+                        }
+                        resolve();
+                    });
+                });
+                // 포트가 완전히 닫힐 때까지 대기
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        } catch (e) {
+            console.log('기존 포트 정리 중 오류:', e.message);
+        }
+        serialPort = null;
     }
     
     // auto인 경우 자동 감지
@@ -126,49 +140,73 @@ async function connectSerial(portPath, baudRate) {
     
     baudRate = baudRate || config.serial.baudRate;
     
-    try {
-        serialPort = new SerialPort({
-            path: portPath,
-            baudRate: baudRate
-        });
-        
-        serialPort.on('open', () => {
-            console.log(`✅ 시리얼 연결: ${portPath} @ ${baudRate}bps`);
-            currentStatus.connected = true;
-            currentStatus.port = portPath;
-            currentStatus.baudRate = baudRate;
+    return new Promise((resolve) => {
+        try {
+            serialPort = new SerialPort({
+                path: portPath,
+                baudRate: baudRate,
+                autoOpen: false  // 수동으로 열기
+            });
             
-            // 설정 저장
-            config.serial.port = portPath;
-            config.serial.baudRate = baudRate;
-            saveConfig();
-        });
-        
-        serialPort.on('error', (err) => {
-            console.error('시리얼 오류:', err.message);
+            serialPort.on('error', (err) => {
+                console.error('시리얼 오류:', err.message);
+                currentStatus.connected = false;
+            });
+            
+            serialPort.on('close', () => {
+                console.log('시리얼 연결 종료');
+                currentStatus.connected = false;
+            });
+            
+            serialPort.on('data', (data) => {
+                console.log('STM32:', data.toString().trim());
+            });
+            
+            // 포트 열기
+            serialPort.open((err) => {
+                if (err) {
+                    console.error('❌ 시리얼 연결 실패:', err.message);
+                    currentStatus.connected = false;
+                    serialPort = null;
+                    resolve(false);
+                } else {
+                    console.log(`✅ 시리얼 연결: ${portPath} @ ${baudRate}bps`);
+                    currentStatus.connected = true;
+                    currentStatus.port = portPath;
+                    currentStatus.baudRate = baudRate;
+                    
+                    // 설정 저장
+                    config.serial.port = portPath;
+                    config.serial.baudRate = baudRate;
+                    saveConfig();
+                    resolve(true);
+                }
+            });
+        } catch (err) {
+            console.error('❌ 시리얼 생성 실패:', err.message);
             currentStatus.connected = false;
-        });
-        
-        serialPort.on('close', () => {
-            console.log('시리얼 연결 종료');
-            currentStatus.connected = false;
-        });
-        
-        serialPort.on('data', (data) => {
-            console.log('STM32:', data.toString().trim());
-        });
-        
-        return true;
-    } catch (err) {
-        console.error('❌ 시리얼 연결 실패:', err.message);
-        currentStatus.connected = false;
-        return false;
-    }
+            resolve(false);
+        }
+    });
 }
 
-function disconnectSerial() {
-    if (serialPort && serialPort.isOpen) {
-        serialPort.close();
+async function disconnectSerial() {
+    if (serialPort) {
+        try {
+            if (serialPort.isOpen) {
+                await new Promise((resolve) => {
+                    serialPort.close((err) => {
+                        if (err) {
+                            console.log('포트 닫기 오류:', err.message);
+                        }
+                        resolve();
+                    });
+                });
+            }
+        } catch (e) {
+            console.log('연결 해제 오류:', e.message);
+        }
+        serialPort = null;
         currentStatus.connected = false;
         currentStatus.port = '';
         return true;
@@ -183,20 +221,22 @@ function sendCommand(cmd) {
     }
     
     try {
-        serialPort.write(cmd);
+        // 소문자로 변환하여 전송
+        const lowerCmd = cmd.toLowerCase();
+        serialPort.write(lowerCmd);
         
         const directions = {
-            'W': 'FORWARD', 'w': 'FORWARD',
-            'S': 'BACKWARD', 's': 'BACKWARD',
-            'A': 'LEFT', 'a': 'LEFT',
-            'D': 'RIGHT', 'd': 'RIGHT',
-            'X': 'STOP', 'x': 'STOP'
+            'w': 'FORWARD',
+            's': 'BACKWARD',
+            'a': 'LEFT',
+            'd': 'RIGHT',
+            'x': 'STOP'
         };
         
-        if (directions[cmd]) {
-            currentStatus.direction = directions[cmd];
-        } else if (cmd >= '0' && cmd <= '9') {
-            currentStatus.speed = parseInt(cmd);
+        if (directions[lowerCmd]) {
+            currentStatus.direction = directions[lowerCmd];
+        } else if (lowerCmd >= '0' && lowerCmd <= '9') {
+            currentStatus.speed = parseInt(lowerCmd);
         }
         
         return true;
@@ -721,8 +761,8 @@ app.post('/api/connect', async (req, res) => {
     });
 });
 
-app.post('/api/disconnect', (req, res) => {
-    disconnectSerial();
+app.post('/api/disconnect', async (req, res) => {
+    await disconnectSerial();
     res.json({ success: true });
 });
 
