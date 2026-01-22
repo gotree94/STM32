@@ -1,6 +1,6 @@
 {
   "serial": {
-    "port": "auto",
+    "port": "COM6",
     "baudRate": 115200
   },
   "server": {
