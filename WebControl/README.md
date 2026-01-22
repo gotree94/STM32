@@ -5,7 +5,7 @@
    * https://nodejs.org/ko
    * 다운로드 : https://nodejs.org/dist/v24.13.0/node-v24.13.0-x64.msi
 
-## 2. 서버 파일 설치
+node server.js --port COM3
 
 ---
 
