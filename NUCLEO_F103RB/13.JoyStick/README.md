@@ -287,6 +287,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 ---
 
+# JoyStick (W/A/S/D/X)
+
 ```c
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -485,6 +487,8 @@ A (좌) ←─X─→ D (우)
 
 ---
 
+# JoyStick (W/A/S/D/X) - serial_bridge.py
+
 ```
 ///////////////////////////////////////
 // Serial Bridge (python serial_bridge.py)
@@ -578,5 +582,273 @@ if __name__ == "__main__":
     serial_bridge()
 ```
 
+---
 
+# Commands: W/A/S/D/X + B(Button) - serial_bridge.py
+
+
+<img width="643" height="549" alt="JOYSTICK_B_005" src="https://github.com/user-attachments/assets/821d4489-5200-4b9d-8b02-aab50e7d5dac" />
+<br>
+<img width="806" height="888" alt="JOYSTICK_B_001" src="https://github.com/user-attachments/assets/bbeecb40-bbad-4a1f-8f51-5d5067fc258f" />
+<br>
+<img width="827" height="777" alt="JOYSTICK_B_002" src="https://github.com/user-attachments/assets/95ec5554-a895-4152-ac57-e1a153a9c217" />
+<br>
+<img width="654" height="484" alt="JOYSTICK_B_003" src="https://github.com/user-attachments/assets/728e2025-42a0-4d24-b636-5e09264636bf" />
+<br>
+<img width="723" height="550" alt="JOYSTICK_B_004" src="https://github.com/user-attachments/assets/12582a79-351f-4b36-a0ec-2604a10cd62a" />
+<br>
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN PD */
+#define ADC_BUFFER_SIZE 2
+#define FILTER_SIZE 8
+#define ADC_MAX_VALUE 4095
+#define DEADZONE_THRESHOLD 20
+
+// 스위치 디바운싱 설정
+#define DEBOUNCE_TIME_MS 200
+/* USER CODE END PD */
+```
+
+```c
+/* USER CODE BEGIN PV */
+uint16_t adc_buffer[ADC_BUFFER_SIZE];
+uint16_t joystick_x_raw = 0;
+uint16_t joystick_y_raw = 0;
+
+uint32_t x_filter_buffer[FILTER_SIZE] = {0};
+uint32_t y_filter_buffer[FILTER_SIZE] = {0};
+uint8_t filter_index = 0;
+
+uint16_t joystick_x_filtered = 0;
+uint16_t joystick_y_filtered = 0;
+
+int16_t joystick_x_percent = 0;
+int16_t joystick_y_percent = 0;
+
+char direction_char = 'X';
+char prev_direction_char = 'X';
+
+// 스위치 관련 변수
+volatile uint8_t switch_pressed = 0;        // 스위치 눌림 플래그
+volatile uint32_t last_switch_time = 0;     // 디바운싱용 타임스탬프
+
+char uart_buffer[100];
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+void process_joystick_data(void);
+uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer);
+int16_t convert_to_percentage(uint16_t adc_value);
+char get_direction_char(int16_t x_percent, int16_t y_percent);
+/* USER CODE END PFP */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+    if (ch == '\n')
+        HAL_UART_Transmit(&huart2, (uint8_t*)"\r", 1, 0xFFFF);
+    HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
+    return ch;
+}
+
+uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer)
+{
+    static uint8_t x_init = 0, y_init = 0;
+    uint32_t sum = 0;
+
+    if (filter_buffer == x_filter_buffer) {
+        if (!x_init) {
+            for (int i = 0; i < FILTER_SIZE; i++) {
+                filter_buffer[i] = new_value;
+            }
+            x_init = 1;
+            return new_value;
+        }
+    } else {
+        if (!y_init) {
+            for (int i = 0; i < FILTER_SIZE; i++) {
+                filter_buffer[i] = new_value;
+            }
+            y_init = 1;
+            return new_value;
+        }
+    }
+
+    filter_buffer[filter_index] = new_value;
+
+    for (int i = 0; i < FILTER_SIZE; i++) {
+        sum += filter_buffer[i];
+    }
+
+    return (uint16_t)(sum / FILTER_SIZE);
+}
+
+int16_t convert_to_percentage(uint16_t adc_value)
+{
+    int16_t centered_value = (int16_t)adc_value - (ADC_MAX_VALUE / 2);
+    int16_t percentage = (centered_value * 100) / (ADC_MAX_VALUE / 2);
+
+    if (percentage > 100) percentage = 100;
+    if (percentage < -100) percentage = -100;
+
+    return percentage;
+}
+
+char get_direction_char(int16_t x_percent, int16_t y_percent)
+{
+    int16_t abs_x = (x_percent >= 0) ? x_percent : -x_percent;
+    int16_t abs_y = (y_percent >= 0) ? y_percent : -y_percent;
+
+    if (abs_x < DEADZONE_THRESHOLD && abs_y < DEADZONE_THRESHOLD) {
+        return 'X';
+    }
+
+    if (abs_y >= abs_x) {
+        if (y_percent >= DEADZONE_THRESHOLD) {
+            return 'W';
+        } else if (y_percent <= -DEADZONE_THRESHOLD) {
+            return 'S';
+        }
+    }
+
+    if (abs_x > abs_y) {
+        if (x_percent >= DEADZONE_THRESHOLD) {
+            return 'D';
+        } else if (x_percent <= -DEADZONE_THRESHOLD) {
+            return 'A';
+        }
+    }
+
+    return 'X';
+}
+
+void process_joystick_data(void)
+{
+    joystick_x_raw = adc_buffer[0];
+    joystick_y_raw = adc_buffer[1];
+
+    joystick_x_filtered = apply_moving_average_filter(joystick_x_raw, x_filter_buffer);
+    joystick_y_filtered = apply_moving_average_filter(joystick_y_raw, y_filter_buffer);
+
+    filter_index = (filter_index + 1) % FILTER_SIZE;
+
+    joystick_x_percent = convert_to_percentage(joystick_x_filtered);
+    joystick_y_percent = convert_to_percentage(joystick_y_filtered);
+
+    direction_char = get_direction_char(joystick_x_percent, joystick_y_percent);
+}
+
+/**
+  * @brief  외부 인터럽트 콜백 (조이스틱 스위치)
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    uint32_t current_time = HAL_GetTick();
+
+    // PA4 (조이스틱 스위치) 또는 PC13 (Blue Button)
+    if (GPIO_Pin == GPIO_PIN_4 || GPIO_Pin == GPIO_PIN_13) {
+        // 디바운싱: 마지막 입력 후 일정 시간 경과했는지 확인
+        if ((current_time - last_switch_time) > DEBOUNCE_TIME_MS) {
+            switch_pressed = 1;
+            last_switch_time = current_time;
+        }
+    }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2) {
+        process_joystick_data();
+
+        // 스위치가 눌렸으면 'B' 전송 (Button)
+        if (switch_pressed) {
+            printf("B\n");
+            switch_pressed = 0;
+        }
+        // 방향이 변경되었을 때만 출력
+        else if (direction_char != prev_direction_char) {
+            printf("%c\n", direction_char);
+            prev_direction_char = direction_char;
+        }
+    }
+}
+/* USER CODE END 0 */
+```
+
+
+```c
+  /* USER CODE BEGIN 2 */
+  if (HAL_DMA_Init(&hdma_adc1) != HAL_OK) {
+      Error_Handler();
+  }
+
+  __HAL_LINKDMA(&hadc1, DMA_Handle, hdma_adc1);
+
+  HAL_ADCEx_Calibration_Start(&hadc1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_BUFFER_SIZE);
+  HAL_TIM_Base_Start_IT(&htim2);
+
+  printf("Joystick Control Started\n");
+  printf("Commands: W/A/S/D/X + B(Button)\n");
+  /* USER CODE END 2 */
+```
+
+```c
+    /* USER CODE BEGIN 3 */
+	  HAL_Delay(10);  // 메인 루프 딜레이
+  }
+  /* USER CODE END 3 */
+```
+
+
+## 출력 화면
+
+```
+Joystick Control Started
+Commands: W/A/S/D/X + B(Button)
+A
+S
+X
+B
+B
+S
+X
+W
+X
+S
+X
+S
+X
+W
+X
+S
+X
+A
+X
+D
+X
+B
+B
+B
+B
+B
+```
 
