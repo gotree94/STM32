@@ -164,9 +164,12 @@ STM32F103_Project/
 ```bash
 # 1. 작업할 폴더로 이동
 cd /c/Users/사용자명/STM32CubeIDE/workspace_1.x
+예) cd C:\Users\Administrator\STM32CubeIDE\workspace_1.18.1
+예) cd C:\Users\user\STM32CubeIDE\workspace_1.18.1
 
 # 2. GitHub 저장소 클론
 git clone git@github.com:사용자명/STM32F103_Project.git
+예) git clone https://github.com/gotree94/STM32F103_Project.git
 
 # 3. STM32CubeIDE에서 프로젝트 생성
 #    - File → New → STM32 Project
@@ -193,9 +196,12 @@ git push origin main
 ```bash
 # 1. 작업할 폴더로 이동
 cd /c/Users/사용자명/STM32CubeIDE/workspace_1.x
+예) cd C:\Users\Administrator\STM32CubeIDE\workspace_1.18.1
+예) cd C:\Users\user\STM32CubeIDE\workspace_1.18.1
 
 # 2. 저장소 클론
 git clone git@github.com:개발자A사용자명/STM32F103_Project.git
+예) git clone https://github.com/gotree94/STM32F103_Project.git
 
 # 3. STM32CubeIDE에서 Import
 #    - File → Import → Existing Projects into Workspace
@@ -268,7 +274,7 @@ git log --oneline -5
 **개발자 A가 작성한 초기 main.c 일부:**
 ```c
 /* USER CODE BEGIN 3 */
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
     HAL_Delay(500);  // 500ms 딜레이
   }
 /* USER CODE END 3 */
@@ -332,11 +338,11 @@ git branch
 
 # === 커밋 ===
 git add .
-git commit -m "MPU6050 센서 I2C 초기화 코드 추가"
+git commit -m "LED2 코드 추가"
 
 # === 추가 작업 후 커밋 ===
 git add .
-git commit -m "MPU6050 가속도 데이터 읽기 함수 구현"
+git commit -m "LED2 코드 추가"
 
 # === 원격 저장소에 브랜치 Push ===
 git push -u origin feature/sensor-init
@@ -355,6 +361,17 @@ git checkout -b feature/motor-control
 
 # === 코드 작업 (모터 제어 코드) ===
 # STM32CubeIDE에서 작업...
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
 
 # === 커밋 및 Push ===
 git add .
@@ -379,9 +396,10 @@ git branch -a
 
 # === 개발자 A의 브랜치 변경사항 확인 (병합 없이) ===
 git log origin/feature/sensor-init --oneline
-# 출력:
-# c3d4e5f MPU6050 가속도 데이터 읽기 함수 구현
-# a1b2c3d MPU6050 센서 I2C 초기화 코드 추가
+# 7bc361c (origin/feature/sensor-init, feature/sensor-init) LED2 코드 추가
+# 6d52154 (main) stdio.h 추가
+# 453afef Initial STM32F103 project setup
+# ab3f47f Initial commit
 
 # === 변경된 파일 목록 보기 ===
 git diff --stat main origin/feature/sensor-init
@@ -395,6 +413,55 @@ git diff --stat main origin/feature/sensor-init
 git diff main origin/feature/sensor-init -- Core/Src/main.c
 ```
 
+```
+# === 내 브렌치 확인하 ===
+$ git branch
+* feature/motor-control
+  feature/sensor-init
+  main
+
+# 먼저 원격 정보 최신화
+git fetch origin
+
+# 개발자 A의 브랜치를 내 브랜치에 병합
+git merge origin/feature/sensor-init
+```
+
+<img width="910" height="692" alt="009" src="https://github.com/user-attachments/assets/f58562e0-f398-4fe6-9854-e074ff786af9" />
+
+
+```
+Vim 에디터 실행된 상태
+* 그냥 기본 메시지로 저장하고 나가기:
+:wq
+
+: 입력 (명령 모드)
+wq 입력 (write + quit)
+Enter 키
+
+또는 더 간단하게:
+Shift + Z + Z
+
+```
+
+```
+# 코드 확인
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  HAL_Delay(500);  // 500ms 딜레이
+  }
+  /* USER CODE END 3 */
+}
+```
+
 ### 5.5 Pull Request (PR)를 통한 코드 리뷰
 
 **GitHub 웹에서:**
@@ -406,16 +473,14 @@ git diff main origin/feature/sensor-init -- Core/Src/main.c
 5. 변경사항 확인 후 "Create pull request" 클릭
 6. 제목과 설명 작성:
    ```
-   제목: MPU6050 센서 드라이버 추가
+   제목: LED2 코드 추가
    
    설명:
    ## 변경 사항
-   - MPU6050 I2C 초기화 코드 추가
-   - 가속도/자이로 데이터 읽기 함수 구현
+   - LED2 코드 추가
    
    ## 테스트
-   - I2C 통신 확인 완료
-   - 가속도 값 정상 출력 확인
+   - LED2 코드 확인 완료
    ```
 7. 개발자 B를 Reviewer로 지정
 
