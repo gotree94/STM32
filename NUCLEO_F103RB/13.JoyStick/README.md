@@ -285,6 +285,203 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE END 3 */
 ```
 
+---
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
+
+/* USER CODE BEGIN PD */
+#define ADC_BUFFER_SIZE 2
+#define FILTER_SIZE 8        // 이동평균 필터 크기
+#define ADC_MAX_VALUE 4095   // 12bit ADC 최대값
+#define DEADZONE_THRESHOLD 20  // 중앙 데드존 임계값 (%)
+/* USER CODE END PD */
+
+/* USER CODE BEGIN PV */
+uint16_t adc_buffer[ADC_BUFFER_SIZE];  // DMA 버퍼
+uint16_t joystick_x_raw = 0;           // 조이스틱 X축 원시값
+uint16_t joystick_y_raw = 0;           // 조이스틱 Y축 원시값
+
+// 이동평균 필터를 위한 배열
+uint32_t x_filter_buffer[FILTER_SIZE] = {0};
+uint32_t y_filter_buffer[FILTER_SIZE] = {0};
+uint8_t filter_index = 0;
+
+// 필터링된 값
+uint16_t joystick_x_filtered = 0;
+uint16_t joystick_y_filtered = 0;
+
+// 백분율로 변환된 값 (-100 ~ +100)
+int16_t joystick_x_percent = 0;
+int16_t joystick_y_percent = 0;
+
+// 방향 문자
+char direction_char = 'X';
+char prev_direction_char = 'X';
+
+char uart_buffer[100];
+/* USER CODE END PV */
+
+/* USER CODE BEGIN PFP */
+void process_joystick_data(void);
+uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer);
+int16_t convert_to_percentage(uint16_t adc_value);
+char get_direction_char(int16_t x_percent, int16_t y_percent);
+/* USER CODE END PFP */
+
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+  if (ch == '\n')
+    HAL_UART_Transmit(&huart2, (uint8_t*)"\r", 1, 0xFFFF);
+  HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
+  return ch;
+}
+
+uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer)
+{
+    static uint8_t x_init = 0, y_init = 0;
+    uint32_t sum = 0;
+
+    if (filter_buffer == x_filter_buffer) {
+        if (!x_init) {
+            for (int i = 0; i < FILTER_SIZE; i++) {
+                filter_buffer[i] = new_value;
+            }
+            x_init = 1;
+            return new_value;
+        }
+    } else {
+        if (!y_init) {
+            for (int i = 0; i < FILTER_SIZE; i++) {
+                filter_buffer[i] = new_value;
+            }
+            y_init = 1;
+            return new_value;
+        }
+    }
+
+    filter_buffer[filter_index] = new_value;
+
+    for (int i = 0; i < FILTER_SIZE; i++) {
+        sum += filter_buffer[i];
+    }
+
+    return (uint16_t)(sum / FILTER_SIZE);
+}
+
+int16_t convert_to_percentage(uint16_t adc_value)
+{
+    int16_t centered_value = (int16_t)adc_value - (ADC_MAX_VALUE / 2);
+    int16_t percentage = (centered_value * 100) / (ADC_MAX_VALUE / 2);
+
+    if (percentage > 100) percentage = 100;
+    if (percentage < -100) percentage = -100;
+
+    return percentage;
+}
+
+/**
+  * @brief  조이스틱 위치에 따른 방향 문자 반환
+  * @param  x_percent: X축 백분율 (-100 ~ +100), 좌(-) / 우(+)
+  * @param  y_percent: Y축 백분율 (-100 ~ +100), 후(-) / 전(+)
+  * @retval 방향 문자 (W/A/S/D/X)
+  */
+char get_direction_char(int16_t x_percent, int16_t y_percent)
+{
+    int16_t abs_x = (x_percent >= 0) ? x_percent : -x_percent;
+    int16_t abs_y = (y_percent >= 0) ? y_percent : -y_percent;
+
+    // 데드존 내부 = 중앙 (X)
+    if (abs_x < DEADZONE_THRESHOLD && abs_y < DEADZONE_THRESHOLD) {
+        return 'X';
+    }
+
+    // Y축이 더 크면 전진/후진 우선
+    if (abs_y >= abs_x) {
+        if (y_percent >= DEADZONE_THRESHOLD) {
+            return 'W';  // 전진
+        } else if (y_percent <= -DEADZONE_THRESHOLD) {
+            return 'S';  // 후진
+        }
+    }
+
+    // X축이 더 크면 좌회전/우회전
+    if (abs_x > abs_y) {
+        if (x_percent >= DEADZONE_THRESHOLD) {
+            return 'D';  // 우회전
+        } else if (x_percent <= -DEADZONE_THRESHOLD) {
+            return 'A';  // 좌회전
+        }
+    }
+
+    return 'X';  // 기본값: 중앙
+}
+
+void process_joystick_data(void)
+{
+    joystick_x_raw = adc_buffer[0];
+    joystick_y_raw = adc_buffer[1];
+
+    joystick_x_filtered = apply_moving_average_filter(joystick_x_raw, x_filter_buffer);
+    joystick_y_filtered = apply_moving_average_filter(joystick_y_raw, y_filter_buffer);
+
+    filter_index = (filter_index + 1) % FILTER_SIZE;
+
+    joystick_x_percent = convert_to_percentage(joystick_x_filtered);
+    joystick_y_percent = convert_to_percentage(joystick_y_filtered);
+
+    // 방향 문자 결정
+    direction_char = get_direction_char(joystick_x_percent, joystick_y_percent);
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2) {
+        process_joystick_data();
+
+        // 방향이 변경되었을 때만 출력 (또는 항상 출력하려면 조건 제거)
+        if (direction_char != prev_direction_char) {
+            printf("%c\n", direction_char);
+            prev_direction_char = direction_char;
+        }
+
+        // 디버깅용: 항상 상세 정보 출력 (필요시 주석 해제)
+        // printf("Dir: %c | X: %d%%, Y: %d%%\n", 
+        //        direction_char, joystick_x_percent, joystick_y_percent);
+    }
+}
+/* USER CODE END 0 */
+```
+
+## 주요 변경 사항
+
+| 항목 | 설명 |
+|------|------|
+| **DEADZONE_THRESHOLD** | 중앙 감지 임계값 (기본 20%) |
+| **get_direction_char()** | X/Y 백분율을 분석하여 방향 문자 반환 |
+| **방향 출력** | 변경 시에만 출력 (채터링 방지) |
+
+## 방향 매핑
+```
+        W (전진)
+        ↑
+        |
+A (좌) ←─X─→ D (우)
+        |
+        ↓
+        S (후진)
+
+```
 
 
 
