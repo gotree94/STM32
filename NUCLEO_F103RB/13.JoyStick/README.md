@@ -584,7 +584,7 @@ if __name__ == "__main__":
 
 ---
 
-# Commands: W/A/S/D/X + B(Button) - serial_bridge.py
+# Commands: W/A/S/D/X + B(Button)
 
 
 <img width="643" height="549" alt="JOYSTICK_B_005" src="https://github.com/user-attachments/assets/821d4489-5200-4b9d-8b02-aab50e7d5dac" />
