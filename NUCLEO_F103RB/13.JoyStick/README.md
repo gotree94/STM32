@@ -851,4 +851,76 @@ B
 B
 B
 ```
+---
 
+# Commands: W/A/S/D/X + B(Button) + serial_bridge.py
+
+```python
+import serial
+import serial.tools.list_ports
+import time
+
+INPUT_PORT = "COM3"
+OUTPUT_PORT = "COM4"
+BAUD_RATE = 115200
+
+def list_available_ports():
+    ports = serial.tools.list_ports.comports()
+    print("\n[사용 가능한 시리얼 포트]")
+    for port in ports:
+        print(f"  {port.device}: {port.description}")
+    print()
+
+def serial_bridge():
+    list_available_ports()
+    
+    input_serial = None
+    output_serial = None
+    
+    try:
+        print(f"입력 포트 연결 중: {INPUT_PORT}")
+        input_serial = serial.Serial(INPUT_PORT, BAUD_RATE, timeout=0.1)
+        print(f"  ✓ {INPUT_PORT} 연결 성공")
+        
+        print(f"출력 포트 연결 중: {OUTPUT_PORT}")
+        output_serial = serial.Serial(OUTPUT_PORT, BAUD_RATE, timeout=0.1)
+        print(f"  ✓ {OUTPUT_PORT} 연결 성공")
+        
+        print("\n" + "="*50)
+        print("시리얼 브릿지 시작")
+        print(f"  {INPUT_PORT} → {OUTPUT_PORT}")
+        print("명령어: W(전진), S(후진), A(좌), D(우), X(정지), B(버튼)")
+        print("종료: Ctrl+C")
+        print("="*50 + "\n")
+        
+        # B(Button) 추가
+        valid_commands = {'W', 'A', 'S', 'D', 'X', 'B'}
+        
+        while True:
+            if input_serial.in_waiting > 0:
+                data = input_serial.readline().decode('utf-8', errors='ignore').strip()
+                
+                if data and data in valid_commands:
+                    output_serial.write(f"{data}\n".encode('utf-8'))
+                    
+                    # 버튼 입력 시 다르게 표시
+                    if data == 'B':
+                        print(f"[버튼] ●")
+                    else:
+                        print(f"[전송] {data}")
+            
+            time.sleep(0.001)
+            
+    except serial.SerialException as e:
+        print(f"\n[오류] 시리얼 포트 오류: {e}")
+    except KeyboardInterrupt:
+        print("\n\n프로그램 종료")
+    finally:
+        if input_serial and input_serial.is_open:
+            input_serial.close()
+        if output_serial and output_serial.is_open:
+            output_serial.close()
+
+if __name__ == "__main__":
+    serial_bridge()
+```
