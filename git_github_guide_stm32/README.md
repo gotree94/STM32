@@ -5,9 +5,10 @@
 2. [GitHub 계정 및 저장소 생성](#2-github-계정-및-저장소-생성)
 3. [STM32CubeIDE 프로젝트 초기화](#3-stm32cubeide-프로젝트-초기화)
 4. [시나리오 1: 일방향 협업 (Push/Pull)](#4-시나리오-1-일방향-협업)
-5. [시나리오 2: 양방향 협업 (Branch 활용)](#5-시나리오-2-양방향-협업)
-6. [충돌 해결 방법](#6-충돌-해결-방법)
-7. [유용한 명령어 모음](#7-유용한-명령어-모음)
+5. [Collaborator 등록 및 양방향 Push](#5-collaborator-등록-및-양방향-push)
+6. [시나리오 2: 양방향 협업 (Branch 활용)](#6-시나리오-2-양방향-협업)
+7. [충돌 해결 방법](#7-충돌-해결-방법)
+8. [유용한 명령어 모음](#8-유용한-명령어-모음)
 
 ---
 
@@ -164,12 +165,9 @@ STM32F103_Project/
 ```bash
 # 1. 작업할 폴더로 이동
 cd /c/Users/사용자명/STM32CubeIDE/workspace_1.x
-예) cd C:\Users\Administrator\STM32CubeIDE\workspace_1.18.1
-예) cd C:\Users\user\STM32CubeIDE\workspace_1.18.1
 
 # 2. GitHub 저장소 클론
 git clone git@github.com:사용자명/STM32F103_Project.git
-예) git clone https://github.com/gotree94/STM32F103_Project.git
 
 # 3. STM32CubeIDE에서 프로젝트 생성
 #    - File → New → STM32 Project
@@ -196,12 +194,9 @@ git push origin main
 ```bash
 # 1. 작업할 폴더로 이동
 cd /c/Users/사용자명/STM32CubeIDE/workspace_1.x
-예) cd C:\Users\Administrator\STM32CubeIDE\workspace_1.18.1
-예) cd C:\Users\user\STM32CubeIDE\workspace_1.18.1
 
 # 2. 저장소 클론
 git clone git@github.com:개발자A사용자명/STM32F103_Project.git
-예) git clone https://github.com/gotree94/STM32F103_Project.git
 
 # 3. STM32CubeIDE에서 Import
 #    - File → Import → Existing Projects into Workspace
@@ -274,7 +269,7 @@ git log --oneline -5
 **개발자 A가 작성한 초기 main.c 일부:**
 ```c
 /* USER CODE BEGIN 3 */
-    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
     HAL_Delay(500);  // 500ms 딜레이
   }
 /* USER CODE END 3 */
@@ -295,7 +290,175 @@ git log --oneline -5
 
 ---
 
-## 5. 시나리오 2: 양방향 협업
+## 5. Collaborator 등록 및 양방향 Push
+
+**상황:** 4절에서는 개발자 A만 Push하고 개발자 B는 Pull만 했습니다. 이제 개발자 B도 Push할 수 있도록 권한을 부여합니다.
+
+```
+[이전: 일방향]
+개발자 A ──push──→ GitHub ──pull──→ 개발자 B
+
+[이후: 양방향]
+개발자 A ←──push/pull──→ GitHub ←──push/pull──→ 개발자 B
+```
+
+### 5.1 왜 Collaborator 등록이 필요한가?
+
+GitHub 저장소는 기본적으로 **소유자(Owner)만 Push 가능**합니다.
+
+| 권한 | 소유자 (개발자 A) | 일반 사용자 (개발자 B) |
+|------|------------------|----------------------|
+| Clone (복제) | ✅ | ✅ |
+| Pull (받기) | ✅ | ✅ |
+| Push (올리기) | ✅ | ❌ → Collaborator 등록 필요! |
+
+### 5.2 개발자 A: Collaborator 초대하기
+
+**GitHub 웹에서:**
+
+1. 저장소 페이지 접속 (`STM32F103_Project`)
+2. 상단 **Settings** 탭 클릭
+3. 좌측 메뉴에서 **Collaborators** 클릭 (또는 "Collaborators and teams")
+4. **Add people** 버튼 클릭
+5. 개발자 B의 GitHub 사용자명 또는 이메일 입력
+6. 검색 결과에서 해당 사용자 선택
+7. **Add [사용자명] to this repository** 클릭
+
+```
+┌─────────────────────────────────────────┐
+│  Settings > Collaborators               │
+├─────────────────────────────────────────┤
+│                                         │
+│  Manage access                          │
+│  ┌─────────────────────────────────┐   │
+│  │ 🔍 Search by username or email  │   │
+│  └─────────────────────────────────┘   │
+│                                         │
+│  [ Add people ]                         │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+### 5.3 개발자 B: 초대 수락하기
+
+**방법 1: 이메일 확인**
+1. GitHub 가입 이메일로 초대 메일 수신
+2. **"View invitation"** 버튼 클릭
+3. **"Accept invitation"** 클릭
+
+**방법 2: GitHub 알림 확인**
+1. GitHub 접속 → 우측 상단 🔔 알림 아이콘 클릭
+2. 초대 알림 확인
+3. **"Accept"** 클릭
+
+**방법 3: 직접 URL 접속**
+```
+https://github.com/개발자A사용자명/STM32F103_Project/invitations
+```
+
+### 5.4 개발자 B: Push 테스트
+
+이제 개발자 B도 Push할 수 있습니다!
+
+```bash
+# === 현재 프로젝트 폴더로 이동 ===
+cd /c/Users/사용자명/STM32CubeIDE/workspace_1.x/STM32F103_Project
+
+# === 최신 코드 받기 ===
+git pull origin main
+
+# === 코드 수정 (예: LED 딜레이 변경) ===
+# STM32CubeIDE에서 main.c 수정 후 저장
+
+# === 변경 사항 확인 ===
+git status
+
+# === 커밋 ===
+git add .
+git commit -m "LED 딜레이 200ms로 변경 - 빠른 점멸 테스트"
+
+# === Push (이제 가능!) ===
+git push origin main
+```
+
+**성공 시 출력:**
+```
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 328 bytes | 328.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0)
+To github.com:개발자A사용자명/STM32F103_Project.git
+   e4f5g6h..a1b2c3d  main -> main
+```
+
+### 5.5 Push 실패 시 해결 방법
+
+**오류 1: Permission denied**
+```
+ERROR: Permission to 사용자명/STM32F103_Project.git denied to 개발자B.
+fatal: Could not read from remote repository.
+```
+→ Collaborator 초대가 아직 수락되지 않았거나, 초대가 안 됨. 5.2~5.3 단계 재확인
+
+**오류 2: Updates were rejected**
+```
+! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'github.com:...'
+hint: Updates were rejected because the remote contains work that you do not have locally.
+```
+→ 다른 사람이 먼저 Push함. Pull 먼저 받고 다시 Push:
+```bash
+git pull origin main
+# 충돌 있으면 해결 후
+git push origin main
+```
+
+### 5.6 협업 흐름 정리
+
+Collaborator 등록 후의 양방향 협업 흐름:
+
+```bash
+# === 개발자 A 작업 ===
+git pull origin main          # 1. 최신 코드 받기
+# 코드 수정...
+git add .
+git commit -m "기능 A 추가"
+git push origin main          # 2. Push
+
+# === 개발자 B 작업 ===
+git pull origin main          # 3. A의 변경사항 받기
+# 코드 수정...
+git add .  
+git commit -m "기능 B 추가"
+git push origin main          # 4. Push
+
+# === 개발자 A 다시 ===
+git pull origin main          # 5. B의 변경사항 받기
+# ... 반복
+```
+
+### 5.7 Collaborator 권한 종류 (참고)
+
+GitHub에서 설정 가능한 권한 레벨:
+
+| 권한 | Pull | Push | 설정 변경 | 삭제 |
+|------|------|------|----------|------|
+| Read | ✅ | ❌ | ❌ | ❌ |
+| Triage | ✅ | ❌ | ❌ | ❌ |
+| Write | ✅ | ✅ | ❌ | ❌ |
+| Maintain | ✅ | ✅ | 일부 | ❌ |
+| Admin | ✅ | ✅ | ✅ | ✅ |
+
+일반적인 Collaborator 초대는 **Write** 권한으로, Push가 가능합니다.
+
+---
+
+## 6. 시나리오 2: 양방향 협업
+
+> **참고:** 이 섹션은 5절에서 Collaborator 등록이 완료된 상태에서 진행합니다.
+> 동일한 `STM32F103_Project`에서 계속 실습합니다.
 
 **상황:** 두 개발자가 각자 수정하고, 서로의 변경사항을 확인하며 병합
 
@@ -306,7 +469,7 @@ git log --oneline -5
  sensor                         motor
 ```
 
-### 5.1 브랜치 전략
+### 6.1 브랜치 전략
 
 ```
 main (또는 master)
@@ -316,7 +479,7 @@ main (또는 master)
   └── feature/motor-control   (개발자 B: 모터 제어)
 ```
 
-### 5.2 개발자 A: 새 브랜치에서 작업
+### 6.2 개발자 A: 새 브랜치에서 작업
 
 ```bash
 # === 최신 main 받기 ===
@@ -338,18 +501,18 @@ git branch
 
 # === 커밋 ===
 git add .
-git commit -m "LED2 코드 추가"
+git commit -m "MPU6050 센서 I2C 초기화 코드 추가"
 
 # === 추가 작업 후 커밋 ===
 git add .
-git commit -m "LED2 코드 추가"
+git commit -m "MPU6050 가속도 데이터 읽기 함수 구현"
 
 # === 원격 저장소에 브랜치 Push ===
 git push -u origin feature/sensor-init
 # -u 옵션: 이후 git push만 해도 이 브랜치로 push됨
 ```
 
-### 5.3 개발자 B: 별도 브랜치에서 작업
+### 6.3 개발자 B: 별도 브랜치에서 작업
 
 ```bash
 # === 최신 main 받기 ===
@@ -362,24 +525,13 @@ git checkout -b feature/motor-control
 # === 코드 작업 (모터 제어 코드) ===
 # STM32CubeIDE에서 작업...
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
-
 # === 커밋 및 Push ===
 git add .
 git commit -m "DC 모터 PWM 제어 초기화 코드 추가"
 git push -u origin feature/motor-control
 ```
 
-### 5.4 상대방 변경사항 확인하기
+### 6.4 상대방 변경사항 확인하기
 
 ```bash
 # === 원격 저장소 정보 업데이트 ===
@@ -396,10 +548,9 @@ git branch -a
 
 # === 개발자 A의 브랜치 변경사항 확인 (병합 없이) ===
 git log origin/feature/sensor-init --oneline
-# 7bc361c (origin/feature/sensor-init, feature/sensor-init) LED2 코드 추가
-# 6d52154 (main) stdio.h 추가
-# 453afef Initial STM32F103 project setup
-# ab3f47f Initial commit
+# 출력:
+# c3d4e5f MPU6050 가속도 데이터 읽기 함수 구현
+# a1b2c3d MPU6050 센서 I2C 초기화 코드 추가
 
 # === 변경된 파일 목록 보기 ===
 git diff --stat main origin/feature/sensor-init
@@ -413,56 +564,7 @@ git diff --stat main origin/feature/sensor-init
 git diff main origin/feature/sensor-init -- Core/Src/main.c
 ```
 
-```
-# === 내 브렌치 확인하 ===
-$ git branch
-* feature/motor-control
-  feature/sensor-init
-  main
-
-# 먼저 원격 정보 최신화
-git fetch origin
-
-# 개발자 A의 브랜치를 내 브랜치에 병합
-git merge origin/feature/sensor-init
-```
-
-<img width="910" height="692" alt="009" src="https://github.com/user-attachments/assets/f58562e0-f398-4fe6-9854-e074ff786af9" />
-
-
-```
-Vim 에디터 실행된 상태
-* 그냥 기본 메시지로 저장하고 나가기:
-:wq
-
-: 입력 (명령 모드)
-wq 입력 (write + quit)
-Enter 키
-
-또는 더 간단하게:
-Shift + Z + Z
-
-```
-
-```
-# 코드 확인
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(500);  // 500ms 딜레이
-  }
-  /* USER CODE END 3 */
-}
-```
-
-### 5.5 Pull Request (PR)를 통한 코드 리뷰
+### 6.5 Pull Request (PR)를 통한 코드 리뷰
 
 **GitHub 웹에서:**
 
@@ -473,14 +575,16 @@ Shift + Z + Z
 5. 변경사항 확인 후 "Create pull request" 클릭
 6. 제목과 설명 작성:
    ```
-   제목: LED2 코드 추가
+   제목: MPU6050 센서 드라이버 추가
    
    설명:
    ## 변경 사항
-   - LED2 코드 추가
+   - MPU6050 I2C 초기화 코드 추가
+   - 가속도/자이로 데이터 읽기 함수 구현
    
    ## 테스트
-   - LED2 코드 확인 완료
+   - I2C 통신 확인 완료
+   - 가속도 값 정상 출력 확인
    ```
 7. 개발자 B를 Reviewer로 지정
 
@@ -490,7 +594,7 @@ Shift + Z + Z
 3. 라인별로 코멘트 추가 가능
 4. 리뷰 완료 후 "Approve" 또는 "Request changes"
 
-### 5.6 브랜치 병합 (Merge)
+### 6.6 브랜치 병합 (Merge)
 
 **방법 1: GitHub 웹에서 (권장)**
 1. PR 페이지에서 "Merge pull request" 클릭
@@ -515,7 +619,7 @@ git push origin main
 git branch -d feature/sensor-init
 ```
 
-### 5.7 병합 후 다른 개발자 동기화
+### 6.7 병합 후 다른 개발자 동기화
 
 ```bash
 # 개발자 B가 병합된 main 받기
@@ -530,9 +634,9 @@ git rebase main
 
 ---
 
-## 6. 충돌 해결 방법
+## 7. 충돌 해결 방법
 
-### 6.1 충돌 발생 상황
+### 7.1 충돌 발생 상황
 
 두 개발자가 같은 파일의 같은 부분을 수정했을 때 발생
 
@@ -552,7 +656,7 @@ git rebase main
 /* USER CODE END 2 */
 ```
 
-### 6.2 충돌 해결 과정
+### 7.2 충돌 해결 과정
 
 ```bash
 # === 병합 시도 시 충돌 발생 ===
@@ -570,7 +674,7 @@ git status
 #   both modified:   Core/Src/main.c
 ```
 
-### 6.3 충돌 파일 내용
+### 7.3 충돌 파일 내용
 
 main.c 파일을 열면:
 ```c
@@ -583,7 +687,7 @@ main.c 파일을 열면:
 /* USER CODE END 2 */
 ```
 
-### 6.4 충돌 해결
+### 7.4 충돌 해결
 
 **수동으로 수정하여 양쪽 코드 모두 포함:**
 ```c
@@ -595,7 +699,7 @@ main.c 파일을 열면:
 
 **주의:** `<<<<<<<`, `=======`, `>>>>>>>` 마커를 모두 제거해야 합니다!
 
-### 6.5 충돌 해결 후 커밋
+### 7.5 충돌 해결 후 커밋
 
 ```bash
 # === 수정한 파일 스테이징 ===
@@ -608,7 +712,7 @@ git commit -m "Merge feature/sensor-init: 센서와 모터 초기화 코드 통�
 git push origin main
 ```
 
-### 6.6 충돌 예방 팁
+### 7.6 충돌 예방 팁
 
 1. **자주 Pull 하기:** 작업 전/후로 `git pull` 습관화
 2. **작은 단위로 커밋:** 큰 변경보다 작은 변경을 자주
@@ -617,9 +721,9 @@ git push origin main
 
 ---
 
-## 7. 유용한 명령어 모음
+## 8. 유용한 명령어 모음
 
-### 7.1 기본 명령어
+### 8.1 기본 명령어
 
 | 명령어 | 설명 |
 |--------|------|
@@ -630,7 +734,7 @@ git push origin main
 | `git push origin <브랜치>` | 원격 저장소에 업로드 |
 | `git pull origin <브랜치>` | 원격 저장소에서 받기 |
 
-### 7.2 브랜치 명령어
+### 8.2 브랜치 명령어
 
 | 명령어 | 설명 |
 |--------|------|
@@ -641,7 +745,7 @@ git push origin main
 | `git branch -d <브랜치>` | 브랜치 삭제 |
 | `git merge <브랜치>` | 브랜치 병합 |
 
-### 7.3 확인/비교 명령어
+### 8.3 확인/비교 명령어
 
 | 명령어 | 설명 |
 |--------|------|
@@ -651,7 +755,7 @@ git push origin main
 | `git diff <브랜치1> <브랜치2>` | 브랜치 간 차이 |
 | `git show <커밋해시>` | 특정 커밋 상세 보기 |
 
-### 7.4 되돌리기 명령어
+### 8.4 되돌리기 명령어
 
 | 명령어 | 설명 |
 |--------|------|
@@ -661,7 +765,7 @@ git push origin main
 | `git reset --hard HEAD~1` | 최근 커밋 완전 삭제 ⚠️ |
 | `git revert <커밋해시>` | 커밋 되돌리기 (이력 유지) |
 
-### 7.5 자주 쓰는 조합
+### 8.5 자주 쓰는 조합
 
 ```bash
 # === 매일 작업 시작 루틴 ===
@@ -729,6 +833,11 @@ git commit --amend -m "새로운 메시지"
 - [ ] 개발자 A: 코드 수정 → 커밋 → Push
 - [ ] 개발자 B: Pull로 변경사항 받기
 
+### ✅ Collaborator 등록 실습
+- [ ] 개발자 A: Settings에서 Collaborator 초대
+- [ ] 개발자 B: 초대 수락
+- [ ] 개발자 B: 코드 수정 → 커밋 → Push 성공 확인
+
 ### ✅ 시나리오 2 실습
 - [ ] 각자 feature 브랜치 생성
 - [ ] 각자 코드 수정 → 커밋 → Push
@@ -765,14 +874,5 @@ git reset --hard origin/main
 
 ---
 
-## EGit 플러그인 설치 확인
-```
-Git 기능이 아예 없다면 EGit 플러그인이 없는 거예요:
-
-Help → Eclipse Marketplace...
-검색창에 EGit 입력
-"EGit - Git Integration for Eclipse" 찾기
-Install 또는 Installed 확인
-설치 후 IDE 재시작
-```
-
+*작성일: 2025년 1월*
+*STM32CubeIDE 버전: 1.x 기준*
