@@ -765,7 +765,8 @@ git reset --hard origin/main
 
 ---
 
-EGit 플러그인 설치 확인
+## EGit 플러그인 설치 확인
+```
 Git 기능이 아예 없다면 EGit 플러그인이 없는 거예요:
 
 Help → Eclipse Marketplace...
@@ -773,3 +774,5 @@ Help → Eclipse Marketplace...
 "EGit - Git Integration for Eclipse" 찾기
 Install 또는 Installed 확인
 설치 후 IDE 재시작
+```
+
