@@ -765,5 +765,11 @@ git reset --hard origin/main
 
 ---
 
-*작성일: 2025년 1월*
-*STM32CubeIDE 버전: 1.x 기준*
+EGit 플러그인 설치 확인
+Git 기능이 아예 없다면 EGit 플러그인이 없는 거예요:
+
+Help → Eclipse Marketplace...
+검색창에 EGit 입력
+"EGit - Git Integration for Eclipse" 찾기
+Install 또는 Installed 확인
+설치 후 IDE 재시작
