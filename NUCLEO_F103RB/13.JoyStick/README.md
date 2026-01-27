@@ -614,6 +614,9 @@ if __name__ == "__main__":
 
 // 스위치 디바운싱 설정
 #define DEBOUNCE_TIME_MS 200
+
+// 캘리브레이션 샘플 수
+#define CALIBRATION_SAMPLES 32
 /* USER CODE END PD */
 ```
 
@@ -623,12 +626,23 @@ uint16_t adc_buffer[ADC_BUFFER_SIZE];
 uint16_t joystick_x_raw = 0;
 uint16_t joystick_y_raw = 0;
 
+// X축 필터 변수
 uint32_t x_filter_buffer[FILTER_SIZE] = {0};
+uint8_t x_filter_index = 0;
+uint8_t x_filter_init = 0;
+
+// Y축 필터 변수
 uint32_t y_filter_buffer[FILTER_SIZE] = {0};
-uint8_t filter_index = 0;
+uint8_t y_filter_index = 0;
+uint8_t y_filter_init = 0;
 
 uint16_t joystick_x_filtered = 0;
 uint16_t joystick_y_filtered = 0;
+
+// 캘리브레이션 값 (중립 위치)
+uint16_t joystick_x_center = ADC_MAX_VALUE / 2;  // 기본값 2048
+uint16_t joystick_y_center = ADC_MAX_VALUE / 2;  // 기본값 2048
+uint8_t calibration_done = 0;
 
 int16_t joystick_x_percent = 0;
 int16_t joystick_y_percent = 0;
@@ -637,8 +651,8 @@ char direction_char = 'X';
 char prev_direction_char = 'X';
 
 // 스위치 관련 변수
-volatile uint8_t switch_pressed = 0;        // 스위치 눌림 플래그
-volatile uint32_t last_switch_time = 0;     // 디바운싱용 타임스탬프
+volatile uint8_t switch_pressed = 0;
+volatile uint32_t last_switch_time = 0;
 
 char uart_buffer[100];
 /* USER CODE END PV */
@@ -647,8 +661,10 @@ char uart_buffer[100];
 ```c
 /* USER CODE BEGIN PFP */
 void process_joystick_data(void);
-uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer);
-int16_t convert_to_percentage(uint16_t adc_value);
+void calibrate_joystick(void);
+uint16_t apply_moving_average_x(uint16_t new_value);
+uint16_t apply_moving_average_y(uint16_t new_value);
+int16_t convert_to_percentage_calibrated(uint16_t adc_value, uint16_t center);
 char get_direction_char(int16_t x_percent, int16_t y_percent);
 /* USER CODE END PFP */
 ```
@@ -669,58 +685,119 @@ PUTCHAR_PROTOTYPE
     return ch;
 }
 
-uint16_t apply_moving_average_filter(uint16_t new_value, uint32_t *filter_buffer)
+// X축 전용 이동 평균 필터
+uint16_t apply_moving_average_x(uint16_t new_value)
 {
-    static uint8_t x_init = 0, y_init = 0;
     uint32_t sum = 0;
 
-    if (filter_buffer == x_filter_buffer) {
-        if (!x_init) {
-            for (int i = 0; i < FILTER_SIZE; i++) {
-                filter_buffer[i] = new_value;
-            }
-            x_init = 1;
-            return new_value;
+    // 첫 호출 시 버퍼 초기화
+    if (!x_filter_init) {
+        for (int i = 0; i < FILTER_SIZE; i++) {
+            x_filter_buffer[i] = new_value;
         }
-    } else {
-        if (!y_init) {
-            for (int i = 0; i < FILTER_SIZE; i++) {
-                filter_buffer[i] = new_value;
-            }
-            y_init = 1;
-            return new_value;
-        }
+        x_filter_init = 1;
+        return new_value;
     }
 
-    filter_buffer[filter_index] = new_value;
+    // 현재 인덱스에 새 값 저장
+    x_filter_buffer[x_filter_index] = new_value;
+    x_filter_index = (x_filter_index + 1) % FILTER_SIZE;
 
+    // 평균 계산
     for (int i = 0; i < FILTER_SIZE; i++) {
-        sum += filter_buffer[i];
+        sum += x_filter_buffer[i];
     }
 
     return (uint16_t)(sum / FILTER_SIZE);
 }
 
-int16_t convert_to_percentage(uint16_t adc_value)
+// Y축 전용 이동 평균 필터
+uint16_t apply_moving_average_y(uint16_t new_value)
 {
-    int16_t centered_value = (int16_t)adc_value - (ADC_MAX_VALUE / 2);
-    int16_t percentage = (centered_value * 100) / (ADC_MAX_VALUE / 2);
+    uint32_t sum = 0;
 
+    // 첫 호출 시 버퍼 초기화
+    if (!y_filter_init) {
+        for (int i = 0; i < FILTER_SIZE; i++) {
+            y_filter_buffer[i] = new_value;
+        }
+        y_filter_init = 1;
+        return new_value;
+    }
+
+    // 현재 인덱스에 새 값 저장
+    y_filter_buffer[y_filter_index] = new_value;
+    y_filter_index = (y_filter_index + 1) % FILTER_SIZE;
+
+    // 평균 계산
+    for (int i = 0; i < FILTER_SIZE; i++) {
+        sum += y_filter_buffer[i];
+    }
+
+    return (uint16_t)(sum / FILTER_SIZE);
+}
+
+// 캘리브레이션된 퍼센트 변환
+int16_t convert_to_percentage_calibrated(uint16_t adc_value, uint16_t center)
+{
+    int16_t centered_value = (int16_t)adc_value - (int16_t)center;
+    int16_t percentage;
+
+    if (centered_value >= 0) {
+        // 양의 방향: center ~ ADC_MAX_VALUE
+        uint16_t range = ADC_MAX_VALUE - center;
+        if (range == 0) range = 1;  // 0으로 나누기 방지
+        percentage = (centered_value * 100) / range;
+    } else {
+        // 음의 방향: 0 ~ center
+        uint16_t range = center;
+        if (range == 0) range = 1;  // 0으로 나누기 방지
+        percentage = (centered_value * 100) / range;
+    }
+
+    // 범위 제한
     if (percentage > 100) percentage = 100;
     if (percentage < -100) percentage = -100;
 
     return percentage;
 }
 
+// 조이스틱 캘리브레이션 (시작 시 호출)
+void calibrate_joystick(void)
+{
+    uint32_t x_sum = 0;
+    uint32_t y_sum = 0;
+
+    printf("Calibrating joystick... Keep neutral position!\n");
+    HAL_Delay(500);  // 안정화 대기
+
+    // 여러 샘플 수집
+    for (int i = 0; i < CALIBRATION_SAMPLES; i++) {
+        x_sum += adc_buffer[0];
+        y_sum += adc_buffer[1];
+        HAL_Delay(10);
+    }
+
+    joystick_x_center = x_sum / CALIBRATION_SAMPLES;
+    joystick_y_center = y_sum / CALIBRATION_SAMPLES;
+    calibration_done = 1;
+
+    printf("Calibration done! Center: X=%d, Y=%d\n",
+           joystick_x_center, joystick_y_center);
+}
+
+// 방향 문자 결정
 char get_direction_char(int16_t x_percent, int16_t y_percent)
 {
     int16_t abs_x = (x_percent >= 0) ? x_percent : -x_percent;
     int16_t abs_y = (y_percent >= 0) ? y_percent : -y_percent;
 
+    // 데드존 내에 있으면 중립
     if (abs_x < DEADZONE_THRESHOLD && abs_y < DEADZONE_THRESHOLD) {
         return 'X';
     }
 
+    // Y축이 더 크거나 같으면 W/S
     if (abs_y >= abs_x) {
         if (y_percent >= DEADZONE_THRESHOLD) {
             return 'W';
@@ -729,6 +806,7 @@ char get_direction_char(int16_t x_percent, int16_t y_percent)
         }
     }
 
+    // X축이 더 크면 D/A
     if (abs_x > abs_y) {
         if (x_percent >= DEADZONE_THRESHOLD) {
             return 'D';
@@ -740,18 +818,22 @@ char get_direction_char(int16_t x_percent, int16_t y_percent)
     return 'X';
 }
 
+// 조이스틱 데이터 처리
 void process_joystick_data(void)
 {
+    // 캘리브레이션 완료 전에는 처리하지 않음
+    if (!calibration_done) return;
+
     joystick_x_raw = adc_buffer[0];
     joystick_y_raw = adc_buffer[1];
 
-    joystick_x_filtered = apply_moving_average_filter(joystick_x_raw, x_filter_buffer);
-    joystick_y_filtered = apply_moving_average_filter(joystick_y_raw, y_filter_buffer);
+    // 각 축별 독립적인 필터 적용
+    joystick_x_filtered = apply_moving_average_x(joystick_x_raw);
+    joystick_y_filtered = apply_moving_average_y(joystick_y_raw);
 
-    filter_index = (filter_index + 1) % FILTER_SIZE;
-
-    joystick_x_percent = convert_to_percentage(joystick_x_filtered);
-    joystick_y_percent = convert_to_percentage(joystick_y_filtered);
+    // 캘리브레이션된 중심값 기준으로 퍼센트 계산
+    joystick_x_percent = convert_to_percentage_calibrated(joystick_x_filtered, joystick_x_center);
+    joystick_y_percent = convert_to_percentage_calibrated(joystick_y_filtered, joystick_y_center);
 
     direction_char = get_direction_char(joystick_x_percent, joystick_y_percent);
 }
@@ -773,6 +855,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     }
 }
 
+// 타이머 인터럽트 콜백
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2) {
@@ -804,6 +887,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, ADC_BUFFER_SIZE);
+
+  // ADC DMA 안정화 대기 후 캘리브레이션 수행
+  HAL_Delay(100);
+  calibrate_joystick();
+
+  // 타이머 인터럽트 시작
   HAL_TIM_Base_Start_IT(&htim2);
 
   printf("Joystick Control Started\n");
@@ -813,7 +902,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 ```c
     /* USER CODE BEGIN 3 */
-	  HAL_Delay(10);  // 메인 루프 딜레이
+    HAL_Delay(10);  // 메인 루프 딜레이
   }
   /* USER CODE END 3 */
 ```
@@ -822,21 +911,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 ## 출력 화면
 
 ```
+Calibrating joystick... Keep neutral position!
+Calibration done! Center: X=3200, Y=3217
 Joystick Control Started
 Commands: W/A/S/D/X + B(Button)
-A
-S
-X
-B
-B
-S
-X
-W
-X
-S
-X
-S
-X
 W
 X
 S
@@ -846,10 +924,22 @@ X
 D
 X
 B
-B
-B
-B
-B
+W
+X
+S
+X
+A
+X
+D
+X
+W
+X
+S
+X
+A
+X
+D
+X
 ```
 ---
 
