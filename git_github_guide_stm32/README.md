@@ -619,18 +619,83 @@ git push origin main
 git branch -d feature/sensor-init
 ```
 
-### 6.7 병합 후 다른 개발자 동기화
+### 6.7 병합 후 다른 개발자 동기화 (중요!)
 
+개발자 A의 `feature/sensor-init`이 main에 병합된 후, 개발자 B는 자신의 브랜치에 최신 main을 반영해야 합니다.
+
+**왜 필요한가?**
+- A의 변경사항 없이 PR하면 충돌 발생 가능
+- 최신 코드 기반으로 작업해야 통합이 수월함
+
+#### 6장 전체 흐름도
+
+```
+시작: main (초기 코드)
+         │
+         ├─────────────────────────────────┐
+         │                                 │
+    feature/sensor-init              feature/motor-control
+    (개발자 A: LED2 추가)             (개발자 B: 모터 코드 추가)
+         │                                 │
+         │                                 │
+    ① A가 먼저 PR → main에 Merge          │
+         │                                 │
+         ▼                                 │
+    main (LED2 포함)                       │
+         │                                 │
+         │    ② B가 최신 main을 자기 브랜치에 반영
+         │         (merge 또는 rebase)     │
+         │                                 ▼
+         │                          feature/motor-control
+         │                          (LED2 + 모터 코드)
+         │                                 │
+         │    ③ B가 PR → main에 Merge      │
+         │                                 │
+         ▼◀────────────────────────────────┘
+    main (LED2 + 모터 코드 모두 포함)
+```
+
+#### 개발자 B의 작업 순서
+
+**1단계: 최신 main 받기**
 ```bash
-# 개발자 B가 병합된 main 받기
 git checkout main
 git pull origin main
-
-# 자신의 작업 브랜치를 최신 main과 동기화 (선택)
-git checkout feature/motor-control
-git rebase main
-# 또는: git merge main
 ```
+
+**2단계: 내 브랜치로 이동 후 main 반영**
+```bash
+git checkout feature/motor-control
+git merge main
+# 또는: git rebase main (히스토리가 더 깔끔해짐)
+```
+
+**3단계: 충돌 확인**
+- 충돌 없으면 → 4단계로 진행
+- 충돌 있으면 → 7장 "충돌 해결 방법" 참고하여 해결 후 진행
+
+**4단계: 병합 결과 Push**
+```bash
+git push origin feature/motor-control
+```
+
+**5단계: GitHub에서 PR 생성 및 Merge**
+1. GitHub 저장소 페이지 접속
+2. "Pull requests" → "New pull request"
+3. base: `main` ← compare: `feature/motor-control` 선택
+4. "Create pull request" → 리뷰 후 "Merge"
+
+#### 명령어 요약표
+
+| 단계 | 명령어 | 설명 |
+|------|--------|------|
+| 1 | `git checkout main` | main 브랜치로 이동 |
+| 2 | `git pull origin main` | 최신 main 받기 (A의 코드 포함) |
+| 3 | `git checkout feature/motor-control` | 내 브랜치로 이동 |
+| 4 | `git merge main` | main 내용을 내 브랜치에 반영 |
+| 5 | (충돌 시) 해결 후 `git add .` → `git commit` | 충돌 해결 |
+| 6 | `git push origin feature/motor-control` | 내 브랜치 Push |
+| 7 | GitHub에서 PR → Merge | main에 최종 반영 |
 
 ---
 
