@@ -139,15 +139,15 @@
 | `main.c` | 21KB | 시스템 초기화, FSM 실행, UART 명령 처리 |
 | `robot_state.c/h` | 1KB | 전역 상태 관리 (Getter/Setter) |
 | `ui_fsm.c/h` | 2.5KB | UI 상태 표시 및 LCD 텍스트 출력 |
-| `ultrasonic.c` | 2KB | HC-SR04 거리 측정 (블로킹 방식) |
-| `servo.c` | 1KB | SG90 서보 각도 제어 (PWM) |
-| `motor.c` | 3.5KB | 4륜 DC 모터 제어 (TC118S ×4) |
-| `buzzer.c` | 3.5KB | 논블로킹 멜로디 재생 |
-| `lcd_st7735.c` | 4.5KB | ST7735 SPI 드라이버 |
-| `lcd_gfx.c` | 5KB | 그래픽 프리미티브 (원, 사각형, 선) |
-| `eyes.c` | 4.5KB | 표정 렌더링 (Dirty Flag 패턴) |
-| `anim.c` | 2.5KB | 깜빡임 애니메이션 (논블로킹) |
-| `rgb_led.c` | 1.5KB | RGB LED 상태 표시 |
+| `ultrasonic.c/h` | 2KB | HC-SR04 거리 측정 (블로킹 방식) |
+| `servo.c/h` | 1KB | SG90 서보 각도 제어 (PWM) |
+| `motor.c/h` | 3.5KB | 4륜 DC 모터 제어 (TC118S ×4) |
+| `buzzer.c/h` | 3.5KB | 논블로킹 멜로디 재생 |
+| `lcd_st7735.c/h` | 4.5KB | ST7735 SPI 드라이버 |
+| `lcd_gfx.c/h` | 5KB | 그래픽 프리미티브 (원, 사각형, 선) |
+| `eyes.c/h` | 4.5KB | 표정 렌더링 (Dirty Flag 패턴) |
+| `anim.c/h` | 2.5KB | 깜빡임 애니메이션 (논블로킹) |
+| `rgb_led.c/h` | 1.5KB | RGB LED 상태 표시 |
 | `robot_config.h` | 2KB | 하드웨어 핀 매핑, 임계값 정의 |
 
 ### 2.3 상태 기계 (FSM) 설계
