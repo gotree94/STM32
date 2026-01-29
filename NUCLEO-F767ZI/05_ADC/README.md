@@ -388,18 +388,18 @@ uint16_t Get_Average_ADC(void)
 ```
 ============================================
   NUCLEO-F767ZI ADC Temperature Sensor Demo
-  System Clock: 216 MHz
+  System Clock: 96 MHz
 ============================================
 Calibration Values:
-  TS_CAL1 (30C):  943
-  TS_CAL2 (110C): 1193
+  TS_CAL1 (30C):  951
+  TS_CAL2 (110C): 1206
 ============================================
 
-[    0] ADC: 1012 | Temp(Cal):  52.14 C | Temp(Formula):  50.38 C
-[    1] ADC: 1015 | Temp(Cal):  53.10 C | Temp(Formula):  51.26 C
-[    2] ADC: 1013 | Temp(Cal):  52.46 C | Temp(Formula):  50.67 C
-[    3] ADC: 1014 | Temp(Cal):  52.78 C | Temp(Formula):  50.97 C
-[    4] ADC: 1012 | Temp(Cal):  52.14 C | Temp(Formula):  50.38 C
+[    0] ADC:  943 | Temp(Cal):  27.49 C | Temp(Formula):  24.90 C
+[    1] ADC:  947 | Temp(Cal):  28.75 C | Temp(Formula):  26.19 C
+[    2] ADC:  948 | Temp(Cal):  29.06 C | Temp(Formula):  26.51 C
+[    3] ADC:  949 | Temp(Cal):  29.37 C | Temp(Formula):  26.83 C
+[    4] ADC:  953 | Temp(Cal):  30.63 C | Temp(Formula):  28.12 C
 ...
 ```
 
