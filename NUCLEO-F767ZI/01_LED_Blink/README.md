@@ -1,7 +1,4 @@
-# STM32
-## NUCLEO-F767ZI
-
-## NUCLEO-F767ZI LED Blink 프로젝트
+# NUCLEO-F767ZI LED Blink 프로젝트
 
 <img width="1193" height="896" alt="001" src="https://github.com/user-attachments/assets/25ca614b-4ec5-422f-8330-fd55f057d2a8" />
 
