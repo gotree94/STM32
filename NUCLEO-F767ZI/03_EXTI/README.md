@@ -197,7 +197,7 @@ void EXTI15_10_IRQHandler(void)
     /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 
     /* USER CODE END EXTI15_10_IRQn 0 */
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+    HAL_GPIO_EXTI_IRQHandler(USER_Btn_Pin);
     /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
     /* USER CODE END EXTI15_10_IRQn 1 */
@@ -220,6 +220,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     {
         // LED 토글
         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
         HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 
         // 카운터 증가 및 플래그 설정
@@ -282,6 +283,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         if (current_time - last_interrupt_time > 50)
         {
             HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
             HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 
             button_press_count++;
@@ -306,8 +308,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     {
         debounce_active = 1;
 
-        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-        HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+		HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 
         button_press_count++;
         button_pressed_flag = 1;
@@ -336,10 +339,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 ==========================================
 Press the Blue User Button (B1) to toggle LEDs
 
-[  1] Button Pressed! LD1: ON , LD3: ON 
-[  2] Button Pressed! LD1: OFF, LD3: OFF
-[  3] Button Pressed! LD1: ON , LD3: ON 
-[  4] Button Pressed! LD1: OFF, LD3: OFF
+[  1] Button Pressed! LD1: ON , LD2: ON , LD3: ON 
+[  2] Button Pressed! LD1: OFF, LD2: OFF, LD3: OFF
+[  3] Button Pressed! LD1: ON , LD2: ON , LD3: ON 
+[  4] Button Pressed! LD1: OFF, LD2: OFF, LD3: OFF
 ...
 ```
 
