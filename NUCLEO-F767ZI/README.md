@@ -1,10 +1,10 @@
 # STM32
 ## NUCLEO-F767ZI
-  - [] 01.LED_Blink
-  - [] 02.USART_Print
-  - [] 03.EXTI
-  - [] 04.TM_TimeBase
-  - [] 05.ADC
+  - [V] 01.LED_Blink
+  - [V] 02.USART_Print
+  - [V] 03.EXTI
+  - [V] 04.TM_TimeBase
+  - [V] 05.ADC
   - [] 06.HC-SR04
   - [] 07.Buzzer
   - [] 08.CLCD
@@ -37,3 +37,4 @@
   - [] 34.2.4" TFT SPI 240*320
   - [] 35.RTC
   - [] 36.MAX98357 I2S DAC
+  - [] 37.Ethernet
