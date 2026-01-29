@@ -153,22 +153,23 @@ int main(void)
     printf("Press the Blue User Button (B1) to toggle LEDs\r\n\n");
     /* USER CODE END 2 */
 
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
-    while (1)
-    {
-        // 버튼 인터럽트 플래그 확인 (메인 루프에서 처리)
-        if (button_pressed_flag)
-        {
-            button_pressed_flag = 0;
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      // 버튼 인터럽트 플래그 확인 (메인 루프에서 처리)
+      if (button_pressed_flag)
+      {
+          button_pressed_flag = 0;
 
-            printf("[%3lu] Button Pressed! LD1: %s, LD3: %s\r\n",
-                   button_press_count,
-                   HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
-                   HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
-        }
+          printf("[%3lu] Button Pressed! LD1: %s, LD2: %s, LD3: %s\r\n",
+                 button_press_count,
+                 HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
+				 HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin) ? "ON " : "OFF",
+                 HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
+      }
 
-        /* USER CODE END WHILE */
+      /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
     }
