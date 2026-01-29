@@ -48,8 +48,10 @@ STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로
 
 | 항목 | 설정값 |
 |------|--------|
-| HSE | Crystal/Ceramic Resonator |
+| HSE | **BYPASS Clock Source** |
 | LSE | Crystal/Ceramic Resonator (선택) |
+
+> ⚠️ **주의**: NUCLEO 보드는 외부 크리스탈이 없고 ST-LINK의 MCO에서 8MHz 클럭을 공급받으므로 반드시 **BYPASS Clock Source**를 선택해야 합니다.
 
 **Clock Configuration 탭:**
 
