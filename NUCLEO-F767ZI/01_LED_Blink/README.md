@@ -69,6 +69,7 @@ NUCLEO-F767ZI 보드의 User LED 핀 매핑:
 while (1)
 {
     HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
     HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
     HAL_Delay(500);
 }
@@ -91,7 +92,7 @@ while (1)
 
 ## 5. 동작 확인
 
-* LD1(초록)과 LD3(빨강)이 500ms 간격으로 번갈아 점멸
+* LD1(초록)과 LD2(파랑)과 LD3(빨강)이 50ms 간격으로 번갈아 점멸
 * Toggle 방식 사용 시 두 LED가 동시에 토글됨
 
 ## 6. 트러블슈팅
