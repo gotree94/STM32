@@ -37,4 +37,5 @@
   - [] 34.2.4" TFT SPI 240*320
   - [] 35.RTC
   - [] 36.MAX98357 I2S DAC
-  - [] 37.Ethernet
+  - [V] 37.Ethernet
+  - [V] 37.FFT
