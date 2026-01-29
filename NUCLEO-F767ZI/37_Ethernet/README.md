@@ -92,6 +92,16 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 |----------|-----|
 | PHY Address | 0 |
 | PHY | LAN8742A_PHY_ADDRESS |
+| **Rx Mode** | **Interrupt Mode** |
+
+> ⚠️ **중요**: Rx Mode는 반드시 **Interrupt Mode**로 설정하세요! Polling Mode는 패킷 손실이 발생할 수 있습니다.
+
+#### Rx Mode 옵션 비교
+
+| Rx Mode | 장점 | 단점 | 권장 |
+|---------|------|------|------|
+| Polling Mode | 구현 간단 | CPU 점유율 높음, 패킷 손실 가능 | ❌ |
+| **Interrupt Mode** | 효율적, 안정적 | 인터럽트 설정 필요 | ✅ **권장** |
 
 #### 3.3 Parameter Settings - Advanced Parameters
 
@@ -101,6 +111,14 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 | Tx Buffers Length | 1524 |
 | Rx Buffers Number | 4 |
 | Tx Buffers Number | 4 |
+
+#### 3.4 NVIC Settings
+
+**ETH 인터럽트 활성화 (Interrupt Mode 사용 시 필수)**
+
+| 인터럽트 | Enable | Preemption Priority |
+|----------|--------|---------------------|
+| Ethernet global interrupt | ✅ | 5 |
 
 ### 4. LWIP 설정
 
