@@ -1,6 +1,6 @@
-# NUCLEO-F767ZI LED Blink with USART Printf
+# NUCLEO-F767ZI User Button EXTI Interrupt
 
-STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로젝트입니다.
+STM32 NUCLEO-F767ZI 보드의 파란색 User Button을 이용한 외부 인터럽트(EXTI) 예제입니다.
 
 ## 📋 프로젝트 개요
 
@@ -9,9 +9,17 @@ STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로
 | 보드 | NUCLEO-F767ZI |
 | MCU | STM32F767ZIT6 (ARM Cortex-M7, 216MHz) |
 | IDE | STM32CubeIDE |
-| 기능 | LD1/LD3 LED 토글 + USART3 Printf 출력 |
+| 기능 | User Button(B1) 인터럽트로 LED 토글 + USART3 상태 출력 |
 
 ## 🔧 하드웨어 구성
+
+### User Button
+
+| 버튼 | GPIO | 특성 |
+|------|------|------|
+| B1 (Blue) | **PC13** | Active High (누르면 HIGH) |
+
+> 💡 NUCLEO-F767ZI의 User Button은 **Active High** 방식입니다. 버튼을 누르면 PC13이 HIGH가 됩니다.
 
 ### LED 핀 매핑
 
@@ -28,59 +36,64 @@ STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로
 | TX | PD8 |
 | RX | PD9 |
 
-> NUCLEO 보드의 ST-LINK는 Virtual COM Port를 제공하며, USART3에 연결되어 있습니다.
+## ⚙️ CubeMX 설정
 
-## ⚙️ 프로젝트 생성 절차
-
-### 1. STM32CubeIDE 프로젝트 생성
-
-1. **File → New → STM32 Project**
-2. Board Selector에서 `NUCLEO-F767ZI` 선택
-3. 프로젝트 이름 입력 (예: `LED_Blink_USART`)
-4. Targeted Language: **C**
-5. **Finish** 클릭
-
-### 2. CubeMX 설정 (.ioc 파일)
-
-#### 2.1 RCC 설정
+### 1. RCC 설정
 
 **Pinout & Configuration → System Core → RCC**
 
 | 항목 | 설정값 |
 |------|--------|
 | HSE | **BYPASS Clock Source** |
-| LSE | Crystal/Ceramic Resonator (선택) |
 
-> ⚠️ **주의**: NUCLEO 보드는 외부 크리스탈이 없고 ST-LINK의 MCO에서 8MHz 클럭을 공급받으므로 반드시 **BYPASS Clock Source**를 선택해야 합니다.
+> ⚠️ NUCLEO 보드는 ST-LINK MCO에서 8MHz 클럭을 공급받으므로 BYPASS 선택
 
-**Clock Configuration 탭:**
+**Clock Configuration:**
 
 | 파라미터 | 값 |
 |----------|-----|
-| PLL Source | HSE |
-| PLLM | /8 |
-| PLLN | ×432 |
-| PLLP | /2 |
-| PLLQ | /9 |
-| **SYSCLK** | **216 MHz** |
-| AHB Prescaler | /1 |
-| APB1 Prescaler | /4 (54 MHz) |
-| APB2 Prescaler | /2 (108 MHz) |
+| SYSCLK | 216 MHz |
+| APB1 | 54 MHz |
+| APB2 | 108 MHz |
 
-> 💡 **Tip**: HCLK 입력란에 `216`을 입력하고 Enter를 누르면 자동으로 최적의 PLL 값이 계산됩니다.
+### 2. GPIO 설정 (User Button - EXTI)
 
-#### 2.2 GPIO 설정 (LED)
+**Pinout & Configuration → System Core → GPIO**
 
-보드 선택 시 자동 설정됨. 확인만 필요:
+Pinout view에서 **PC13** 클릭 → **GPIO_EXTI13** 선택
 
-**System Core → GPIO**
+또는 보드 선택 시 자동 설정된 경우 확인:
 
-| 핀 | Mode | Output Level | User Label |
-|----|------|--------------|------------|
-| PB0 | Output Push Pull | Low | LD1 |
-| PB14 | Output Push Pull | Low | LD3 |
+**GPIO → PC13 설정:**
 
-#### 2.3 USART3 설정
+| 항목 | 설정값 |
+|------|--------|
+| GPIO mode | **External Interrupt Mode with Rising edge trigger detection** |
+| GPIO Pull-up/Pull-down | **No pull-up and no pull-down** |
+| User Label | **USER_Btn** |
+
+> 💡 **Rising Edge**: 버튼을 누르는 순간 인터럽트 발생  
+> 💡 **Falling Edge**: 버튼을 떼는 순간 인터럽트 발생  
+> 💡 **Rising/Falling Edge**: 누르거나 떼는 순간 모두 인터럽트 발생
+
+### 3. NVIC 설정 (인터럽트 활성화)
+
+**Pinout & Configuration → System Core → NVIC**
+
+| 인터럽트 | Enable | Preemption Priority |
+|----------|--------|---------------------|
+| EXTI line[15:10] interrupts | ✅ **체크** | 0 (기본값) |
+
+> ⚠️ PC13은 EXTI Line 13이므로 **EXTI line[15:10]** 인터럽트를 활성화해야 합니다.
+
+### 4. GPIO 설정 (LED)
+
+| 핀 | Mode | User Label |
+|----|------|------------|
+| PB0 | Output Push Pull | LD1 |
+| PB14 | Output Push Pull | LD3 |
+
+### 5. USART3 설정
 
 **Connectivity → USART3**
 
@@ -92,7 +105,7 @@ STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로
 | Parity | None |
 | Stop Bits | 1 |
 
-#### 2.4 코드 생성
+### 6. 코드 생성
 
 **Ctrl+S** 또는 **Project → Generate Code**
 
@@ -106,6 +119,11 @@ STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로
 #include <string.h>
 /* USER CODE END Includes */
 
+/* USER CODE BEGIN PV */
+volatile uint32_t button_press_count = 0;
+volatile uint8_t button_pressed_flag = 0;
+/* USER CODE END PV */
+
 /* USER CODE BEGIN 0 */
 
 // printf 리다이렉션 (USART3)
@@ -113,22 +131,6 @@ STM32 NUCLEO-F767ZI 보드를 이용한 LED Blink 및 USART Printf 예제 프로
 int __io_putchar(int ch)
 {
     HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-    return ch;
-}
-#else
-int fputc(int ch, FILE *f)
-{
-    HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-    return ch;
-}
-#endif
-
-// scanf 리다이렉션 (선택)
-#ifdef __GNUC__
-int __io_getchar(void)
-{
-    uint8_t ch;
-    HAL_UART_Receive(&huart3, &ch, 1, HAL_MAX_DELAY);
     return ch;
 }
 #endif
@@ -144,28 +146,27 @@ int main(void)
     MX_USART3_UART_Init();
 
     /* USER CODE BEGIN 2 */
-    printf("\r\n=================================\r\n");
-    printf("  NUCLEO-F767ZI LED Blink Demo\r\n");
+    printf("\r\n==========================================\r\n");
+    printf("  NUCLEO-F767ZI EXTI Button Interrupt Demo\r\n");
     printf("  System Clock: %lu MHz\r\n", HAL_RCC_GetSysClockFreq() / 1000000);
-    printf("=================================\r\n\n");
+    printf("==========================================\r\n");
+    printf("Press the Blue User Button (B1) to toggle LEDs\r\n\n");
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-    uint32_t count = 0;
     while (1)
     {
-        // LD1, LD3 토글
-        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-        HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+        // 버튼 인터럽트 플래그 확인 (메인 루프에서 처리)
+        if (button_pressed_flag)
+        {
+            button_pressed_flag = 0;
 
-        // 상태 출력
-        printf("[%5lu] LD1: %s, LD3: %s\r\n",
-               count++,
-               HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
-               HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
-
-        HAL_Delay(500);
+            printf("[%3lu] Button Pressed! LD1: %s, LD3: %s\r\n",
+                   button_press_count,
+                   HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
+                   HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
+        }
 
         /* USER CODE END WHILE */
 
@@ -175,105 +176,232 @@ int main(void)
 }
 ```
 
-## 🖥️ 시리얼 터미널 설정
+### stm32f7xx_it.c (인터럽트 핸들러)
 
-### 터미널 프로그램
+```c
+/* USER CODE BEGIN Includes */
+#include "main.h"
+/* USER CODE END Includes */
 
-- **Windows**: PuTTY, Tera Term, RealTerm
-- **Linux**: minicom, screen
-- **macOS**: screen, CoolTerm
+/* USER CODE BEGIN EV */
+extern volatile uint32_t button_press_count;
+extern volatile uint8_t button_pressed_flag;
+/* USER CODE END EV */
 
-### 연결 설정
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+    /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 
-| 항목 | 값 |
-|------|-----|
-| Port | COMx (Windows) / /dev/ttyACMx (Linux) |
-| Baud Rate | 115200 |
-| Data Bits | 8 |
-| Parity | None |
-| Stop Bits | 1 |
-| Flow Control | None |
+    /* USER CODE END EXTI15_10_IRQn 0 */
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+    /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
-### Linux 터미널 명령
-
-```bash
-# 포트 확인
-ls /dev/ttyACM*
-
-# minicom 사용
-sudo minicom -D /dev/ttyACM0 -b 115200
-
-# screen 사용
-screen /dev/ttyACM0 115200
+    /* USER CODE END EXTI15_10_IRQn 1 */
+}
 ```
 
-## 📤 빌드 및 다운로드
+### EXTI Callback 함수 (main.c 또는 별도 파일)
 
-1. **빌드**: `Ctrl+B` 또는 Project → Build Project
-2. **다운로드/디버그**: `F11` 또는 Run → Debug As → STM32 C/C++ Application
-3. **실행**: `F8` (Resume)
+```c
+/* USER CODE BEGIN 4 */
+
+/**
+  * @brief  EXTI line detection callback
+  * @param  GPIO_Pin: Specifies the port pin connected to corresponding EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == USER_Btn_Pin)  // PC13
+    {
+        // LED 토글
+        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+        HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+
+        // 카운터 증가 및 플래그 설정
+        button_press_count++;
+        button_pressed_flag = 1;
+    }
+}
+
+/* USER CODE END 4 */
+```
+
+## 🔄 동작 방식
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Button Press                         │
+│                         │                                │
+│                         ▼                                │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │              Rising Edge on PC13                 │    │
+│  └─────────────────────────────────────────────────┘    │
+│                         │                                │
+│                         ▼                                │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │           EXTI15_10_IRQHandler()                 │    │
+│  │                     │                            │    │
+│  │                     ▼                            │    │
+│  │         HAL_GPIO_EXTI_IRQHandler()               │    │
+│  │                     │                            │    │
+│  │                     ▼                            │    │
+│  │         HAL_GPIO_EXTI_Callback()                 │    │
+│  │              - Toggle LEDs                       │    │
+│  │              - Set flag                          │    │
+│  └─────────────────────────────────────────────────┘    │
+│                         │                                │
+│                         ▼                                │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │              Main Loop                           │    │
+│  │              - Check flag                        │    │
+│  │              - Print status via USART            │    │
+│  └─────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────┘
+```
+
+## 🛡️ 디바운싱 (선택사항)
+
+기계식 버튼은 채터링(Chattering) 현상이 발생할 수 있습니다. 소프트웨어 디바운싱을 추가하려면:
+
+### 방법 1: 간단한 딜레이
+
+```c
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    static uint32_t last_interrupt_time = 0;
+    uint32_t current_time = HAL_GetTick();
+
+    if (GPIO_Pin == USER_Btn_Pin)
+    {
+        // 50ms 이내 재입력 무시 (디바운싱)
+        if (current_time - last_interrupt_time > 50)
+        {
+            HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+            HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+
+            button_press_count++;
+            button_pressed_flag = 1;
+
+            last_interrupt_time = current_time;
+        }
+    }
+}
+```
+
+### 방법 2: 타이머 기반 디바운싱
+
+```c
+/* USER CODE BEGIN PV */
+volatile uint8_t debounce_active = 0;
+/* USER CODE END PV */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == USER_Btn_Pin && !debounce_active)
+    {
+        debounce_active = 1;
+
+        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+        HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+
+        button_press_count++;
+        button_pressed_flag = 1;
+
+        // 타이머로 50ms 후 debounce_active 해제
+        HAL_TIM_Base_Start_IT(&htim6);
+    }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM6)
+    {
+        debounce_active = 0;
+        HAL_TIM_Base_Stop_IT(&htim6);
+    }
+}
+```
 
 ## 📺 예상 출력
 
 ```
-=================================
-  NUCLEO-F767ZI LED Blink Demo
+==========================================
+  NUCLEO-F767ZI EXTI Button Interrupt Demo
   System Clock: 216 MHz
-=================================
+==========================================
+Press the Blue User Button (B1) to toggle LEDs
 
-[    0] LD1: ON , LD3: ON 
-[    1] LD1: OFF, LD3: OFF
-[    2] LD1: ON , LD3: ON 
-[    3] LD1: OFF, LD3: OFF
+[  1] Button Pressed! LD1: ON , LD3: ON 
+[  2] Button Pressed! LD1: OFF, LD3: OFF
+[  3] Button Pressed! LD1: ON , LD3: ON 
+[  4] Button Pressed! LD1: OFF, LD3: OFF
 ...
 ```
 
 ## 🔍 트러블슈팅
 
-### LED가 동작하지 않는 경우
+### 버튼을 눌러도 반응이 없는 경우
 
-- [ ] GPIO 핀이 Output으로 설정되었는지 확인
-- [ ] User Label (LD1, LD3)이 올바르게 지정되었는지 확인
-- [ ] 코드 생성 후 빌드했는지 확인
+- [ ] PC13이 GPIO_EXTI13으로 설정되었는지 확인
+- [ ] NVIC에서 **EXTI line[15:10] interrupts** 활성화 확인
+- [ ] `HAL_GPIO_EXTI_Callback()` 함수가 구현되었는지 확인
+- [ ] User Label이 `USER_Btn`으로 설정되었는지 확인
 
-### 시리얼 출력이 안 되는 경우
+### 버튼 한 번 눌렀는데 여러 번 인식되는 경우
 
-- [ ] USART3 활성화 여부 확인
-- [ ] TX/RX 핀이 PD8/PD9로 설정되었는지 확인
-- [ ] Baud Rate가 터미널과 일치하는지 확인
-- [ ] ST-LINK 펌웨어 업데이트 필요 여부 확인
+- [ ] 디바운싱 코드 추가 필요
+- [ ] Rising Edge만 사용 (Rising/Falling 동시 사용 시 2번 인식됨)
 
-### 글자가 깨지는 경우
+### 인터럽트가 발생하지 않는 경우
 
-- [ ] Baud Rate 일치 여부 확인
-- [ ] RCC 클럭 설정이 올바른지 확인 (잘못된 클럭 설정은 UART Baud Rate에 영향)
+- [ ] GPIO mode가 **External Interrupt Mode**인지 확인
+- [ ] `MX_GPIO_Init()` 이후에 NVIC 설정이 되는지 확인
+- [ ] `stm32f7xx_it.c`에 `EXTI15_10_IRQHandler()` 함수 존재 확인
 
 ## 📁 프로젝트 구조
 
 ```
-LED_Blink_USART/
+EXTI_Button/
 ├── Core/
 │   ├── Inc/
 │   │   ├── main.h
 │   │   ├── stm32f7xx_hal_conf.h
 │   │   └── stm32f7xx_it.h
 │   └── Src/
-│       ├── main.c
+│       ├── main.c                 # 메인 로직 + Callback
 │       ├── stm32f7xx_hal_msp.c
-│       ├── stm32f7xx_it.c
+│       ├── stm32f7xx_it.c         # IRQ Handler
 │       └── system_stm32f7xx.c
 ├── Drivers/
 │   ├── CMSIS/
 │   └── STM32F7xx_HAL_Driver/
-├── LED_Blink_USART.ioc
+├── EXTI_Button.ioc
 └── README.md
 ```
+
+## 📚 EXTI Line 매핑 참고
+
+| GPIO Pin | EXTI Line | IRQ Handler |
+|----------|-----------|-------------|
+| Px0 | EXTI0 | EXTI0_IRQHandler |
+| Px1 | EXTI1 | EXTI1_IRQHandler |
+| Px2 | EXTI2 | EXTI2_IRQHandler |
+| Px3 | EXTI3 | EXTI3_IRQHandler |
+| Px4 | EXTI4 | EXTI4_IRQHandler |
+| Px5~Px9 | EXTI5~9 | EXTI9_5_IRQHandler |
+| Px10~Px15 | EXTI10~15 | **EXTI15_10_IRQHandler** |
+
+> PC13은 EXTI Line 13이므로 `EXTI15_10_IRQHandler`에서 처리됩니다.
 
 ## 📚 참고 자료
 
 - [NUCLEO-F767ZI User Manual (UM1974)](https://www.st.com/resource/en/user_manual/um1974-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
-- [STM32F767ZI Datasheet](https://www.st.com/resource/en/datasheet/stm32f767zi.pdf)
-- [STM32F7 HAL Driver Manual](https://www.st.com/resource/en/user_manual/um1905-description-of-stm32f7-hal-and-lowlayer-drivers-stmicroelectronics.pdf)
+- [STM32F767ZI Reference Manual (RM0410)](https://www.st.com/resource/en/reference_manual/rm0410-stm32f76xxx-and-stm32f77xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [STM32F7 HAL Driver - GPIO](https://www.st.com/resource/en/user_manual/um1905-description-of-stm32f7-hal-and-lowlayer-drivers-stmicroelectronics.pdf)
 
 ## 📝 라이선스
 
