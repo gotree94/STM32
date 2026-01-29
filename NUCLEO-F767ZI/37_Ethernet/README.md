@@ -362,34 +362,57 @@ Cortex Memory Protection Unit Control Settings
 
 > 💡 **MPU Control Mode**를 `Background Region Access Not Allowed + MPU Enabled...`로 변경하면 **MPU Region 설정** 옵션이 나타납니다.
 
-#### 5.3 MPU Region 설정 (MPU 활성화 후)
+#### 5.3 MPU Region 0 설정 (ETH DMA용)
 
-MPU Control Mode를 활성화하면 아래와 같이 Region 설정이 표시됩니다:
+MPU Control Mode를 활성화하면 Region 0~7 설정이 나타납니다.
+**Region 0**을 **Enabled**로 변경하고 아래와 같이 설정합니다.
 
-**MPU Region 0 (ETH DMA Descriptors):**
+**Cortex Memory Protection Unit Region 0 Settings:**
 
-| 파라미터 | 값 | 설명 |
-|----------|-----|------|
-| MPU Region | Enabled | Region 0 활성화 |
-| MPU Region Base Address | 0x30040000 | ETH DMA 디스크립터 주소 |
-| MPU Region Size | 256B | 디스크립터 영역 크기 |
-| MPU SubRegion Disable | 0x0 | 모든 서브리전 사용 |
-| MPU TEX field level | 1 | Type Extension |
-| MPU Access Permission | ALL ACCESS PERMITTED | 모든 접근 허용 |
-| MPU Instruction Access | DISABLE | 코드 실행 금지 |
-| MPU Shareability Permission | DISABLE | |
-| MPU Cacheable Permission | DISABLE | 캐시 비활성화 |
-| MPU Bufferable Permission | ENABLE | 버퍼 활성화 |
+| 파라미터 | 기본값 | 권장값 (변경) | 설명 |
+|----------|--------|---------------|------|
+| MPU Region | Disabled | **Enabled** | Region 0 활성화 |
+| MPU Region Base Address | 0x0 | **0x30040000** | ETH DMA 디스크립터 주소 |
+| MPU Region Size | 32B | **256B** | 디스크립터 영역 크기 |
+| MPU TEX field level | level 0 | **level 1** | Type Extension |
+| MPU Access Permission | ALL ACCESS NOT PERMITTED | **ALL ACCESS PERMITTED** | 모든 접근 허용 |
+| MPU Instruction Access | ENABLE | **DISABLE** | 코드 실행 금지 |
+| MPU Shareability Permission | DISABLE | DISABLE (유지) | |
+| MPU Cacheable Permission | DISABLE | DISABLE (유지) | 캐시 비활성화 |
+| MPU Bufferable Permission | DISABLE | **ENABLE** | 버퍼 활성화 |
+
+> ⚠️ **6개 항목 변경 필요!** 기본값 그대로 사용하면 Ethernet이 동작하지 않습니다.
 
 ```
-MPU 설정 요약:
+MPU Region 0 설정 요약:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                                                                             │
-│   왜 MPU 설정이 필요한가?                                                   │
-│   ───────────────────────                                                  │
+│   변경해야 할 항목 (6개):                                                   │
+│   ─────────────────────                                                    │
+│   1. MPU Region:              Disabled → Enabled                           │
+│   2. MPU Region Base Address: 0x0 → 0x30040000                             │
+│   3. MPU Region Size:         32B → 256B                                   │
+│   4. MPU TEX field level:     level 0 → level 1                            │
+│   5. MPU Access Permission:   ALL ACCESS NOT PERMITTED                     │
+│                               → ALL ACCESS PERMITTED                       │
+│   6. MPU Instruction Access:  ENABLE → DISABLE                             │
+│   7. MPU Bufferable Permission: DISABLE → ENABLE                           │
+│                                                                             │
+│   유지할 항목 (2개):                                                        │
+│   ─────────────────                                                        │
+│   • MPU Shareability Permission: DISABLE                                   │
+│   • MPU Cacheable Permission:    DISABLE                                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+```
+왜 MPU 설정이 필요한가?
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
 │   • STM32F7의 Ethernet DMA는 특정 메모리 영역에 접근                       │
 │   • DMA 디스크립터 영역은 캐시되지 않아야 함 (데이터 일관성)               │
-│   • MPU로 해당 영역을 Non-cacheable로 설정                                 │
+│   • MPU로 해당 영역을 Non-cacheable + Bufferable로 설정                    │
 │                                                                             │
 │   설정하지 않으면?                                                          │
 │   ───────────────                                                          │
@@ -400,8 +423,7 @@ MPU 설정 요약:
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> ⚠️ **참고**: CubeMX 버전에 따라 LwIP 설정 시 MPU가 자동으로 구성될 수 있습니다. 
-> 빌드 후 동작하지 않으면 위 설정을 확인하세요.
+> 💡 **참고**: Region 1~7은 **Disabled** 상태로 유지합니다.
 
 ### 6. USART3 설정
 
