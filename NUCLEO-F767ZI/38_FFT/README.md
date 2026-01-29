@@ -2,6 +2,30 @@
 
 STM32 NUCLEO-F767ZI 보드의 CMSIS-DSP 라이브러리를 이용한 FFT(Fast Fourier Transform) 예제입니다.
 
+## 주요 내용:
+
+| 항목 | 내용 | 
+|:---:|:---:|
+| 라이브러리 | CMSIS-DSP (arm_math.h)|
+| FFT 크기 | 1024 포인트 | 
+| 샘플링 레이트 | 48kHz |
+| 주파수 분해능 | ~46.875 Hz | 
+
+* 포함된 내용:
+   * Cortex-M7 DSP 특성 (FPU, SIMD, MAC)
+   * CMSIS-DSP 라이브러리 설정 (Include Path, Library 링크, Define)
+   * FFT 구현 코드
+     * 테스트 신호 생성 (1kHz + 2.5kHz + 5kHz)
+     * ADC 데이터 변환
+     * FFT 수행 및 크기 스펙트럼 계산
+     * 피크 주파수 검출
+     * ASCII 스펙트럼 그래프 출력
+   * 윈도우 함수 (Hanning Window)
+   * FFT 크기별 분해능 표
+   * ADC 입력 회로 (DC Bias)
+   * CMSIS-DSP 주요 함수 레퍼런스
+   * 트러블슈팅 가이드
+
 ## 📋 프로젝트 개요
 
 | 항목 | 내용 |
