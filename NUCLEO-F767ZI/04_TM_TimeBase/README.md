@@ -160,45 +160,66 @@ int __io_putchar(int ch)
 
 int main(void)
 {
-    /* MCU Configuration */
-    HAL_Init();
-    SystemClock_Config();
-    MX_GPIO_Init();
-    MX_USART3_UART_Init();
-    MX_TIM6_Init();
 
-    /* USER CODE BEGIN 2 */
-    printf("\r\n========================================\r\n");
-    printf("  NUCLEO-F767ZI TIM6 TimeBase Demo\r\n");
-    printf("  System Clock: %lu MHz\r\n", HAL_RCC_GetSysClockFreq() / 1000000);
-    printf("  Timer Period: 1 second\r\n");
-    printf("========================================\r\n\n");
+  /* USER CODE BEGIN 1 */
 
-    // 타이머 인터럽트 시작
-    HAL_TIM_Base_Start_IT(&htim6);
+  /* USER CODE END 1 */
 
-    printf("Timer started. LEDs will toggle every 1 second.\r\n\n");
-    /* USER CODE END 2 */
+  /* MCU Configuration--------------------------------------------------------*/
 
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
-    while (1)
-    {
-        if (tim6_flag)
-        {
-            tim6_flag = 0;
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-            printf("[%5lu] Timer Tick - LD1: %s, LD3: %s\r\n",
-                   tim6_counter,
-                   HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
-                   HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
-        }
+  /* USER CODE BEGIN Init */
 
-        /* USER CODE END WHILE */
+  /* USER CODE END Init */
 
-        /* USER CODE BEGIN 3 */
-    }
-    /* USER CODE END 3 */
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_ETH_Init();
+  MX_USART3_UART_Init();
+  MX_USB_OTG_FS_PCD_Init();
+  MX_TIM6_Init();
+  /* USER CODE BEGIN 2 */
+     printf("\r\n========================================\r\n");
+     printf("  NUCLEO-F767ZI TIM6 TimeBase Demo\r\n");
+     printf("  System Clock: %lu MHz\r\n", HAL_RCC_GetSysClockFreq() / 1000000);
+     printf("  Timer Period: 1 second\r\n");
+     printf("========================================\r\n\n");
+
+     // 타이머 인터럽트 시작
+     HAL_TIM_Base_Start_IT(&htim6);
+
+     printf("Timer started. LEDs will toggle every 1 second.\r\n\n");
+     /* USER CODE END 2 */
+
+     /* Infinite loop */
+     /* USER CODE BEGIN WHILE */
+     while (1)
+     {
+         if (tim6_flag)
+         {
+             tim6_flag = 0;
+
+             printf("[%5lu] Timer Tick - LD1: %s, LD2: %s, LD3: %s\r\n",
+                    tim6_counter,
+                    HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
+					HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin) ? "ON " : "OFF",
+                    HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
+         }
+
+         /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
 }
 ```
 
@@ -218,6 +239,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
         // LED 토글
         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
         HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 
         // 카운터 증가 및 플래그 설정
@@ -342,19 +364,23 @@ set_timer_period_ms(&htim6, 2000);  // 2초로 변경
 ## 📺 예상 출력
 
 ```
+
 ========================================
   NUCLEO-F767ZI TIM6 TimeBase Demo
-  System Clock: 216 MHz
+  System Clock: 96 MHz
   Timer Period: 1 second
 ========================================
 
 Timer started. LEDs will toggle every 1 second.
 
-[    1] Timer Tick - LD1: ON , LD3: ON 
-[    2] Timer Tick - LD1: OFF, LD3: OFF
-[    3] Timer Tick - LD1: ON , LD3: ON 
-[    4] Timer Tick - LD1: OFF, LD3: OFF
-[    5] Timer Tick - LD1: ON , LD3: ON 
+[    1] Timer Tick - LD1: ON , LD2: ON , LD3: ON
+[    2] Timer Tick - LD1: OFF, LD2: OFF, LD3: OFF
+[    3] Timer Tick - LD1: ON , LD2: ON , LD3: ON
+[    4] Timer Tick - LD1: OFF, LD2: OFF, LD3: OFF
+[    5] Timer Tick - LD1: ON , LD2: ON , LD3: ON
+[    6] Timer Tick - LD1: OFF, LD2: OFF, LD3: OFF
+[    7] Timer Tick - LD1: ON , LD2: ON , LD3: ON
+[    8] Timer Tick - LD1: OFF, LD2: OFF, LD3: OFF
 ...
 ```
 
