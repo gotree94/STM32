@@ -230,6 +230,9 @@ screen /dev/ttyACM0 115200
 ...
 ```
 
+<img width="739" height="582" alt="1002" src="https://github.com/user-attachments/assets/6bae2f8b-1048-4da8-936e-0a2cc5b71542" />
+
+
 ## 🔍 트러블슈팅
 
 ### LED가 동작하지 않는 경우
