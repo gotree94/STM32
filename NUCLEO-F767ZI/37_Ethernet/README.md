@@ -113,7 +113,7 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 
 | 인터럽트 | Enable | Preemption Priority |
 |----------|--------|---------------------|
-| Ethernet global interrupt | ✅ | 5 |
+| Ethernet global interrupt | ✅ | 0 (기본값) |
 
 ### 4. LWIP 설정
 
