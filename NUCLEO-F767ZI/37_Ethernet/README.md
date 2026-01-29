@@ -86,15 +86,19 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 |------|--------|
 | Mode | **RMII** |
 
-#### 3.2 Parameter Settings - General
+#### 3.2 Parameter Settings - General : Ethernet Configuration
 
-| 파라미터 | 값 |
-|----------|-----|
-| PHY Address | 0 |
-| PHY | LAN8742A_PHY_ADDRESS |
-| **Rx Mode** | **Interrupt Mode** |
+| 파라미터 | 값 | 설명 |
+|----------|-----|------|
+| Ethernet MAC Address | 00:80:E1:00:00:00 | 기본값 사용 |
+| Tx Descriptor Length | 4 | 송신 디스크립터 수 |
+| First Tx Descriptor Address | 0x2007c0a0 | 자동 설정 |
+| Rx Descriptor Length | 4 | 수신 디스크립터 수 |
+| First Rx Descriptor Address | 0x2007c000 | 자동 설정 |
+| Rx Buffers Length | 1524 | 수신 버퍼 크기 |
+| **Rx Mode** | **Interrupt Mode** | ⚠️ **필수 변경!** |
 
-> ⚠️ **중요**: Rx Mode는 반드시 **Interrupt Mode**로 설정하세요! Polling Mode는 패킷 손실이 발생할 수 있습니다.
+> ⚠️ **중요**: **Rx Mode**는 기본값이 **Polling Mode**입니다. 반드시 **Interrupt Mode**로 변경하세요! Polling Mode는 CPU 점유율이 높고 패킷 손실이 발생할 수 있습니다.
 
 #### Rx Mode 옵션 비교
 
@@ -103,16 +107,7 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 | Polling Mode | 구현 간단 | CPU 점유율 높음, 패킷 손실 가능 | ❌ |
 | **Interrupt Mode** | 효율적, 안정적 | 인터럽트 설정 필요 | ✅ **권장** |
 
-#### 3.3 Parameter Settings - Advanced Parameters
-
-| 파라미터 | 값 |
-|----------|-----|
-| Rx Buffers Length | 1524 |
-| Tx Buffers Length | 1524 |
-| Rx Buffers Number | 4 |
-| Tx Buffers Number | 4 |
-
-#### 3.4 NVIC Settings
+#### 3.3 NVIC Settings
 
 **ETH 인터럽트 활성화 (Interrupt Mode 사용 시 필수)**
 
