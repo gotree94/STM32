@@ -157,12 +157,14 @@ int main(void)
     {
         // LD1, LD3 토글
         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
         HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 
         // 상태 출력
         printf("[%5lu] LD1: %s, LD3: %s\r\n",
                count++,
                HAL_GPIO_ReadPin(LD1_GPIO_Port, LD1_Pin) ? "ON " : "OFF",
+               HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin) ? "ON " : "OFF",
                HAL_GPIO_ReadPin(LD3_GPIO_Port, LD3_Pin) ? "ON " : "OFF");
 
         HAL_Delay(500);
