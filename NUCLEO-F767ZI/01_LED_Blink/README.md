@@ -33,6 +33,7 @@ NUCLEO-F767ZI 보드의 User LED 핀 매핑:
 | 핀 |  GPIO output level | GPIO mode | User Label| 
 |:----:| :----:| :----:| :----:| 
 | PB0 | Low | Output Push Pull | LD1 | 
+| PB7 | Low | Output Push Pull | LD2 | 
 | PB14 | Low | Output Push Pull | LD3 | 
 
 4. Project → Generate Code (또는 Ctrl+S)
