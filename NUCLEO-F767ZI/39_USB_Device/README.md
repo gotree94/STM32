@@ -1,76 +1,82 @@
-# STM32
-## NUCLEO_F103RB
-  - [완료] 01.LED_Blink
-  - [완료] 02.USART_Print
-  - [완료] 03.EXTI
-  - [완료] 04.TM_TimeBase
-  - [완료] 05.ADC
-  - [완료] 06.HC-SR04
-  - [완료] 07.Buzzer
-  - [완료] 08.CLCD
-  - [완료] 09.ServoMotor
-  - [완료] 10.GM009605_LCD
-  - [완료] 11.LCD-SPI
-  - [완료] 12.DHT11
-  - [완료] 13.JoyStick
-  - [완료] 14.ILI9341 - 2.4" TFT LCD SHIELD :  터치(불능?) SD-32.FATFS 참고
-  - [완료] 15.CDS_sensor
-  - [완료] 16.I2C-EEPROM
-  - [완료] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
-  - [완료] 18.Rotary_Encoder
-  - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
-  - [완료] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
-  - [] 21.OV7670-103
-  - [완료] 22.I2C_EEPROM_GPIO
-  - [완료] 23.Waveshare_1.3inch_oled
-  - [] 24.StepMotor(NEMA-17) - L298N
-  - [완료] 25.StepMotor(28BYJ-48) 5V - ULN2003
-  - [완료] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
-  - NS-SD04_ReferenceManual_KR.pdf
-  - [완료] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
-  - [] 28.USB HOST
-  - [] 29.GY-GPS6MV2 (PC와 인터페이스 확인 : 9600bps)
-  - [완료] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
-  - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
-  - [완료] 32.FATFS
-  - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
-  - [] 34.2.4" TFT SPI 240*320
-  - [] 35.RTC
-  - [] 36.MAX98357 I2S DAC
+# 📄 USB 데이터 전송 모드 비교 (Stable vs High-Speed)
 
-## NUCLEO_F411RE
- - [완료] 01.LED_Blink
- - [완료] 02.USART_Print
- - [완료] 03.EXTI
- - [완료] 04.TM_TimeBase
- - [완료] 05.ADC
- - [] 06.HC-SR04
- - [완료] 07.Buzzer
- - [완료] 08.CLCD
- - [완료] 09.ServoMotor
- - [] 10.GM009605_LCD 
- - [] 11.LCD-SPI
- - [] 12.DHT11
- - [] 13.JoyStick
- - [] 14.ILI9341 - 터치/SDCard 미구현
- - [] 15.CDS_sensorx
- - [] 16.I2C-EEPROM
- - [] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
- - [] 18.Rotary_Encoder
- - [] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
- - [] 20.VL53L0X : Time-of-Flight (ToF) ranging sensor
- - [] 21.RTC
- - [] 22.I2C_EEPROM_GPIO
- - [] 23.Waveshare_1.3inch_oled
- - [] 24.StepMotor(NEMA-17) - L298N
- - [] 25.StepMotor(28BYJ-48) - ULN2003
- - [] 26.MicroSD Card Adaptor : NS-SD04 (아두이노호환 microSD Card 어댑터)
-   - NS-SD04_ReferenceManual_KR.pdf
- - [] 27.MicroSD Card Adaptor : Arduino Mega Micro Sd Card Adapter
- - [] 28.USB HOST
- - [] 29.GY-GPS6MV2
- - [] 30.1.28" TFT Ver1.0 (240*240) : GC9A01
- - [] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
- - [] 32.FATFS
- - [] 36.MAX98357 I2S DAC
+본 문서는 임베디드 시스템(STM32 등)에서 USB 기반 데이터 전송을 설계할 때  
+**안정성 중심 전송 모드(09_Stable)** 와 **고속 대용량 전송 모드(10_HighSpeed)** 를 비교·정리한 자료입니다.
 
+---
+
+## 📊 전송 모드 비교 표
+
+| 항목 | 09_안정적 전송 모드 (Stable) | 10_고속 대용량 모드 (High-Speed) |
+|---|---|---|
+| USB 속도 | Full Speed (12 Mbps) | High Speed (480 Mbps) |
+| 저장 매체 | 내부 Flash / SD (SPI) | SD 카드 (SDMMC 4-bit) |
+| 실효 전송 속도 | ~1 MB/s | ~15~25 MB/s |
+| DMA 사용 | 선택 사항 | 필수 |
+| 외부 PHY | 불필요 | 필요 (USB3300 ULPI) |
+| 저장 용량 | 64KB (Flash) / GB (SD) | GB ~ TB |
+| 시스템 복잡도 | 낮음 | 높음 |
+| 주요 용도 | 설정 파일, 소량 로그 | 대용량 데이터, 실시간 저장 |
+
+---
+
+## ✅ 09_안정적 전송 모드 특징 (Stable Mode)
+
+### 장점
+- ✅ 추가 하드웨어 불필요 (내부 Flash 사용 가능)
+- ✅ 설정 및 구현이 단순
+- ✅ 안정적인 동작
+- ✅ 저전력 동작에 유리
+
+### 단점
+- ❌ 전송 속도 제한 (~1 MB/s)
+- ❌ 내부 Flash 용량 및 수명 제한
+
+---
+
+## 🚀 10_고속 대용량 모드 특징 (High-Speed Mode)
+
+### 장점
+- ✅ 최대 약 25 MB/s 전송 속도
+- ✅ GB ~ TB 단위 대용량 저장 지원
+- ✅ 실시간 데이터 스트리밍 가능
+- ✅ DMA 기반으로 CPU 부하 최소화
+
+### 단점
+- ❌ USB3300 ULPI PHY 등 외부 하드웨어 필요
+- ❌ 하드웨어 및 소프트웨어 구조 복잡
+- ❌ 전력 소비 증가
+
+---
+
+## 💡 선택 가이드
+
+| 용도 | 권장 모드 |
+|---|---|
+| 설정 파일 교환 | 09_Stable |
+| 펌웨어 업데이트 | 09_Stable |
+| 소량 로그 (< 10 MB) | 09_Stable |
+| 대용량 로그 (GB 단위) | 10_HighSpeed |
+| 실시간 센서 데이터 저장 | 10_HighSpeed |
+| 영상 / 음성 데이터 저장 | 10_HighSpeed |
+
+---
+
+## 🧭 설계 권장 전략
+
+- **초기 제품 / 양산 안정성 중시**  
+  → `09_Stable` 모드로 시작 후 필요 시 확장
+
+- **데이터 중심 제품 (센서, 영상, AI Edge Device)**  
+  → `10_HighSpeed` 모드 권장
+
+---
+
+## 📌 Notes
+
+- High-Speed 모드는 **USB PHY, PCB 설계, 전원 설계**까지 함께 고려해야 함
+- Stable 모드는 **교육용, 산업용 설정 장치, 유지보수 인터페이스**에 매우 적합
+
+---
+
+📎 본 문서는 GitHub README.md 용도로 작성되었습니다.
