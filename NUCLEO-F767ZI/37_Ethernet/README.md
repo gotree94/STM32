@@ -243,9 +243,33 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 
 **CubeMX에서 변경할 값 (Key Options 탭):**
 
+**Infrastructure - Heap and Memory Pools Options:**
+
 | 파라미터 | 기본값 | 권장값 | 설명 |
 |----------|--------|--------|------|
 | MEM_SIZE | 1600 | **10240** | Heap 메모리 크기 (10KB) |
+
+**Infrastructure - Internal Memory Pool Sizes:**
+
+| 파라미터 | 기본값 | 권장값 | 설명 |
+|----------|--------|--------|------|
+| MEMP_NUM_TCP_SEG | 16 | **24** | TCP 세그먼트 큐 수 |
+
+> ⚠️ **주의**: TCP_SND_BUF를 늘리면 TCP_SND_QUEUELEN이 자동으로 증가합니다 (17).
+> **MEMP_NUM_TCP_SEG는 반드시 TCP_SND_QUEUELEN 이상**이어야 합니다!
+> 
+> ```
+> 규칙: MEMP_NUM_TCP_SEG >= TCP_SND_QUEUELEN
+> 
+> 에러 발생 시:
+> "MEMP_NUM_TCP_SEG must be between 17 and 2,147,483,647"
+> → MEMP_NUM_TCP_SEG를 17 이상으로 설정하세요.
+> ```
+
+**Callback - TCP Options:**
+
+| 파라미터 | 기본값 | 권장값 | 설명 |
+|----------|--------|--------|------|
 | TCP_MSS | 536 | **1460** | 이더넷 MTU 최적화 |
 | TCP_WND | 2144 | **5840** | TCP 수신 윈도우 (4×MSS) |
 | TCP_SND_BUF | 1072 | **5840** | TCP 송신 버퍼 (4×MSS) |
@@ -258,6 +282,7 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 | TCP_QUEUE_OOSEQ | Enabled | Out-of-order 패킷 큐잉 |
 | LWIP_TCP_SACK_OUT | Disabled | Selective ACK |
 | ETH_RX_BUFFER_CNT | 12 | 수신 버퍼 개수 |
+| TCP_SND_QUEUELEN | 17 | 자동 계산됨 (변경 불필요) |
 
 #### 4.5 Checksum Settings (하드웨어 체크섬)
 
