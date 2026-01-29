@@ -327,26 +327,81 @@ NUCLEO-F767ZI는 **LAN8742A** PHY 칩이 내장되어 있습니다.
 
 **Pinout & Configuration → System Core → CORTEX_M7**
 
-| 항목 | 설정값 |
-|------|--------|
-| MPU | ✅ **Enabled** |
-
-#### MPU Region 0 (ETH DMA Descriptors)
-
-| 파라미터 | 값 |
-|----------|-----|
-| MPU Region | Enabled |
-| MPU Region Base Address | 0x30040000 |
-| MPU Region Size | 256B |
-| MPU SubRegion Disable | 0x0 |
-| MPU TEX field level | 1 |
-| MPU Access Permission | ALL ACCESS PERMITTED |
-| MPU Instruction Access | DISABLE |
-| MPU Shareability Permission | DISABLE |
-| MPU Cacheable Permission | DISABLE |
-| MPU Bufferable Permission | ENABLE |
-
 > ⚠️ **중요**: STM32F7에서 Ethernet DMA가 정상 동작하려면 MPU 설정이 필수입니다!
+
+#### 5.1 CORTEX_M7 기본 설정
+
+**Parameter Settings 탭:**
+
+```
+Speculation default mode Settings
+└── Speculation default mode              Disabled
+
+Cortex Interface Settings
+├── Flash Interface                       AXI Interface
+├── ART ACCELERATOR                       Disabled
+├── Instruction Prefetch                  Disabled
+├── CPU ICache                            Disabled
+├── CPU DCache                            Disabled
+
+Cortex Memory Protection Unit Control Settings
+└── MPU Control Mode                      ⬅️ 변경 필요!
+```
+
+#### 5.2 MPU Control Mode 설정
+
+**MPU Control Mode 드롭다운에서 선택:**
+
+| 옵션 | 설명 | 권장 |
+|------|------|------|
+| MPU NOT USED | MPU 비활성화 (기본값) | ❌ |
+| Background Region Access Not Allowed + MPU Disabled during hard fault | | |
+| **Background Region Access Not Allowed + MPU Enabled during hard fault** | MPU 활성화 | ✅ **권장** |
+| Background Region Privileged accesses only + MPU Disabled during hard fault | | |
+| Background Region Privileged accesses only + MPU Enabled during hard fault | | |
+
+> 💡 **MPU Control Mode**를 `Background Region Access Not Allowed + MPU Enabled...`로 변경하면 **MPU Region 설정** 옵션이 나타납니다.
+
+#### 5.3 MPU Region 설정 (MPU 활성화 후)
+
+MPU Control Mode를 활성화하면 아래와 같이 Region 설정이 표시됩니다:
+
+**MPU Region 0 (ETH DMA Descriptors):**
+
+| 파라미터 | 값 | 설명 |
+|----------|-----|------|
+| MPU Region | Enabled | Region 0 활성화 |
+| MPU Region Base Address | 0x30040000 | ETH DMA 디스크립터 주소 |
+| MPU Region Size | 256B | 디스크립터 영역 크기 |
+| MPU SubRegion Disable | 0x0 | 모든 서브리전 사용 |
+| MPU TEX field level | 1 | Type Extension |
+| MPU Access Permission | ALL ACCESS PERMITTED | 모든 접근 허용 |
+| MPU Instruction Access | DISABLE | 코드 실행 금지 |
+| MPU Shareability Permission | DISABLE | |
+| MPU Cacheable Permission | DISABLE | 캐시 비활성화 |
+| MPU Bufferable Permission | ENABLE | 버퍼 활성화 |
+
+```
+MPU 설정 요약:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   왜 MPU 설정이 필요한가?                                                   │
+│   ───────────────────────                                                  │
+│   • STM32F7의 Ethernet DMA는 특정 메모리 영역에 접근                       │
+│   • DMA 디스크립터 영역은 캐시되지 않아야 함 (데이터 일관성)               │
+│   • MPU로 해당 영역을 Non-cacheable로 설정                                 │
+│                                                                             │
+│   설정하지 않으면?                                                          │
+│   ───────────────                                                          │
+│   • Ethernet 패킷 송수신 실패                                              │
+│   • DMA 에러 발생                                                          │
+│   • 간헐적인 통신 오류                                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+> ⚠️ **참고**: CubeMX 버전에 따라 LwIP 설정 시 MPU가 자동으로 구성될 수 있습니다. 
+> 빌드 후 동작하지 않으면 위 설정을 확인하세요.
 
 ### 6. USART3 설정
 
