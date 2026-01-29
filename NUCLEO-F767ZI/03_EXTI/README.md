@@ -13,6 +13,13 @@ STM32 NUCLEO-F767ZI 보드의 파란색 User Button을 이용한 외부 인터�
 
 ## 🔧 하드웨어 구성
 
+<img width="1193" height="896" alt="2001" src="https://github.com/user-attachments/assets/535743ad-a4a8-4d9f-bdeb-60bcd91bd117" />
+<br>
+<img width="1193" height="896" alt="2002" src="https://github.com/user-attachments/assets/fee12d3a-760f-454c-9d9a-97d265e10af4" />
+<br>
+<img width="1193" height="896" alt="2003" src="https://github.com/user-attachments/assets/966def81-cdb9-41ee-823a-c6782c48fc3e" />
+<br>
+
 ### User Button
 
 | 버튼 | GPIO | 특성 |
