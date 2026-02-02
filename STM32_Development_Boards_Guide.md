@@ -82,7 +82,7 @@
 
 ### Nucleo 보드
 
-| 보드명 | MCU | Flash | RAM | 특징 |
+|  | 보드명 | MCU | Flash | RAM | 특징 |
 |----|--------|-----|-------|-----|------|
 |  | NUCLEO-F302R8 | STM32F302R8 | 64KB | 16KB | Motor control |
 |  | NUCLEO-F303K8 | STM32F303K8 | 64KB | 12KB | Nano 폼팩터 |
