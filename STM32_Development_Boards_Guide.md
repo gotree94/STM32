@@ -204,15 +204,15 @@
 
 ### Nucleo 보드
 
-| 보드명 | MCU | 특징 |
-|--------|-----|------|
-| NUCLEO-WL33CC | STM32WL33CC | Sub-GHz 무선 |
+|  | 보드명 | MCU | 특징 |
+|-----|--------|-----|------|
+|  | NUCLEO-WL33CC | STM32WL33CC | Sub-GHz 무선 |
 
 ### Discovery 보드
 
-| 보드명 | MCU | 특징 |
-|--------|-----|------|
-| STM32N6570-DK | STM32N657X0 | Neural-ART 가속기, AI |
+|  | 보드명 | MCU | 특징 |
+|-----|--------|-----|------|
+|  | STM32N6570-DK | STM32N657X0 | Neural-ART 가속기, AI |
 
 ---
 
