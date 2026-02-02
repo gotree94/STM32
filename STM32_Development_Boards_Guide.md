@@ -94,11 +94,12 @@
 | V | **NUCLEO-F411RE** | **STM32F411RE** | **512KB** | **128KB** | **⭐ 고성능 추천** |
 |  | NUCLEO-F412ZG | STM32F412ZG | 1MB | 256KB | |
 |  | NUCLEO-F413ZH | STM32F413ZH | 1.5MB | 320KB | |
-|  | NUCLEO-F446RE | STM32F446RE | 512KB | 128KB | 180MHz |
+| V | NUCLEO-F429 | STM32F429ZIT6 | 2.0MB | 256+4KB | |
+| V | NUCLEO-F446RE | STM32F446RE | 512KB | 128KB | 180MHz |
 |  | NUCLEO-F446ZE | STM32F446ZE | 512KB | 128KB | 144핀 |
 |  | NUCLEO-G431KB | STM32G431KB | 128KB | 32KB | Nano |
 |  | NUCLEO-G431RB | STM32G431RB | 128KB | 32KB | |
-|  | NUCLEO-G474RE | STM32G474RE | 512KB | 128KB | 고성능 아날로그 |
+| V | NUCLEO-G474RE | STM32G474RE | 512KB | 128KB | 고성능 아날로그 |
 |  | NUCLEO-G491RE | STM32G491RE | 512KB | 112KB | |
 |  | NUCLEO-L412KB | STM32L412KB | 128KB | 40KB | Ultra-low power |
 |  | NUCLEO-L432KC | STM32L432KC | 256KB | 64KB | Nano |
@@ -110,7 +111,7 @@
 |  | NUCLEO-L4R5ZI | STM32L4R5ZI | 2MB | 640KB | |
 |  | NUCLEO-L4P5ZG | STM32L4P5ZG | 1MB | 320KB | |
 |  | NUCLEO-WB15CC | STM32WB15CC | 320KB | 48KB | BLE |
-|  | **NUCLEO-WB55RG** | **STM32WB55RG** | **1MB** | **256KB** | **⭐ BLE, Zigbee** |
+| V | **NUCLEO-WB55RG** | **STM32WB55RG** | **1MB** | **256KB** | **⭐ BLE, Zigbee** |
 |  | **NUCLEO-WL55JC** | **STM32WL55JC** | **256KB** | **64KB** | **⭐ LoRa, Sub-GHz** |
 
 ### Discovery 보드
@@ -119,7 +120,7 @@
 |------|--------|-----|------|
 |  | STM32F3DISCOVERY | STM32F303VC | 자이로스코프, 가속도계 |
 |  | STM32F401C-DISCO | STM32F401VC | 오디오, 가속도계 |
-|  | **STM32F407G-DISC1** | **STM32F407VG** | **⭐ 가장 인기, 오디오, 가속도계** |
+| V | **STM32F407G-DISC1** | **STM32F407VG** | **⭐ 가장 인기, 오디오, 가속도계** |
 |  | STM32F411E-DISCO | STM32F411VE | 자이로, 가속도계, 마그네토 |
 |  | STM32F412G-DISCO | STM32F412ZG | TFT LCD, 오디오 |
 |  | STM32F413H-DISCO | STM32F413ZH | LCD, 오디오, MEMS |
@@ -141,17 +142,17 @@
 
 |  | 보드명 | MCU | Flash | RAM | 특징 |
 |----|--------|-----|-------|-----|------|
-|  | NUCLEO-F722ZE | STM32F722ZE | 512KB | 256KB | |
+| V | NUCLEO-F722ZE | STM32F722ZE | 512KB | 256KB | |
 |  | NUCLEO-F746ZG | STM32F746ZG | 1MB | 320KB | |
 |  | NUCLEO-F756ZG | STM32F756ZG | 1MB | 320KB | Crypto |
-|  | NUCLEO-F767ZI | STM32F767ZI | 2MB | 512KB | 고성능 |
+| V | NUCLEO-F767ZI | STM32F767ZI | 2MB | 512KB | 고성능 |
 |  | NUCLEO-H723ZG | STM32H723ZG | 1MB | 564KB | 550MHz |
 |  | **NUCLEO-H743ZI** | **STM32H743ZI** | **2MB** | **1MB** | **⭐ 480MHz, 추천** |
 |  | NUCLEO-H743ZI2 | STM32H743ZI | 2MB | 1MB | Rev.2 |
 |  | **NUCLEO-H745ZI-Q** | **STM32H745ZI** | **2MB** | **1MB** | **⭐ 듀얼코어 M7+M4** |
 |  | NUCLEO-H753ZI | STM32H753ZI | 2MB | 1MB | Crypto |
 |  | NUCLEO-H755ZI-Q | STM32H755ZI | 2MB | 1MB | 듀얼코어 + Crypto |
-|  | NUCLEO-H7A3ZI-Q | STM32H7A3ZI | 2MB | 1.4MB | |
+| V | NUCLEO-H7A3ZI-Q | STM32H7A3ZI | 2MB | 1.4MB | |
 |  | NUCLEO-H7S3L8 | STM32H7S3L8 | 64KB | 620KB | 외부 메모리 |
 
 ### Discovery 보드
@@ -170,6 +171,8 @@
 |  | STM32H7B3I-EVAL | STM32H7B3II | 평가 보드 |
 |  | STM32H7S78-DK | STM32H7S7L8 | 최신, 외부 메모리 |
 
+   * STM32F723 Discovery kit
+  
 ---
 
 ## Cortex-M33
@@ -197,6 +200,12 @@
 |  | STM32U5A9J-DK | STM32U5A9NJ | LCD, 터치, OSPI |
 |  | STM32H573I-DK | STM32H573II | LCD, 이더넷, USB-C |
 |  | STM32WBA55G-DK1 | STM32WBA55CG | BLE 5.4, LCD |
+
+---
+
+## Cortex-A7 + Cortex-M4 (이종 듀얼코어)
+
+   * STM32MP157A Discovery kit
 
 ---
 
