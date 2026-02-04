@@ -16,6 +16,7 @@
 | [05. 준수 및 문서화](docs/05-compliance.md) | 컴플라이언스 프로세스, Deviation | 1시간 |
 | [06. 실습 예제](docs/06-practical-examples.md) | STM32 기반 실습 프로젝트 | 3시간 |
 | [07. 교육 커리큘럼](docs/07-curriculum.md) | 교육 일정 및 평가 방법 | - |
+| [08. IDE 툴 가이드](docs/08-ide-tools-guide.md) | IDE 툴 가이드 | - |
 
 ## 🎯 교육 목표
 
