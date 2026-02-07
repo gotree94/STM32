@@ -147,12 +147,12 @@
 |  | NUCLEO-F756ZG | STM32F756ZG | 1MB | 320KB | Crypto |
 | V | NUCLEO-F767ZI | STM32F767ZI | 2MB | 512KB | 고성능 |
 |  | NUCLEO-H723ZG | STM32H723ZG | 1MB | 564KB | 550MHz |
-|  | **NUCLEO-H743ZI** | **STM32H743ZI** | **2MB** | **1MB** | **⭐ 480MHz, 추천** |
+| V | **NUCLEO-H743ZI** | **STM32H743ZI** | **2MB** | **1MB** | **⭐ 480MHz, 추천** |
 |  | NUCLEO-H743ZI2 | STM32H743ZI | 2MB | 1MB | Rev.2 |
 |  | **NUCLEO-H745ZI-Q** | **STM32H745ZI** | **2MB** | **1MB** | **⭐ 듀얼코어 M7+M4** |
-|  | NUCLEO-H753ZI | STM32H753ZI | 2MB | 1MB | Crypto |
+| V | NUCLEO-H753ZI | STM32H753ZI | 2MB | 1MB | Crypto |
 |  | NUCLEO-H755ZI-Q | STM32H755ZI | 2MB | 1MB | 듀얼코어 + Crypto |
-| V | NUCLEO-H7A3ZI-Q | STM32H7A3ZI | 2MB | 1.4MB | |
+|  | NUCLEO-H7A3ZI-Q | STM32H7A3ZI | 2MB | 1.4MB | |
 |  | NUCLEO-H7S3L8 | STM32H7S3L8 | 64KB | 620KB | 외부 메모리 |
 
 ### Discovery 보드
