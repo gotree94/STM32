@@ -937,6 +937,26 @@ git fetch origin
 git reset --hard origin/main
 ```
 
+**GitHub 저장소를 완전히 초기화하고 로컬 구조대로 다시 올리는 방법**
+
+```
+방법 1: 저장소 초기화 후 재업로드 (권장)
+1단계 - 기존 저장소 내용 전체 삭제 후 새로 푸시
+bash# 로컬 PC에서 정리된 폴더로 이동
+cd /path/to/your/project
+
+# git 초기화 (이미 git이 있다면 .git 폴더 삭제 후 재초기화)
+rm -rf .git
+git init
+git add .
+git commit -m "초기화: 새 구조로 재업로드"
+
+# 기존 GitHub 저장소에 강제 푸시 (기존 히스토리 완전 덮어쓰기)
+git remote add origin https://github.com/사용자명/저장소명.git
+git branch -M main
+git push --force origin main
+```
+
 ---
 
 *작성일: 2025년 1월*
