@@ -31,22 +31,22 @@ Git LFS는 **Git에서 큰 파일을 효율적으로 관리하기 위한 확장 
 ## ⚙️ 기본 사용 방법
 
 ### 1️⃣ 설치
-\`\`\`bash
+```bash
 git lfs install
-\`\`\`
+```
 
 ### 2️⃣ 추적할 파일 지정
-\`\`\`bash
+```bash
 git lfs track "*.psd"
-\`\`\`
+```
 
 ### 3️⃣ 커밋 & 푸시
-\`\`\`bash
+```bash
 git add .gitattributes
 git add file.psd
 git commit -m "Add file"
 git push
-\`\`\`
+```
 
 ---
 
