@@ -81,13 +81,13 @@ HSI (16MHz)
     ▼
 SYSCLK = 100MHz
     │
-    ├─ AHB  (DIV1) → HCLK  = 100MHz
+    ├─ AHB  (DIV1) → HCLK  = 84MHz
     │
-    ├─ APB2 (DIV1) → PCLK2 = 100MHz
-    │                   └─ TIM1 클럭 = 100MHz  ← 38kHz PWM 생성
+    ├─ APB2 (DIV1) → PCLK2 = 84MHz
+    │                   └─ TIM1 클럭 = 84MHz  ← 38kHz PWM 생성
     │
     └─ APB1 (DIV2) → PCLK1 =  50MHz
-                        └─ TIM2 클럭 = 100MHz  ← 1μs 딜레이 기준
+                        └─ TIM2 클럭 = 84MHz  ← 1μs 딜레이 기준
                            (APBx PSC > 1 → TIMx 클럭 = APBx × 2, RM0383 규칙)
 ```
 
@@ -104,10 +104,10 @@ SYSCLK = 100MHz
 IR LED를 38kHz로 ON/OFF 변조하는 반송파를 생성합니다.
 
 ```
-TIM1 클럭 = 100MHz
+TIM1 클럭 = 84MHz
 
 PSC  = 0
-ARR  = 2631  →  100,000,000 / (0+1) / (2631+1) = 38,004 Hz ≈ 38kHz
+ARR  = 2631  →  84,000,000 / (0+1) / (2631+1) = 38,004 Hz ≈ 38kHz
 CCR1 = 877   →  877 / 2632 ≈ 33% 듀티비 (IR 표준)
 
 출력 핀: PA8 (AF1, TIM1_CH1)
