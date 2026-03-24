@@ -86,7 +86,7 @@ SYSCLK = 100MHz
     ├─ APB2 (DIV1) → PCLK2 = 84MHz
     │                   └─ TIM1 클럭 = 84MHz  ← 38kHz PWM 생성
     │
-    └─ APB1 (DIV2) → PCLK1 =  50MHz
+    └─ APB1 (DIV2) → PCLK1 =  84MHz
                         └─ TIM2 클럭 = 84MHz  ← 1μs 딜레이 기준
                            (APBx PSC > 1 → TIMx 클럭 = APBx × 2, RM0383 규칙)
 ```
