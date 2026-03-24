@@ -74,12 +74,12 @@ HSI (16MHz)
     │
     ▼
   PLL
-  ├─ PLLM = 8   → 16MHz / 8  =   2MHz
-  ├─ PLLN = 200 → 2MHz × 200 = 400MHz (VCO)
-  └─ PLLP = 4   → 400MHz / 4 = 100MHz
+  ├─ PLLM = 16   → 16MHz / 16  =   1MHz
+  ├─ PLLN = 336 → 2MHz × 336 = 336MHz (VCO)
+  └─ PLLP = 4   → 400MHz / 4 = 84MHz
     │
     ▼
-SYSCLK = 100MHz
+SYSCLK = 84MHz
     │
     ├─ AHB  (DIV1) → HCLK  = 84MHz
     │
@@ -107,7 +107,7 @@ IR LED를 38kHz로 ON/OFF 변조하는 반송파를 생성합니다.
 TIM1 클럭 = 84MHz
 
 PSC  = 0
-ARR  = 2631  →  84,000,000 / (0+1) / (2631+1) = 38,004 Hz ≈ 38kHz
+ARR  = 2631  →  84,000,000 / (0+1) / (2209+1) = 38,009 Hz ≈ 38kHz
 CCR1 = 877   →  877 / 2632 ≈ 33% 듀티비 (IR 표준)
 
 출력 핀: PA8 (AF1, TIM1_CH1)
@@ -122,9 +122,9 @@ CCR1 = 877   →  877 / 2632 ≈ 33% 듀티비 (IR 표준)
 NEC 프로토콜의 마크/스페이스 타이밍(560μs, 4.5ms, 9ms 등)을 정확하게 생성합니다.
 
 ```
-TIM2 클럭 = 100MHz  (APB1=50MHz, PSC=2 → TIM 배수 × 2)
+TIM2 클럭 = 84MHz  (APB1=84MHz, PSC=2 → TIM 배수 × 2)
 
-PSC  = 99         →  100,000,000 / 100 = 1,000,000 Hz
+PSC  = 83         →  84,000,000 / 84 = 1,000,000 Hz
 ARR  = 0xFFFFFFFF →  32비트 최대
 → 1틱 = 1μs
 ```
