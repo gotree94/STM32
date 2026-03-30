@@ -6,6 +6,10 @@
 
 ---
 
+<img width="680" height="659" alt="003" src="https://github.com/user-attachments/assets/ea7a77af-1a12-472d-8852-d2bc2d5bfbf8" />
+
+
+
 ## 📋 버그 목록 요약
 
 | # | 심각도 | 위치 | 증상 영향 |
