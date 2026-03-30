@@ -39,6 +39,8 @@ drivers/
 
 ### 1-1. ST7735 LCD 드라이버 (`lcd_st7735.c`)
 
+https://rs29.tistory.com/22
+
 #### 하드웨어 사양
 
 | 항목 | 내용 |
