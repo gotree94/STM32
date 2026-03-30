@@ -1,0 +1,343 @@
+/**
+ * @file lcd_st7735.c
+ * @brief ST7735 LCD 드라이버 - 성능 최적화 버전
+ * 
+ * 최적화 내용:
+ * 1. DMA 전송 지원 (선택적)
+ * 2. 버퍼 기반 bulk 전송
+ * 3. CS 토글 최소화
+ */
+
+#include "drivers/lcd_st7735.h"
+#include "stm32f1xx_hal.h"
+
+volatile uint8_t spi_dma_busy = 0;
+volatile uint8_t spi_dma_done = 1;
+volatile uint8_t spi_busy = 0;
+extern SPI_HandleTypeDef hspi2;
+
+
+/* ===== 오프셋 (LCD 모듈에 따라 조정) ===== */
+#define X_OFFSET 0
+#define Y_OFFSET 26
+
+/* ===== GPIO 매크로 (인라인으로 최적화) ===== */
+#define LCD_CS_LOW()   (GPIOB->BRR  = GPIO_PIN_12)
+#define LCD_CS_HIGH()  (GPIOB->BSRR = GPIO_PIN_12)
+#define LCD_DC_LOW()   (GPIOA->BRR  = GPIO_PIN_8)
+#define LCD_DC_HIGH()  (GPIOA->BSRR = GPIO_PIN_8)
+#define LCD_RES_LOW()  (GPIOD->BRR  = GPIO_PIN_2)
+#define LCD_RES_HIGH() (GPIOD->BSRR = GPIO_PIN_2)
+
+/* ===== ST7735 명령어 ===== */
+#define ST7735_SWRESET 0x01
+#define ST7735_SLPOUT  0x11
+#define ST7735_DISPON  0x29
+#define ST7735_CASET   0x2A
+#define ST7735_RASET   0x2B
+#define ST7735_RAMWR   0x2C
+#define ST7735_MADCTL  0x36
+#define ST7735_COLMOD  0x3A
+
+/* ===== 전송 버퍼 (스택 절약을 위해 static) ===== */
+#define TX_BUF_SIZE 128
+static uint8_t tx_buf[TX_BUF_SIZE];
+
+/* ===== 내부 함수 ===== */
+
+static inline void LCD_Cmd(uint8_t cmd)
+{
+    LCD_DC_LOW();
+    LCD_CS_LOW();
+    HAL_SPI_Transmit(&hspi2, &cmd, 1, HAL_MAX_DELAY);
+    LCD_CS_HIGH();
+}
+
+static inline void LCD_Data(uint8_t data)
+{
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+    HAL_SPI_Transmit(&hspi2, &data, 1, HAL_MAX_DELAY);
+    LCD_CS_HIGH();
+}
+
+/* ===== 외부 API ===== */
+
+void LCD_SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+{
+    /* CASET (Column Address Set) */
+    LCD_Cmd(ST7735_CASET);
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+    uint8_t col_data[4] = {0, (uint8_t)(x0 + X_OFFSET), 0, (uint8_t)(x1 + X_OFFSET)};
+    HAL_SPI_Transmit(&hspi2, col_data, 4, HAL_MAX_DELAY);
+    LCD_CS_HIGH();
+
+    /* RASET (Row Address Set) */
+    LCD_Cmd(ST7735_RASET);
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+    uint8_t row_data[4] = {0, (uint8_t)(y0 + Y_OFFSET), 0, (uint8_t)(y1 + Y_OFFSET)};
+    HAL_SPI_Transmit(&hspi2, row_data, 4, HAL_MAX_DELAY);
+    LCD_CS_HIGH();
+
+    /* RAMWR (Memory Write 시작) */
+    LCD_Cmd(ST7735_RAMWR);
+
+
+}
+
+/**
+ * @brief 색상을 count개 연속 출력 (버퍼 기반 bulk 전송)
+ */
+void LCD_WriteColorFast(uint16_t color, uint32_t count)
+{
+    uint8_t hi = color >> 8;
+    uint8_t lo = color & 0xFF;
+
+    for (int i = 0; i < TX_BUF_SIZE; i += 2)
+    {
+        tx_buf[i]     = hi;
+        tx_buf[i + 1] = lo;
+    }
+
+    spi_busy = 1;        // ← 전송 시작
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+
+    uint32_t pixels_per_buf = TX_BUF_SIZE / 2;
+    while (count > 0)
+    {
+        uint32_t chunk = (count >= pixels_per_buf) ? pixels_per_buf : count;
+        HAL_SPI_Transmit(&hspi2, tx_buf, chunk * 2, HAL_MAX_DELAY);
+        count -= chunk;
+    }
+
+    LCD_CS_HIGH();
+    spi_busy = 0;        // ← 전송 완료
+}
+/**
+ * @brief 색상 배열을 직접 전송 (이미지 출력용)
+ */
+void LCD_WriteBuffer(uint16_t *buf, uint32_t count)
+{
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+
+    while (count > 0)
+    {
+        uint32_t chunk = (count > TX_BUF_SIZE / 2) ? TX_BUF_SIZE / 2 : count;
+
+        for (uint32_t i = 0; i < chunk; i++)
+        {
+            tx_buf[i * 2]     = buf[i] >> 8;
+            tx_buf[i * 2 + 1] = buf[i] & 0xFF;
+        }
+
+        spi_dma_done = 0;
+        spi_dma_busy = 1;
+        if (HAL_SPI_Transmit_DMA(&hspi2, tx_buf, chunk * 2) == HAL_OK)
+        {
+            uint32_t t = HAL_GetTick();
+            while (!spi_dma_done)
+            {
+                if (HAL_GetTick() - t > 50)
+                {
+                    LCD_CS_HIGH();
+                    spi_dma_busy = 0;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            LCD_CS_HIGH();
+            spi_dma_busy = 0;
+            break;
+        }
+
+        buf   += chunk;
+        count -= chunk;
+    }
+}
+void LCD_Clear(uint16_t color)
+{
+    LCD_SetWindow(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
+    LCD_WriteColorFast(color, (uint32_t)LCD_WIDTH * LCD_HEIGHT);
+}
+
+void LCD_Init(void)
+{
+    /* 하드웨어 리셋 */
+    LCD_RES_LOW();
+    HAL_Delay(50);
+    LCD_RES_HIGH();
+    HAL_Delay(50);
+
+    /* 소프트웨어 리셋 */
+    LCD_Cmd(ST7735_SWRESET);
+    HAL_Delay(150);
+
+    /* Sleep Out */
+    LCD_Cmd(ST7735_SLPOUT);
+    HAL_Delay(150);
+
+    /* Memory Data Access Control (회전 설정) */
+    LCD_Cmd(ST7735_MADCTL);
+    LCD_Data(0x60);  // RGB, 가로 방향
+
+    /* Color Mode: 16bit/pixel */
+    LCD_Cmd(ST7735_COLMOD);
+    LCD_Data(0x05);
+
+    /* Display On */
+    LCD_Cmd(ST7735_DISPON);
+    HAL_Delay(100);
+}
+
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+    if (hspi->Instance == SPI2)
+    {
+        spi_dma_done = 1;
+        spi_dma_busy = 0;
+    }
+}
+
+/* ===== 5x7 폰트 (ASCII 32~126) ===== */
+static const uint8_t font5x7[][5] = {
+    {0x00,0x00,0x00,0x00,0x00}, // ' '
+    {0x00,0x00,0x5F,0x00,0x00}, // '!'
+    {0x00,0x07,0x00,0x07,0x00}, // '"'
+    {0x14,0x7F,0x14,0x7F,0x14}, // '#'
+    {0x24,0x2A,0x7F,0x2A,0x12}, // '$'
+    {0x23,0x13,0x08,0x64,0x62}, // '%'
+    {0x36,0x49,0x55,0x22,0x50}, // '&'
+    {0x00,0x05,0x03,0x00,0x00}, // '''
+    {0x00,0x1C,0x22,0x41,0x00}, // '('
+    {0x00,0x41,0x22,0x1C,0x00}, // ')'
+    {0x08,0x2A,0x1C,0x2A,0x08}, // '*'
+    {0x08,0x08,0x3E,0x08,0x08}, // '+'
+    {0x00,0x50,0x30,0x00,0x00}, // ','
+    {0x08,0x08,0x08,0x08,0x08}, // '-'
+    {0x00,0x60,0x60,0x00,0x00}, // '.'
+    {0x20,0x10,0x08,0x04,0x02}, // '/'
+    {0x3E,0x51,0x49,0x45,0x3E}, // '0'
+    {0x00,0x42,0x7F,0x40,0x00}, // '1'
+    {0x42,0x61,0x51,0x49,0x46}, // '2'
+    {0x21,0x41,0x45,0x4B,0x31}, // '3'
+    {0x18,0x14,0x12,0x7F,0x10}, // '4'
+    {0x27,0x45,0x45,0x45,0x39}, // '5'
+    {0x3C,0x4A,0x49,0x49,0x30}, // '6'
+    {0x01,0x71,0x09,0x05,0x03}, // '7'
+    {0x36,0x49,0x49,0x49,0x36}, // '8'
+    {0x06,0x49,0x49,0x29,0x1E}, // '9'
+    {0x00,0x36,0x36,0x00,0x00}, // ':'
+    {0x00,0x56,0x36,0x00,0x00}, // ';'
+    {0x08,0x14,0x22,0x41,0x00}, // '<'
+    {0x14,0x14,0x14,0x14,0x14}, // '='
+    {0x00,0x41,0x22,0x14,0x08}, // '>'
+    {0x02,0x01,0x51,0x09,0x06}, // '?'
+    {0x32,0x49,0x79,0x41,0x3E}, // '@'
+    {0x7E,0x11,0x11,0x11,0x7E}, // 'A'
+    {0x7F,0x49,0x49,0x49,0x36}, // 'B'
+    {0x3E,0x41,0x41,0x41,0x22}, // 'C'
+    {0x7F,0x41,0x41,0x22,0x1C}, // 'D'
+    {0x7F,0x49,0x49,0x49,0x41}, // 'E'
+    {0x7F,0x09,0x09,0x09,0x01}, // 'F'
+    {0x3E,0x41,0x49,0x49,0x7A}, // 'G'
+    {0x7F,0x08,0x08,0x08,0x7F}, // 'H'
+    {0x00,0x41,0x7F,0x41,0x00}, // 'I'
+    {0x20,0x40,0x41,0x3F,0x01}, // 'J'
+    {0x7F,0x08,0x14,0x22,0x41}, // 'K'
+    {0x7F,0x40,0x40,0x40,0x40}, // 'L'
+    {0x7F,0x02,0x04,0x02,0x7F}, // 'M'
+    {0x7F,0x04,0x08,0x10,0x7F}, // 'N'
+    {0x3E,0x41,0x41,0x41,0x3E}, // 'O'
+    {0x7F,0x09,0x09,0x09,0x06}, // 'P'
+    {0x3E,0x41,0x51,0x21,0x5E}, // 'Q'
+    {0x7F,0x09,0x19,0x29,0x46}, // 'R'
+    {0x46,0x49,0x49,0x49,0x31}, // 'S'
+    {0x01,0x01,0x7F,0x01,0x01}, // 'T'
+    {0x3F,0x40,0x40,0x40,0x3F}, // 'U'
+    {0x1F,0x20,0x40,0x20,0x1F}, // 'V'
+    {0x3F,0x40,0x38,0x40,0x3F}, // 'W'
+    {0x63,0x14,0x08,0x14,0x63}, // 'X'
+    {0x07,0x08,0x70,0x08,0x07}, // 'Y'
+    {0x61,0x51,0x49,0x45,0x43}, // 'Z'
+    {0x00,0x7F,0x41,0x41,0x00}, // '['
+    {0x02,0x04,0x08,0x10,0x20}, // '\'
+    {0x00,0x41,0x41,0x7F,0x00}, // ']'
+    {0x04,0x02,0x01,0x02,0x04}, // '^'
+    {0x40,0x40,0x40,0x40,0x40}, // '_'
+    {0x00,0x01,0x02,0x04,0x00}, // '`'
+    {0x20,0x54,0x54,0x54,0x78}, // 'a'
+    {0x7F,0x48,0x44,0x44,0x38}, // 'b'
+    {0x38,0x44,0x44,0x44,0x20}, // 'c'
+    {0x38,0x44,0x44,0x48,0x7F}, // 'd'
+    {0x38,0x54,0x54,0x54,0x18}, // 'e'
+    {0x08,0x7E,0x09,0x01,0x02}, // 'f'
+    {0x08,0x54,0x54,0x54,0x3C}, // 'g'
+    {0x7F,0x08,0x04,0x04,0x78}, // 'h'
+    {0x00,0x44,0x7D,0x40,0x00}, // 'i'
+    {0x20,0x40,0x44,0x3D,0x00}, // 'j'
+    {0x7F,0x10,0x28,0x44,0x00}, // 'k'
+    {0x00,0x41,0x7F,0x40,0x00}, // 'l'
+    {0x7C,0x04,0x18,0x04,0x78}, // 'm'
+    {0x7C,0x08,0x04,0x04,0x78}, // 'n'
+    {0x38,0x44,0x44,0x44,0x38}, // 'o'
+    {0x7C,0x14,0x14,0x14,0x08}, // 'p'
+    {0x08,0x14,0x14,0x18,0x7C}, // 'q'
+    {0x7C,0x08,0x04,0x04,0x08}, // 'r'
+    {0x48,0x54,0x54,0x54,0x20}, // 's'
+    {0x04,0x3F,0x44,0x40,0x20}, // 't'
+    {0x3C,0x40,0x40,0x40,0x7C}, // 'u'
+    {0x1C,0x20,0x40,0x20,0x1C}, // 'v'
+    {0x3C,0x40,0x30,0x40,0x3C}, // 'w'
+    {0x44,0x28,0x10,0x28,0x44}, // 'x'
+    {0x0C,0x50,0x50,0x50,0x3C}, // 'y'
+    {0x44,0x64,0x54,0x4C,0x44}, // 'z'
+    {0x00,0x08,0x36,0x41,0x00}, // '{'
+    {0x00,0x00,0x7F,0x00,0x00}, // '|'
+    {0x00,0x41,0x36,0x08,0x00}, // '}'
+    {0x08,0x08,0x2A,0x1C,0x08}, // '~'
+};
+
+void LCD_DrawChar(uint16_t x, uint16_t y, char c, uint16_t fg, uint16_t bg)
+{
+    if (c < 32 || c > 126) c = '?';
+    const uint8_t *glyph = font5x7[c - 32];
+    uint8_t buf[6 * 8 * 2];  /* 6열 x 8행 x 2바이트 */
+    int idx = 0;
+
+    for (int row = 0; row < 8; row++)
+    {
+        for (int col = 0; col < 5; col++)
+        {
+            uint16_t color = (glyph[col] & (1 << row)) ? fg : bg;
+            buf[idx++] = color >> 8;
+            buf[idx++] = color & 0xFF;
+        }
+        /* 6번째 열(간격)은 배경색 */
+        buf[idx++] = bg >> 8;
+        buf[idx++] = bg & 0xFF;
+    }
+
+    LCD_SetWindow(x, y, x + 5, y + 7);
+    LCD_DC_HIGH();
+    LCD_CS_LOW();
+    /* DMA 대신 블로킹 전송 (96바이트라 빠름) */
+    HAL_SPI_Transmit(&hspi2, buf, sizeof(buf), HAL_MAX_DELAY);
+    LCD_CS_HIGH();
+}
+
+void LCD_DrawString(uint16_t x, uint16_t y, const char *str,
+                    uint16_t fg, uint16_t bg)
+{
+    while (*str)
+    {
+        LCD_DrawChar(x, y, *str++, fg, bg);
+        x += 6;
+        if (x + 6 > LCD_WIDTH) break;
+    }
+}
