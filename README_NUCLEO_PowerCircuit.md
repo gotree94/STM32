@@ -27,7 +27,8 @@
 
 <img src="power_001" width="200" height="100"><br>
 <img src="power_001" width="200" height="100">
-
+![대체 텍스트](power_001)
+![대체 텍스트](power_002)
 
 ## 전체 신호 흐름
 
