@@ -3,6 +3,16 @@
 
 
 
+
+## 1. CubeMX 설정 (사전 준비)
+* 코드를 적용하기 전, CubeMX에서 다음 설정을 확인하세요.
+* TIM3: 'Internal Clock' 활성화, Prescaler를 63으로 설정 (8MHz 기준 1MHz clock 생성 -> $1\mu s$ 단위 카운팅).
+* GPIO: IR 수신 핀(예: PA0)을 GPIO_EXTI0로 설정, Falling Edge 인터럽트 활성화.
+* NVIC: EXTI line0 interrupt를 활성화(Enable).
+
+
+### 2. Code
+
 ```c
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -119,7 +129,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 ```
 
 
-### 실행결과
+### 2. 실행결과
 
 * 데이터 형식을 보면 20DF(주소와 주소 반전)는 고정되어 있고, Cmd 부분과 그 뒤의 ~Cmd 부분이 변하고 있습니다.
   * Address: 0x20 (반전된 값 0xDF와 합쳐져 0x20DF 형성)
