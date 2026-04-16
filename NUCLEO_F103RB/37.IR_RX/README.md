@@ -1,10 +1,12 @@
 # IR 리모컨 수신부 Projects for STM32F103
 
 
+## 1. 작외선 모듈
+
+<img src="ir_rx_000.png" width="90%"></img><br>
 
 
-
-## 1. CubeMX 설정 (사전 준비)
+## 2. CubeMX 설정 (사전 준비)
 * 코드를 적용하기 전, CubeMX에서 다음 설정을 확인하세요.
 * TIM3: 'Internal Clock' 활성화, Prescaler를 63으로 설정 (8MHz 기준 1MHz clock 생성 -> $1\mu s$ 단위 카운팅).
 * GPIO: IR 수신 핀(예: PA0)을 GPIO_EXTI0로 설정, Falling Edge 인터럽트 활성화.
