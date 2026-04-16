@@ -4,7 +4,13 @@
 
 <img src="TEK0008.BMP">
 
-## 2. 소스코드
+## 2. 설정
+
+   * GPIO 모드: GPIO_MODE_INPUT → GPIO_MODE_IT_FALLING (충격 시 LOW로 떨어지는 신호 감지 기준)
+   * NVIC 설정: PA0에 해당하는 EXTI0_IRQn 활성화 및 우선순위 설정.
+   * Callback 구현: HAL_GPIO_EXTI_Callback 함수를 사용하여 충격 발생 시 로그 출력 및 LED 제어.
+
+## 3. 소스코드
 
 ```c
 /* USER CODE BEGIN Includes */
