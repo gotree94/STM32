@@ -2,6 +2,11 @@
 
 <img width="267" height="135" alt="133" src="https://github.com/user-attachments/assets/09ede793-cb31-4652-9575-fa08fdfe5ec3" />
 
+<img src="TEK0011.BMP" width="60%"> <br>
+<img src="TEK0012.BMP" width="60%"> <br>
+<img src="TEK0014.BMP" width="60%"> <br>
+
+
 ## 1. 통신 프로토콜 개요
 * DHT11의 통신은 항상 MCU의 시작 신호로 시작되며, 다음과 같은 단계로 진행됩니다.
    1. Start Signal (MCU → Sensor): MCU가 데이터 선을 최소 18ms 동안 Low로 유지한 후 High로 올립니다.
