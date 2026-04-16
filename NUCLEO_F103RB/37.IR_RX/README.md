@@ -1,10 +1,65 @@
-# IR 리모컨 수신부 Projects for STM32F103
+# 📡 IR Remote Control Project (NEC Protocol) for STM32F103
 
+* 이 프로젝트는 **STM32F103 (Nucleo-F103RB)** 보드와 IR 수신 센서를 이용하여, 적외선 리모컨의 신호를 분석하고 데이터를 UART로 출력하는 임베디드 실습 프로젝트입니다.
 
 ## 1. 작외선 모듈
 
 <img src="ir_rx_000.png" width="90%"></img><br>
 
+
+## 2. 📖 IR 통신 프로토콜 이론 (NEC Protocol)
+
+* 가장 흔히 사용되는 **NEC 프로토콜**은 38kHz의 반송파(Carrier)에 실려 전송되며, **펄스 거리 부조화(Pulse Distance Width)** 방식을 사용하여 데이터를 구분합니다.
+
+### 🔹 신호 구조 (Logical '0' vs '1')
+NEC 프로토콜은 인터럽트 간의 시간 간격으로 비트를 판별합니다.
+- **Lead Code:** 9ms High + 4.5ms Low (약 13.5ms의 간격)로 통신의 시작을 알림.
+- **Logical '0':** 총 간격 약 **1.125ms**
+- **Logical '1':** 총 간격 약 **2.25ms**
+
+### 🔹 데이터 프레임 (32-bit)
+1. **Address (8-bit):** 기기 식별 번호
+2. **Address Inverse (8-bit):** 주소 오류 검출
+3. **Command (8-bit):** 버튼 고유 기능 코드
+4. **Command Inverse (8-bit):** 명령 오류 검출
+
+---
+
+## 3. 🛠️ 하드웨어 설정 (STM32 CubeMX)
+
+정확한 시간 측정을 위해 다음과 같이 타이머와 외부 인터럽트를 설정합니다.
+
+| 항목 | 설정값 | 비고 |
+| :--- | :--- | :--- |
+| **TIM3 PSC** | `64-1` (64MHz 기준) | 1MHz 클럭 생성 ($1\mu s$ 단위 측정) |
+| **TIM3 ARR** | `65535` | 최대 $65.5ms$까지 측정 가능 |
+| **GPIO PA0** | `EXTI Line0` | Falling Edge 인터럽트 활성화 |
+| **NVIC** | `EXTI line0 interrupt` | **Enabled** 체크 필수 |
+
+---
+
+## 3. 💻 핵심 구현 코드
+
+### 외부 인터럽트 콜백 (Logic 분석)
+```c
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == GPIO_PIN_0) {
+        uint32_t current_tick = __HAL_TIM_GET_COUNTER(&htim3);
+        uint32_t diff_tick = (current_tick >= last_tick) ? 
+                             (current_tick - last_tick) : (0xFFFF - last_tick + current_tick);
+        last_tick = current_tick;
+
+        if (diff_tick > 13000 && diff_tick < 14000) { // Lead Code
+            bit_count = 0; ir_data = 0;
+        } else if (diff_tick > 1000 && diff_tick < 2500) { // Data Bit
+            ir_data <<= 1;
+            if (diff_tick > 1800) ir_data |= 1; // Bit '1'
+            else ir_data |= 0;                  // Bit '0'
+            bit_count++;
+        }
+        if (bit_count == 32) receive_flag = 1;
+    }
+}
 
 ## 2. CubeMX 설정 (사전 준비)
 * 코드를 적용하기 전, CubeMX에서 다음 설정을 확인하세요.
@@ -138,7 +193,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 ```
 
 
-### 2. 실행결과
+### 4. 실행결과
 
 * 데이터 형식을 보면 20DF(주소와 주소 반전)는 고정되어 있고, Cmd 부분과 그 뒤의 ~Cmd 부분이 변하고 있습니다.
   * Address: 0x20 (반전된 값 0xDF와 합쳐져 0x20DF 형성)
