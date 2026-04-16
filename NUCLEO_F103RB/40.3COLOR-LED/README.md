@@ -13,9 +13,18 @@
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin,1);
+	  HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin,0);
+	  HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin,0);
+	  HAL_Delay(1000);
 	  HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin,0);
 	  HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin,1);
 	  HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin,0);
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin,0);
+	  HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin,0);
+	  HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin,1);
+	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
