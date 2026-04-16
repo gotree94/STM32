@@ -1,7 +1,7 @@
 # Heart Beat Sensor Projects for STM32F103
 
-<img src="hearbeat_sensor_001.png"> <img src="hearbeat_sensor_002.png"> <img src="hearbeat_sensor_003.png"> <br>
-<img src="TEK0022.BMP" width="80%"> <br>
+<img src="hearbeat_sensor_001.png"width="50%"> <img src="hearbeat_sensor_002.png"width="30%"> <img src="hearbeat_sensor_003.png"width="50%"> <br>
+<img src="TEK0022.BMP" width="50%"> <br>
 
 # Heartbeat Sensor Module (심박수 측정 센서)
 
