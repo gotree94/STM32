@@ -3,8 +3,11 @@
 <img width="267" height="135" alt="133" src="https://github.com/user-attachments/assets/09ede793-cb31-4652-9575-fa08fdfe5ec3" />
 
 <img src="TEK0011.BMP" width="60%"> <br>
-<img src="TEK0012.BMP" width="60%"> <br>
+
 <img src="TEK0014.BMP" width="60%"> <br>
+
+<img src="TEK0012.BMP" width="60%"> <br>
+
 
 
 ## 1. 통신 프로토콜 개요
