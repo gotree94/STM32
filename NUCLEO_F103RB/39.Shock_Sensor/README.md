@@ -8,6 +8,7 @@
    * UART2: NUCLEO 보드 기본 설정(USB 연결 시 시리얼 모니터 확인 가능)
 
 
+
 <img src="Shock_Sensor_001.png"><br>
 <img src="Shock_Sensor_002.png">
 
@@ -88,5 +89,7 @@ int __io_putchar(int ch) {
 ```
 
 ## 3. 테스트 결과
+
+<img src="TEK0007.BMP"><br>
 
 <img src="Shock_Sensor_004.png">
