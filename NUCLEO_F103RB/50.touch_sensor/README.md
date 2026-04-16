@@ -2,7 +2,7 @@
 
 <img src="touch_sensor.jpg"> <img src="touch_sensor_001.png"><br>
 
-* Digital / Analog
+* Digital / Analog <br>
 <img src="TEK0018.BMP"> <img src="TEK0019.BMP">
 
 <img src="touch_sensor_002.png"><br>
