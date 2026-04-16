@@ -87,14 +87,6 @@ int __io_putchar(int ch) {
   /* USER CODE END 3 */
 ```
 
-```c
+## 3. 테스트 결과
 
-```
-
-```c
-
-```
-
-```c
-
-```
+<img src="Shock_Sensor_004.png">
