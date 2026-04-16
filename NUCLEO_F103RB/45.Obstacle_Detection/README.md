@@ -2,7 +2,7 @@
 
 <img src="Obstacle_Detection.png" width="30%"> <br>
 
-<img src="TEK0010.BMP" width="70%"> <br>
+<img src="TEK0010.BMP" width="60%"> <br>
 
 
 
