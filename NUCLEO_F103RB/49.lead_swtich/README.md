@@ -2,7 +2,11 @@
 
 <img src="lead_swtich.png">
 
+* Digital
 <img src="TEK0016.BMP" width="50%">
+
+* Analog
+<img src="TEK0017.BMP" width="50%">
 
 * Reed Switch(리드 스위치)는 자기장의 원리를 이용한 기계적 스위치입니다.
 * Reed(갈대)'라고 불리는 이유는 스위치 내부의 금속 접점이 갈대처럼 얇고 유연하기 때문입니다.
