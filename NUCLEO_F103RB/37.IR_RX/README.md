@@ -92,6 +92,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         if (bit_count == 32) receive_flag = 1;
     }
 }
+```
 
 ## 2. CubeMX 설정 (사전 준비)
 * 코드를 적용하기 전, CubeMX에서 다음 설정을 확인하세요.
