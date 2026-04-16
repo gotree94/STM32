@@ -202,7 +202,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   * Address: 0x20 (반전된 값 0xDF와 합쳐져 0x20DF 형성)
   * Command: 각 버튼의 고유값입니다.
 
-<img src="ir_rx_001.png" width="90%"></img><br>
+<img src="ir_rx_001.png" width="50%"></img><br>
 
 ```
 --- IR Receiver Ready ---
