@@ -118,6 +118,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 /* USER CODE END 4 */
 ```
 
+
+### 실행결과
+
+* 데이터 형식을 보면 20DF(주소와 주소 반전)는 고정되어 있고, Cmd 부분과 그 뒤의 ~Cmd 부분이 변하고 있습니다.
+  * Address: 0x20 (반전된 값 0xDF와 합쳐져 0x20DF 형성)
+  * Command: 각 버튼의 고유값입니다.
+
 ```
 --- IR Receiver Ready ---
 Raw: 0x20DF8877 | Addr: 0x20 | Cmd: 0x88
