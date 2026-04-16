@@ -11,6 +11,14 @@
 * NVIC: EXTI line0 interrupt를 활성화(Enable).
 
 
+<img src="ir_rx_001.png" width="90%"></img><br>
+<img src="ir_rx_002.png" width="90%"></img><br>
+<img src="ir_rx_003.png" width="90%"></img><br>
+<img src="ir_rx_004.png" width="90%"></img><br>
+<img src="ir_rx_005.png" width="90%"></img><br>
+<img src="ir_rx_006.png" width="90%"></img><br>
+
+
 ### 2. Code
 
 ```c
