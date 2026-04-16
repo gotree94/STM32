@@ -1,180 +1,261 @@
-# Vector Robot Eye Animation Projects for STM32F103
+# 📡 IR Remote Control Project (NEC Protocol) for STM32F103
 
-로봇 눈 애니메이션을 위한 STM32F103 기반 LCD 프로젝트 모음입니다.
+* 이 프로젝트는 **STM32F103 (Nucleo-F103RB)** 보드와 IR 수신 센서를 이용하여,
+* 적외선 리모컨의 신호를 분석하고 데이터를 UART로 출력하는 임베디드 실습 프로젝트입니다.
 
----
+## 1. 적외선 모듈
 
-## 📁 프로젝트 구성
-
-| 핀 | 표준 SPI 명칭 | 일치 여부 | 기능 설명| 
-|------|------|------|------|
-| PA5 | (SCK)SCK / SCLK| ✅ 일치| Serial Clock - 마스터가 생성하는 동기화 클럭 신호. 데이터 전송 타이밍 결정 | 
-| PA7 | (MOSI)MOSI | ✅ 일치 | Master Out Slave In - 마스터→슬레이브 데이터 전송 라인 | 
-| PB6 | (CS)CS / SS / NSS | ✅ 일치 | Chip Select - 슬레이브 장치 선택 (Active Low). 통신 대상 지정 |
-| PA1 | (RES)- | ❌ 비표준 | Reset - 디스플레이 하드웨어 리셋. SPI 표준 아닌 디스플레이 전용 신호 | 
-| PA6 | (DC)- | ❌ 비표준 | Data/Command - 전송 데이터가 명령(0)인지 데이터(1)인지 구분. 디스플레이 전용 신호 | 
-|   |  MISO(Master In Slave Out) |  |  디스플레이가 단방향 통신(쓰기 전용)만 사용하기 때문 |
+<img src="ir_rx_000.png" width="50%"></img><br>
 
 
-### 1. ST7735S SPI (0.96" 160x80 컬러 LCD)
-**폴더:** `01_ST7735S_SPI_160x80/`
+## 2. 📖 IR 통신 프로토콜 이론 (NEC Protocol)
 
-| 항목 | 내용 |
-|------|------|
-| LCD | ST7735S 0.96" TFT (160x80, 16-bit color) |
-| 인터페이스 | SPI (4-wire) |
-| 핀 연결 | PA5(SCK), PA7(MOSI), PA1(RES), PA6(DC), PB6(CS) |
-| 특징 | 프레임버퍼 방식, 부분 업데이트로 고속 |
+* 가장 흔히 사용되는 **NEC 프로토콜**은 38kHz의 반송파(Carrier)에 실려 전송되며, **펄스 거리 부조화(Pulse Distance Width)** 방식을 사용하여 데이터를 구분합니다.
 
-**CubeMX 설정:**
-- SPI1: Transmit Only Master, Prescaler=4
-- GPIO Output: PA1, PA6, PB6
-- Clock: 64MHz
+### 🔹 신호 구조 (Logical '0' vs '1')
+NEC 프로토콜은 인터럽트 간의 시간 간격으로 비트를 판별합니다.
+- **Lead Code:** 9ms High + 4.5ms Low (약 13.5ms의 간격)로 통신의 시작을 알림.
+- **Logical '0':** 총 간격 약 **1.125ms**
+- **Logical '1':** 총 간격 약 **2.25ms**
 
-<img width="600" height="600" alt="Vector_eyes" src="https://github.com/user-attachments/assets/fdcf7d33-e51a-4500-82f0-af05907c9c6b" />
+<img src="TEK0002.BMP" width="50%"></img><img src="TEK0003.BMP" width="50%"></img><br>
+<img src="TEK0004.BMP" width="50%"></img><img src="TEK0005.BMP" width="50%"></img><br>
+<img src="TEK0006.BMP" width="50%"></img><br>
 
-![LCD2-SPI](https://github.com/user-attachments/assets/381a2b09-9afb-44ee-b7a3-e45a899b3a74)
+### 🔹 데이터 프레임 (32-bit)
+1. **Address (8-bit):** 기기 식별 번호
+2. **Address Inverse (8-bit):** 주소 오류 검출
+3. **Command (8-bit):** 버튼 고유 기능 코드
+4. **Command Inverse (8-bit):** 명령 오류 검출
 
+### 🔹 "Pulse Distance Width" 방식(신호 간의 간격으로 데이터를 구분하는 방식)
 
----
+* 🛰️ NEC 프로토콜 소프트웨어 해석 프로세스
 
-### 2. SSD1306 I2C (0.96" 128x64 OLED)
-**폴더:** `02_SSD1306_I2C_128x64/`
+* 1단계: 동기화 단계 (Lead Code 감지)
+   * 통신의 시작을 알리는 거대한 "알람"을 찾는 과정입니다.
+   * 물리적 신호: 리모컨은 데이터를 보내기 전 9ms의 High 신호와 4.5ms의 Low 신호를 보냅니다.
+   * 해석 로직: 수신 측(MCU)에서는 두 번의 인터럽트 사이 간격(diff_tick)이 약 13.5ms인지를 체크합니다.
+   * 코드 의미: diff_tick > 13000 && diff_tick < 14000은 오차 범위를 감안하여 이 시작 신호를 확정 짓고, 이전에 남아있던 데이터 변수들을 0으로 초기화하여 새로운 수신을 준비하는 과정입니다.
 
-| 항목 | 내용 |
-|------|------|
-| LCD | SSD1306 0.96" OLED (128x64, 단색) |
-| 인터페이스 | I2C (400kHz) |
-| 핀 연결 | PB6(SCL), PB7(SDA) |
-| I2C 주소 | 0x3C (또는 0x3D) |
-| 특징 | 1KB 프레임버퍼, 매우 적은 핀 사용 |
+* 2단계: 데이터 판별 단계 (Bit Decoding)
+   * 시작 신호 이후에 들어오는 짧은 신호들의 간격을 측정하여 0과 1을 구분합니다.
+   * Logic '0' (약 1.125ms): 신호 간격이 짧습니다.
+   * Logic '1' (약 2.25ms): 신호 간격이 '0'보다 두 배 정도 깁니다.
+   * 해석 로직: * ir_data <<= 1;: 새로운 비트가 들어올 자리를 만들기 위해 기존 데이터를 왼쪽으로 1칸 밉니다.
+   * if (diff_tick > 1800): 간격이 1.8ms보다 크면 1로 판단하여 마지막 비트에 1을 추가하고, 아니면 0을 유지합니다.
+   * 기술적 특징: 이 방식은 비트 하나당 하나의 하강 엣지(Falling Edge) 간격을 측정하는 효율적인 알고리즘입니다.
 
-**CubeMX 설정:**
-- I2C1: Fast Mode 400kHz
-- Clock: 64MHz
+* 3단계: 프레임 완성 단계 (Data Assembly)
+   * NEC 프로토콜은 주소와 명령을 포함해 총 32비트의 고정 길이를 가집니다.
+   * 해석 로직: bit_count가 32가 되는 순간을 체크합니다.
+   * 코드 의미: 32개의 비트가 모두 수집되었다는 것은 하나의 완전한 리모컨 명령(Address + ~Address + Command + ~Command)이 들어왔음을 의미합니다.
+   * Flag 처리: 메인 루프에서 데이터를 처리할 수 있도록 receive_flag를 1로 세워 "배달 완료" 신호를 보냅니다.
 
-**주의:** I2C 주소가 안 맞으면 `SSD1306_I2C_ADDR`를 `0x7A`로 변경
-
-<img width="600" height="600" alt="Vector_eyes_i2c" src="https://github.com/user-attachments/assets/1ae23ead-18a3-42db-9aa8-1aeb8c7b910b" />
-
-![LCD2-I2C](https://github.com/user-attachments/assets/23b93b8c-650a-4a46-9b13-841880512bde)
-
-
----
-
-### 3. ILI9341 Parallel (2.8" 240x320 컬러 LCD) - 고속 버전
-**폴더:** `03_ILI9341_Parallel_240x320/`
-
-| 항목 | 내용 |
-|------|------|
-| LCD | ILI9341 2.8" TFT (240x320, 16-bit color) |
-| 인터페이스 | 8-bit Parallel |
-| 핀 연결 | D0-D7 (분산), PA0(RD), PA1(WR), PA4(RS), PB0(CS), PC1(RST) |
-| 특징 | GPIO 레지스터 직접 접근, 초고속 |
-
-**데이터 핀 배치:**
-```
-D0 = PA9    D4 = PB5
-D1 = PC7    D5 = PB4
-D2 = PA10   D6 = PB10
-D3 = PB3    D7 = PA8
-```
-
-**CubeMX 설정:**
-- GPIO Output (High Speed): 모든 LCD 핀
-- Clock: 64MHz
-
-
-<img width="600" height="600" alt="Vector_ili9341" src="https://github.com/user-attachments/assets/dd46cf44-fbfb-4fe1-b929-d7dd6334df94" />
-
-![LCD2](https://github.com/user-attachments/assets/c0259d40-d3c2-431d-812d-e49869f3ec68)
 
 
 
 ---
 
-### 4. ILI9341 Touch Project (원본)
-**폴더:** `04_ILI9341_Touch_Project/`
+## 3. 🛠️ 하드웨어 설정 (STM32 CubeMX)
 
-| 파일 | 설명 |
-|------|------|
-| main.c | 터치 데모 (캘리브레이션, 버튼, 페인트) |
-| ili9341.c | LCD 드라이버 |
-| Ili9341.h | LCD 헤더 |
+정확한 시간 측정을 위해 다음과 같이 타이머와 외부 인터럽트를 설정합니다.
 
-**참고:** 터치 기능 사용시 `touch_adc.c/h` 필요
-
----
-
-## 🎭 지원 표정 (모든 버전 공통)
-
-| 표정 | 설명 |
-|------|------|
-| NORMAL | 일반 (둥근 사각형 눈) |
-| HAPPY | 행복 (^ ^ 모양) |
-| SAD | 슬픔 (처진 눈썹) |
-| ANGRY | 화남 (찡그린 눈썹) |
-| SURPRISED | 놀람 (큰 동그란 눈) |
-| SLEEPY | 졸림 (반쯤 감은 눈) |
-| WINK_LEFT | 왼쪽 윙크 |
-| WINK_RIGHT | 오른쪽 윙크 |
-| BLINK | 깜빡임 |
-| LOVE | 하트 눈 |
-| DIZZY | 어지러움 (X X 눈) |
-| LOOK_LEFT | 왼쪽 보기 |
-| LOOK_RIGHT | 오른쪽 보기 |
-| LOOK_UP | 위 보기 |
-| LOOK_DOWN | 아래 보기 |
+| 항목 | 설정값 | 비고 |
+| :--- | :--- | :--- |
+| **TIM3 PSC** | `64-1` (64MHz 기준) | 1MHz 클럭 생성 ($1\mu s$ 단위 측정) |
+| **TIM3 ARR** | `65535` | 최대 $65.5ms$까지 측정 가능 |
+| **GPIO PA0** | `EXTI Line0` | Falling Edge 인터럽트 활성화 |
+| **NVIC** | `EXTI line0 interrupt` | **Enabled** 체크 필수 |
 
 ---
 
-## 🚀 사용 방법
+## 4. 💻 핵심 구현 코드
 
-### 데모 모드 (모든 표정 순환)
+### 외부 인터럽트 콜백 (Logic 분석)
 ```c
-while(1) {
-    Anim_Demo();
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == GPIO_PIN_0) {
+        uint32_t current_tick = __HAL_TIM_GET_COUNTER(&htim3);
+        uint32_t diff_tick = (current_tick >= last_tick) ? 
+                             (current_tick - last_tick) : (0xFFFF - last_tick + current_tick);
+        last_tick = current_tick;
+
+        if (diff_tick > 13000 && diff_tick < 14000) { // Lead Code
+            bit_count = 0; ir_data = 0;
+        } else if (diff_tick > 1000 && diff_tick < 2500) { // Data Bit
+            ir_data <<= 1;
+            if (diff_tick > 1800) ir_data |= 1; // Bit '1'
+            else ir_data |= 0;                  // Bit '0'
+            bit_count++;
+        }
+        if (bit_count == 32) receive_flag = 1;
+    }
 }
+
+## 2. CubeMX 설정 (사전 준비)
+* 코드를 적용하기 전, CubeMX에서 다음 설정을 확인하세요.
+* TIM3: 'Internal Clock' 활성화, Prescaler를 63으로 설정 (8MHz 기준 1MHz clock 생성 -> $1\mu s$ 단위 카운팅).
+* GPIO: IR 수신 핀(예: PA0)을 GPIO_EXTI0로 설정, Falling Edge 인터럽트 활성화.
+* NVIC: EXTI line0 interrupt를 활성화(Enable).
+
+
+<img src="ir_rx_002.png" width="90%"></img><br>
+<img src="ir_rx_003.png" width="90%"></img><br>
+<img src="ir_rx_004.png" width="90%"></img><br>
+<img src="ir_rx_005.png" width="90%"></img><br>
+<img src="ir_rx_006.png" width="90%"></img><br>
+
+
+### 2. Code
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */
 ```
 
-### Idle 모드 (자연스러운 깜빡임)
+
 ```c
-while(1) {
-    Anim_Idle();
-    HAL_Delay(30);
+/* USER CODE BEGIN PV */
+// IR 수신 관련 변수
+uint32_t last_tick = 0;
+uint32_t diff_tick = 0;
+uint32_t ir_data = 0;
+uint8_t bit_count = 0;
+uint8_t receive_flag = 0;
+char msg[100];
+
+// TIM3 핸들러 (CubeMX가 생성한 변수와 일치해야 함)
+extern TIM_HandleTypeDef htim3;
+/* USER CODE END PV */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+    // 1. 타이머 시작 (1us 단위로 카운팅되도록 설정되어 있어야 함)
+    HAL_TIM_Base_Start(&htim3);
+
+    HAL_UART_Transmit(&huart2, (uint8_t*)"--- IR Receiver Ready ---\r\n", 27, 100);
+  /* USER CODE END 2 */
+```
+
+```c
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  if (receive_flag)
+	      {
+	        // NEC 프로토콜: [Address(8)] [~Address(8)] [Command(8)] [~Command(8)]
+	        uint8_t address = (ir_data >> 24) & 0xFF;
+	        uint8_t command = (ir_data >> 8) & 0xFF;
+
+	        sprintf(msg, "Raw: 0x%08X | Addr: 0x%02X | Cmd: 0x%02X\r\n",
+	                (unsigned int)ir_data, address, command);
+	        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+
+			switch(command) {
+				case 0x88:
+					printf("1번 버튼을 눌렀습니다.\r\n");
+					// HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET); // LED ON 예시
+					break;
+				case 0x48:
+					printf("2번 버튼을 눌렀습니다.\r\n");
+					break;
+				// ... 나머지 버튼들 추가
+				case 0x98:
+					printf("9번 버튼을 눌렀습니다.\r\n");
+					break;
+				default:
+					printf("알 수 없는 버튼: 0x%02X\r\n", command);
+					break;
+			}
+
+	        // 데이터 초기화
+	        receive_flag = 0;
+	        ir_data = 0;
+	        bit_count = 0;
+	      }
+    /* USER CODE END WHILE */
+```
+
+```c
+/* USER CODE BEGIN 4 */
+// 외부 인터럽트(GPIO EXTI) 콜백 함수
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    // PA0 핀 인터럽트 발생 시 (IR 센서 OUT 핀)
+    if (GPIO_Pin == GPIO_PIN_0)
+    {
+        uint32_t current_tick = __HAL_TIM_GET_COUNTER(&htim3);
+
+        // 시간 간격 계산 (타이머 카운트값 차이)
+        if (current_tick >= last_tick) {
+            diff_tick = current_tick - last_tick;
+        } else {
+            diff_tick = (0xFFFF - last_tick) + current_tick;
+        }
+        last_tick = current_tick;
+
+        // NEC 프로토콜 판별 로직
+        // 1. Lead Code (9ms High + 4.5ms Low ≈ 13.5ms)
+        if (diff_tick > 13000 && diff_tick < 14000) {
+            bit_count = 0;
+            ir_data = 0;
+        }
+        // 2. Data Bit 판별 (Logic 0: 1.125ms, Logic 1: 2.25ms)
+        else if (diff_tick > 1000 && diff_tick < 2500) {
+            ir_data <<= 1;
+            if (diff_tick > 1800) { // 2.25ms 근처면 Logic 1
+                ir_data |= 1;
+            } else {                // 1.125ms 근처면 Logic 0
+                ir_data |= 0;
+            }
+            bit_count++;
+        }
+
+        // 32비트(주소 16 + 명령 16) 수신 완료 시
+        if (bit_count == 32) {
+            receive_flag = 1;
+        }
+    }
 }
+/* USER CODE END 4 */
 ```
 
-### 수동 표정 제어
-```c
-Anim_SetExpr(EXPR_HAPPY);   // 행복한 표정
-HAL_Delay(1000);
-Anim_Blink();                // 깜빡임
-Anim_SetExpr(EXPR_NORMAL);  // 일반으로 복귀
+
+### 5. 실행결과
+
+* 데이터 형식을 보면 20DF(주소와 주소 반전)는 고정되어 있고, Cmd 부분과 그 뒤의 ~Cmd 부분이 변하고 있습니다.
+  * Address: 0x20 (반전된 값 0xDF와 합쳐져 0x20DF 형성)
+  * Command: 각 버튼의 고유값입니다.
+
+<img src="ir_rx_001.png" width="50%"></img><br>
+
+```
+--- IR Receiver Ready ---
+Raw: 0x20DF8877 | Addr: 0x20 | Cmd: 0x88
+Raw: 0x20DF48B7 | Addr: 0x20 | Cmd: 0x48
+Raw: 0x20DFC837 | Addr: 0x20 | Cmd: 0xC8
+Raw: 0x20DF28D7 | Addr: 0x20 | Cmd: 0x28
+Raw: 0x20DFA857 | Addr: 0x20 | Cmd: 0xA8
+Raw: 0x20DF6897 | Addr: 0x20 | Cmd: 0x68
+Raw: 0x20DFE817 | Addr: 0x20 | Cmd: 0xE8
+Raw: 0x20DF18E7 | Addr: 0x20 | Cmd: 0x18
+Raw: 0x20DF9867 | Addr: 0x20 | Cmd: 0x98
 ```
 
----
+| 버튼	| Raw Data (32bit)	| Command (8bit)	| 비고 | 
+|:---:|:---:|:---:|:---:|
+| 1	| 0x20DF8877	| 0x88	|  | 
+| 2	| 0x20DF48B7	| 0x48	| | 
+| 3	| 0x20DFC837	| 0xC8	| | 
+| 4	| 0x20DF28D7	| 0x28	| | 
+| 5	| 0x20DFA857	| 0xA8	| | 
+| 6	| 0x20DF6897	| 0x68	| | 
+| 7	| 0x20DFE817	| 0xE8	| | 
+| 8	| 0x20DF18E7	| 0x18	| | 
+| 9	| 0x20DF9867	| 0x98  |  | 
 
-## ⚙️ 눈 위치 조정
-
-각 프로젝트의 main.c에서 다음 값을 조정:
-
-```c
-#define EYE_AREA_Y      20      // 눈 영역 Y 위치 (아래로: 증가)
-#define LX              40      // 왼쪽 눈 X 위치
-#define RX              100     // 오른쪽 눈 X 위치
-#define CY              30      // 눈 중심 Y 위치
-```
-
----
-
-## 📊 성능 비교
-
-| 프로젝트 | 해상도 | 색상 | 프레임버퍼 | 속도 |
-|---------|--------|------|-----------|------|
-| ST7735S SPI | 160x80 | 16-bit | 14KB | ★★★☆☆ |
-| SSD1306 I2C | 128x64 | 1-bit | 1KB | ★★☆☆☆ |
-| ILI9341 Parallel | 240x320 | 16-bit | 부분 | ★★★★★ |
-
----
 
