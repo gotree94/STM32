@@ -2,6 +2,7 @@
 
 <img src="knock_sensor.jpg">
 
+<img src="TEK0008.BMP">
 
 ## 2. 소스코드
 
