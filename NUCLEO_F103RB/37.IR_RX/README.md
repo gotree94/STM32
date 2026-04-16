@@ -11,7 +11,6 @@
 * NVIC: EXTI line0 interrupt를 활성화(Enable).
 
 
-<img src="ir_rx_001.png" width="90%"></img><br>
 <img src="ir_rx_002.png" width="90%"></img><br>
 <img src="ir_rx_003.png" width="90%"></img><br>
 <img src="ir_rx_004.png" width="90%"></img><br>
@@ -142,6 +141,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 * 데이터 형식을 보면 20DF(주소와 주소 반전)는 고정되어 있고, Cmd 부분과 그 뒤의 ~Cmd 부분이 변하고 있습니다.
   * Address: 0x20 (반전된 값 0xDF와 합쳐져 0x20DF 형성)
   * Command: 각 버튼의 고유값입니다.
+
+<img src="ir_rx_001.png" width="90%"></img><br>
 
 ```
 --- IR Receiver Ready ---
