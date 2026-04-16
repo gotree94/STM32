@@ -90,6 +90,6 @@ int __io_putchar(int ch) {
 
 ## 3. 테스트 결과
 
-<img src="TEK0007.BMP" width="80%"><br>
+<img src="TEK0007.BMP" width="60%"><br>
 
 <img src="Shock_Sensor_004.png">
