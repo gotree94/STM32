@@ -2,4 +2,4 @@
 
 <img src="Obstacle_Detection.png">
 
-<img src="Obstacle_Detection.png">
+<img src="TEK0010.BMP">
