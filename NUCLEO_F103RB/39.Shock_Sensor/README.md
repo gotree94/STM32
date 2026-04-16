@@ -2,12 +2,12 @@
 
 <img src="Shock_Sensor.png">
 
+<img src="Shock_Sensor_structure.png">
+
 ## 1. 하드웨어 연결
    * Shock Sensor DO (Digital Output): GPIOA의 PIN 0 (A0 포트)에 연결했다고 가정합니다.
    * VCC/GND: 각각 3.3V와 GND에 연결합니다.
    * UART2: NUCLEO 보드 기본 설정(USB 연결 시 시리얼 모니터 확인 가능)
-
-
 
 <img src="Shock_Sensor_001.png"><br>
 <img src="Shock_Sensor_002.png">
