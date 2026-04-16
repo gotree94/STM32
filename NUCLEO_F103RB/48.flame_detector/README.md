@@ -3,7 +3,7 @@
 <img src="flame_detector.png">
 
 ## Analog : A0
-<img src="TEK0013.BMP" width ="100%">
+<img src="TEK0013.BMP" width ="60%">
 
 ## Digital : D0
-<img src="TEK0015.BMP" width ="100%">
+<img src="TEK0015.BMP" width ="60%">
