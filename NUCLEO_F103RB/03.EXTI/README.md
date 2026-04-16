@@ -40,3 +40,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 /* USER CODE END 0 */
 ```
+
+<img src="shield_bd.png" width="1137" />
+
