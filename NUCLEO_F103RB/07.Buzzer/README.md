@@ -196,6 +196,73 @@ void play_mario_theme(void) {
   /* USER CODE END 3 */
 ```
 
+---
+
+## 엘리제를 위하여
+
+```c
+/* USER CODE BEGIN PV */
+typedef struct {
+    uint16_t frequency;
+    uint16_t duration;
+} Note;
+
+const Note fur_elise[] = {
+    // === 섹션 A - 테마 (1회) ===
+    {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH},
+    {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH}, {NOTE_E5, EIGHTH},
+    {NOTE_B4, EIGHTH}, {NOTE_D5, EIGHTH}, {NOTE_C5, EIGHTH},
+    {NOTE_A4, QUARTER}, {REST, EIGHTH},
+    {NOTE_C4, EIGHTH}, {NOTE_E4, EIGHTH}, {NOTE_A4, EIGHTH},
+    {NOTE_B4, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_GS4, EIGHTH}, {NOTE_B4, EIGHTH},
+    {NOTE_C5, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH},
+    {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH}, {NOTE_E5, EIGHTH},
+    {NOTE_B4, EIGHTH}, {NOTE_D5, EIGHTH}, {NOTE_C5, EIGHTH},
+    {NOTE_A4, QUARTER}, {REST, EIGHTH},
+    {NOTE_C4, EIGHTH}, {NOTE_E4, EIGHTH}, {NOTE_A4, EIGHTH},
+    {NOTE_B4, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_C5, EIGHTH}, {NOTE_B4, EIGHTH},
+    {NOTE_A4, HALF},
+
+    // === 섹션 B - 중간부 ===
+    {REST, EIGHTH},
+    {NOTE_B4, EIGHTH}, {NOTE_C5, EIGHTH}, {NOTE_D5, EIGHTH},
+    {NOTE_E5, QUARTER}, {REST, EIGHTH},
+    {NOTE_G4, EIGHTH}, {NOTE_F5, EIGHTH}, {NOTE_E5, EIGHTH},
+    {NOTE_D5, QUARTER}, {REST, EIGHTH},
+    {NOTE_F4, EIGHTH}, {NOTE_E5, EIGHTH}, {NOTE_D5, EIGHTH},
+    {NOTE_C5, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_D5, EIGHTH}, {NOTE_C5, EIGHTH},
+    {NOTE_B4, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH},
+
+    // === 섹션 A - 테마 재현 ===
+    {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH},
+    {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH}, {NOTE_E5, EIGHTH},
+    {NOTE_B4, EIGHTH}, {NOTE_D5, EIGHTH}, {NOTE_C5, EIGHTH},
+    {NOTE_A4, QUARTER}, {REST, EIGHTH},
+    {NOTE_C4, EIGHTH}, {NOTE_E4, EIGHTH}, {NOTE_A4, EIGHTH},
+    {NOTE_B4, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_GS4, EIGHTH}, {NOTE_B4, EIGHTH},
+    {NOTE_C5, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH},
+    {NOTE_E5, EIGHTH}, {NOTE_DS5, EIGHTH}, {NOTE_E5, EIGHTH},
+    {NOTE_B4, EIGHTH}, {NOTE_D5, EIGHTH}, {NOTE_C5, EIGHTH},
+    {NOTE_A4, QUARTER}, {REST, EIGHTH},
+    {NOTE_C4, EIGHTH}, {NOTE_E4, EIGHTH}, {NOTE_A4, EIGHTH},
+    {NOTE_B4, QUARTER}, {REST, EIGHTH},
+    {NOTE_E4, EIGHTH}, {NOTE_C5, EIGHTH}, {NOTE_B4, EIGHTH},
+    {NOTE_A4, HALF}, {REST, QUARTER},
+};
+
+const uint16_t fur_elise_length = sizeof(fur_elise) / sizeof(fur_elise[0]);
+/* USER CODE END PV */
+```
+
+---
+
 ## 가습기도 가능할까?
 
 <img width="300" height="300" alt="128" src="https://github.com/user-attachments/assets/624c29d0-d512-4d49-ab3b-6123507a595a" />
