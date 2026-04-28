@@ -616,26 +616,18 @@ python face_tracking_pantilt.py --port COM3
 python face_tracking_pantilt.py --port COM7 --camera 2
 ```
 
-======
-코드에서 수정
-======
+* 코드에서 수정
 
-        # 수평 제어 (Pan)
-        # 얼굴이 오른쪽에 있으면 -> 카메라를 오른쪽으로 (d)
-        # 얼굴이 왼쪽에 있으면 -> 카메라를 왼쪽으로 (a)
-        if error_x > self.config.deadzone_x:
-            self._send_command('a')  # 오른쪽으로
-            print(f"[PAN] 오른쪽 이동 (error_x: {error_x})")
-            command_sent = True
-        elif error_x < -self.config.deadzone_x:
-            self._send_command('d')  # 왼쪽으로
-            print(f"[PAN] 왼쪽 이동 (error_x: {error_x})")
-            command_sent = True
-
-
-
-
-
-
-
-
+```
+# 수평 제어 (Pan)
+# 얼굴이 오른쪽에 있으면 -> 카메라를 오른쪽으로 (d)
+# 얼굴이 왼쪽에 있으면 -> 카메라를 왼쪽으로 (a)
+if error_x > self.config.deadzone_x:
+	self._send_command('a')  # 오른쪽으로
+	print(f"[PAN] 오른쪽 이동 (error_x: {error_x})")
+	command_sent = True
+elif error_x < -self.config.deadzone_x:
+	self._send_command('d')  # 왼쪽으로
+	print(f"[PAN] 왼쪽 이동 (error_x: {error_x})")
+	command_sent = True
+```
