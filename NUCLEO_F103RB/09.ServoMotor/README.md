@@ -132,6 +132,13 @@ SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
 
+<img src="TEK0000.JPG" width="50%">
+<img src="TEK0001.JPG" width="50%">
+<img src="TEK0002.JPG" width="50%">
+<img src="TEK0003.JPG" width="50%">
+<img src="TEK0004.JPG" width="50%">
+
+
 ```c
 /* USER CODE BEGIN WHILE */
 while (1)
