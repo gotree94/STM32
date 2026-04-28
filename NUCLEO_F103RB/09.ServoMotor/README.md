@@ -552,6 +552,8 @@ void display_servo_status(uint8_t pan, uint8_t tilt)
 - 연결된 카메라 자동 검색
 - 다중 카메라 동시 표시
 
+* cam_test.py
+
 ```python
 import cv2
 
