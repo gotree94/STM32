@@ -87,15 +87,36 @@ $$\frac{2 \, \text{ms}}{20 \, \mu\text{s}} = 100 \quad \Rightarrow \quad \text{C
 - 90° → 1.5 ms → CCR = 75  
 - 180° → 2 ms → CCR = 100  
 
+<img src="TEK0004.JPG" width="50%">
+
 ```c
 // 0도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 50);
+```
+<img src="TEK0001.JPG" width="50%">
 
+```c
 // 90도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 75);
+```
+<img src="TEK0002.JPG" width="50%">
 
+```c
 // 180도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 100);
+```
+```
+<img src="TEK0003.JPG" width="50%">
+
+```c
+SG90_SetAngle(90);   // 90도
+HAL_Delay(1000);
+```
+<img src="TEK0003.JPG" width="50%">
+
+```c
+SG90_SetAngle(180);  // 180도
+HAL_Delay(1000);
 ```
 
 ---
@@ -120,28 +141,17 @@ void SG90_SetAngle(uint8_t angle)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 ```
-<img src="TEK0004.JPG" width="50%">
 
 ```c
 SG90_SetAngle(0);    // 0도
 HAL_Delay(1000);
-```
-<img src="TEK0001.JPG" width="50%">
 
-```c
 SG90_SetAngle(90);   // 90도
 HAL_Delay(1000);
-```
-<img src="TEK0002.JPG" width="50%">
 
-```c
 SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
-<img src="TEK0003.JPG" width="50%">
-
-
-
 
 ```c
 /* USER CODE BEGIN WHILE */
