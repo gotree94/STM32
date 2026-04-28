@@ -105,16 +105,15 @@ __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 75);
 // 180도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 100);
 ```
-```
 <img src="TEK0003.JPG" width="50%">
 
 ```c
+SG90_SetAngle(0);   // 0도
+HAL_Delay(1000);
+
 SG90_SetAngle(90);   // 90도
 HAL_Delay(1000);
-```
-<img src="TEK0003.JPG" width="50%">
 
-```c
 SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
