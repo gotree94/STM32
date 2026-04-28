@@ -47,7 +47,7 @@ $$
 
 ## 4. 펄스 폭 (CCR 값으로 각도 제어)
 
-<imgsrc="001.png" width = "50%">
+<img src="001.png" width = "50%">
 
 * Position 
   * "0" (1.5 ms pulse) is middle, "90" (~2ms pulse) is middle, 
