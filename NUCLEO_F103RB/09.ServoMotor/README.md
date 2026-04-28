@@ -114,6 +114,13 @@ void SG90_SetAngle(uint8_t angle)
 ---
 
 ## 8. 사용 예시
+
+```c
+  /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  /* USER CODE END 2 */
+```
+
 ```c
 SG90_SetAngle(0);    // 0도
 HAL_Delay(1000);
