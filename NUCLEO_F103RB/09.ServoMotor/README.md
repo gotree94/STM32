@@ -52,7 +52,7 @@ $$
 * Position 
   * "0" (0.5 ms pulse) is middle, 
   * "90" (1.5 ms pulse) is all the way to the right, 
-  * "-90" (~2.5 ms pulse) is all the way to the left.
+  * "-90" (2.5 ms pulse) is all the way to the left.
 
 * CCR은 Capture/Compare Register
    * Compare (비교): 타이머의 현재 카운트 값(CNT)과 내가 설정한 CCR 값을 계속 비교합니다.
@@ -61,9 +61,9 @@ $$
 
 | 각도 | 펄스 폭 (ms) | 계산식 (ARR=1000 기준) | CCR 값 | 
 |:---:|:---:|:---:|:---:|
-| 0°| 1.0 ms| 1000×(1ms/20ms)=50| 25 | 
+| 0°| 0.5 ms| 1000×(1ms/20ms)=50| 25 | 
 | 90°| 1.5 ms| 1000×(1.5ms/20ms)=75| 75 | 
-| 180°| 2.0 ms| 1000×(2ms/20ms)=100| 125 | 
+| 180°| 2.5 ms| 1000×(2ms/20ms)=100| 125 | 
 
 - **1 ms** 펄스 폭  
 $$\frac{1 \, \text{ms}}{20 \, \mu\text{s}} = 50 \quad \Rightarrow \quad \text{CCR} = 50$$
@@ -83,9 +83,9 @@ $$\frac{2 \, \text{ms}}{20 \, \mu\text{s}} = 100 \quad \Rightarrow \quad \text{C
 ---
 
 ## 6. 각도별 CCR 값
-- 0° → 1 ms → CCR = 25  
+- 0° → 0.5 ms → CCR = 25  
 - 90° → 1.5 ms → CCR = 75  
-- 180° → 2 ms → CCR = 125  
+- 180° → 2.5 ms → CCR = 125  
 
 <img src="TEK0004.JPG" width="50%">
 
