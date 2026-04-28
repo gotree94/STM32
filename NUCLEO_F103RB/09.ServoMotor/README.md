@@ -546,6 +546,7 @@ void display_servo_status(uint8_t pan, uint8_t tilt)
 
 ## Camera + PAN/TILT
 
+* https://www.anaconda.com/download/success?reg=skipped
 
 카메라 확인 프로그램
 - 연결된 카메라 자동 검색
