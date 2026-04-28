@@ -50,9 +50,9 @@ $$
 <img src="001.png" width = "50%">
 
 * Position 
-  * "0" (1.5 ms pulse) is middle, "90" (~2ms pulse) is middle, 
-  * "90" (~2 ms pulse) is all the way to the right, 
-  * "-90" (~1 ms pulse) is all the way to the left.
+  * "0" (0.5 ms pulse) is middle, 
+  * "90" (1.5 ms pulse) is all the way to the right, 
+  * "-90" (~2.5 ms pulse) is all the way to the left.
 
 * CCR은 Capture/Compare Register
    * Compare (비교): 타이머의 현재 카운트 값(CNT)과 내가 설정한 CCR 값을 계속 비교합니다.
