@@ -52,7 +52,7 @@ $$
 * Position 
   * "0" (0.5 ms pulse) is middle, 
   * "90" (1.5 ms pulse) is all the way to the right, 
-  * "-90" (2.5 ms pulse) is all the way to the left.
+  * "180" (2.5 ms pulse) is all the way to the left.
 
 * CCR은 Capture/Compare Register
    * Compare (비교): 타이머의 현재 카운트 값(CNT)과 내가 설정한 CCR 값을 계속 비교합니다.
@@ -66,13 +66,13 @@ $$
 | 180°| 2.5 ms| 1000×(2ms/20ms)=100| 125 | 
 
 - **1 ms** 펄스 폭  
-$$\frac{1 \, \text{ms}}{20 \, \mu\text{s}} = 50 \quad \Rightarrow \quad \text{CCR} = 50$$
+$$\frac{0.5 \, \text{ms}}{20 \, \mu\text{s}} = 25 \quad \Rightarrow \quad \text{CCR} = 25$$
 
 - **1.5 ms** 펄스 폭  
 $$\frac{1.5 \, \text{ms}}{20 \, \mu\text{s}} = 75 \quad \Rightarrow \quad \text{CCR} = 75$$
 
 - **2 ms** 펄스 폭  
-$$\frac{2 \, \text{ms}}{20 \, \mu\text{s}} = 100 \quad \Rightarrow \quad \text{CCR} = 100$$
+$$\frac{2.5 \, \text{ms}}{20 \, \mu\text{s}} = 120 \quad \Rightarrow \quad \text{CCR} = 125$$
 
 ---
 
