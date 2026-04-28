@@ -61,9 +61,9 @@ $$
 
 | 각도 | 펄스 폭 (ms) | 계산식 (ARR=1000 기준) | CCR 값 | 
 |:---:|:---:|:---:|:---:|
-| 0°| 1.0 ms| 1000×(1ms/20ms)=50| 50 | 
+| 0°| 1.0 ms| 1000×(1ms/20ms)=50| 25 | 
 | 90°| 1.5 ms| 1000×(1.5ms/20ms)=75| 75 | 
-| 180°| 2.0 ms| 1000×(2ms/20ms)=100| 100 | 
+| 180°| 2.0 ms| 1000×(2ms/20ms)=100| 125 | 
 
 - **1 ms** 펄스 폭  
 $$\frac{1 \, \text{ms}}{20 \, \mu\text{s}} = 50 \quad \Rightarrow \quad \text{CCR} = 50$$
@@ -127,6 +127,18 @@ void SG90_SetAngle(uint8_t angle)
     // angle: 0 ~ 180도
     // CCR: 50(1ms) ~ 100(2ms)
     uint32_t ccr_val = 50 + ((angle * (100 - 50)) / 180);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr_val);
+}
+```
+
+```c
+void SG90_SetAngle(uint8_t angle)
+{
+    // Period = 1000, 주기 = 20ms
+    // 0도  → 0.5ms → CCR = 25
+    // 90도 → 1.5ms → CCR = 75
+    // 180도→ 2.5ms → CCR = 125
+    uint32_t ccr_val = 25 + ((uint32_t)angle * 100 / 180);
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr_val);
 }
 ```
