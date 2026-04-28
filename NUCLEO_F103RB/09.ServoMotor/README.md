@@ -47,6 +47,13 @@ $$
 
 ## 4. 펄스 폭 (CCR 값으로 각도 제어)
 
+<imgsrc="001.png" width = "50%">
+
+* Position 
+  * "0" (1.5 ms pulse) is middle, "90" (~2ms pulse) is middle, 
+  * "90" (~2 ms pulse) is all the way to the right, 
+  * "-90" (~1 ms pulse) is all the way to the left.
+
 - **1 ms** 펄스 폭  
 $$\frac{1 \, \text{ms}}{20 \, \mu\text{s}} = 50 \quad \Rightarrow \quad \text{CCR} = 50$$
 
