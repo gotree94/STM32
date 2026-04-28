@@ -480,6 +480,58 @@ void display_servo_status(uint8_t pan, uint8_t tilt)
 ```
 
 
+```c
+/* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    if (HAL_UART_Receive(&huart2, &ch, sizeof(ch), 10) == HAL_OK)
+    {
+      switch (ch)
+      {
+        case 's': // Down
+          printf("Command: Down\r\n");
+          pos_tilt = (pos_tilt + STEP <= MAX) ? (pos_tilt + STEP) : MAX;
+          break;
+
+        case 'w': // Up
+          printf("Command: Up\r\n");
+          pos_tilt = (pos_tilt - STEP >= MIN) ? (pos_tilt - STEP) : MIN;
+          break;
+
+        case 'a': // Left
+          printf("Command: Left\r\n");
+          pos_pan = (pos_pan + STEP <= MAX) ? (pos_pan + STEP) : MAX;
+          break;
+
+        case 'd': // Right
+          printf("Command: Right\r\n");
+          pos_pan = (pos_pan - STEP >= MIN) ? (pos_pan - STEP) : MIN;
+          break;
+
+        case 'i': // Center
+          printf("Command: Center\r\n");
+          pos_pan = CENTER;
+          pos_tilt = CENTER;
+          break;
+
+        default:
+          printf("Invalid command: %c\r\n", ch);
+          continue; // 잘못된 명령이면 아래 PWM 업데이트 로직을 건너뜀
+      }
+
+      // PWM 듀티 사이클 업데이트 (정상적인 명령일 때만 실행됨)
+      __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_pan);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pos_tilt);
+
+      // 상태 출력
+      display_servo_status(pos_pan, pos_tilt);
+
+      HAL_Delay(50); // 서보 응답 시간
+    }
+  }
+  /* USER CODE END WHILE */
+```
+
 
 
 
