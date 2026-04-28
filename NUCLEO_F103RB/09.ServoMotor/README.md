@@ -131,6 +131,27 @@ HAL_Delay(1000);
 SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
+
+```c
+/* USER CODE BEGIN WHILE */
+while (1)
+{
+    // 0도 → 180도 증가
+    for (int angle = 0; angle <= 180; angle++)
+    {
+        SG90_SetAngle(angle);
+        HAL_Delay(10);
+    }
+
+    // 180도 → 0도 감소
+    for (int angle = 180; angle >= 0; angle--)
+    {
+        SG90_SetAngle(angle);
+        HAL_Delay(10);
+    }
+    /* USER CODE END WHILE */
+```
+
 ----
 # 코드 수정
 ----
