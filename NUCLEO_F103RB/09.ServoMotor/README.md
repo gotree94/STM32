@@ -135,6 +135,8 @@ void SG90_SetAngle(uint8_t angle)
 
 ## 8. 사용 예시
 
+### 8.1 특정 각도로 이동
+
 ```c
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
@@ -151,6 +153,8 @@ HAL_Delay(1000);
 SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
+
+### 8.2 각도 이동 확인
 
 ```c
 /* USER CODE BEGIN WHILE */
