@@ -83,15 +83,15 @@ $$\frac{2 \, \text{ms}}{20 \, \mu\text{s}} = 100 \quad \Rightarrow \quad \text{C
 ---
 
 ## 6. 각도별 CCR 값
-- 0° → 1 ms → CCR = 50  
+- 0° → 1 ms → CCR = 25  
 - 90° → 1.5 ms → CCR = 75  
-- 180° → 2 ms → CCR = 100  
+- 180° → 2 ms → CCR = 125  
 
 <img src="TEK0004.JPG" width="50%">
 
 ```c
 // 0도
-__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 50);
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 25);
 ```
 <img src="TEK0001.JPG" width="50%">
 
@@ -103,7 +103,7 @@ __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 75);
 
 ```c
 // 180도
-__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 100);
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 125);
 ```
 <img src="TEK0003.JPG" width="50%">
 
@@ -121,16 +121,6 @@ HAL_Delay(1000);
 ---
 
 ## 7. 각도를 일반화한 함수
-```c
-void SG90_SetAngle(uint8_t angle)
-{
-    // angle: 0 ~ 180도
-    // CCR: 50(1ms) ~ 100(2ms)
-    uint32_t ccr_val = 50 + ((angle * (100 - 50)) / 180);
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr_val);
-}
-```
-
 ```c
 void SG90_SetAngle(uint8_t angle)
 {
@@ -166,7 +156,7 @@ SG90_SetAngle(180);  // 180도
 HAL_Delay(1000);
 ```
 
-### 8.2 각도 이동 확인
+### 8.2 각도 이동 확인 : 0° → 180° → 0° 스윕 예시
 
 ```c
 /* USER CODE BEGIN WHILE */
@@ -176,14 +166,14 @@ while (1)
     for (int angle = 0; angle <= 180; angle++)
     {
         SG90_SetAngle(angle);
-        HAL_Delay(10);
+        HAL_Delay(100);
     }
 
     // 180도 → 0도 감소
     for (int angle = 180; angle >= 0; angle--)
     {
         SG90_SetAngle(angle);
-        HAL_Delay(10);
+        HAL_Delay(100);
     }
     /* USER CODE END WHILE */
 ```
