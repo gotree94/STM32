@@ -34,8 +34,29 @@
   - [완료] 31. SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
   - [완료] 32.FATFS
   - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
-  - [] 34.2.4" TFT SPI 240*320
+  - [완료] 34.2.4" TFT SPI 240*320
   - [] 35.RTC
+  - [완료] 36.Vector
+  - [완료] 37.IR_RX
+  - [] 38.IR_TX
+  - [완료] 39.Shock_Sensor
+  - [완료] 40.3COLOR-LED
+  - [완료] 41.2COLOR-LED
+  - [완료] 42.Laser
+  - [완료] 43.Knock_Sensor
+  - [완료] 44.Tracking
+  - [완료] 45.Obstacle_Detection
+  - [완료] 46.Realy
+  - [] 47.photo_interrupt
+  - [완료] 48.flame_detector
+  - [완료] 49.Read_swtich
+  - [완료] 50.touch_sensor
+  - [완료] 51.linear_hall_sensor
+  - [완료] 52.hearbeat_sensor
+  - [] MP4-GIF
+  - [] Project_Support/2025-2nd
+  - [] SENSOR_KIT
+  - [] SENSOR_KIT_Arduino
   - [] 36.MAX98357 I2S DAC
 
 ## NUCLEO_F411RE
