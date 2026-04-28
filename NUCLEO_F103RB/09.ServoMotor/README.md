@@ -238,6 +238,68 @@ PUTCHAR_PROTOTYPE
 
     /* USER CODE END WHILE */
 ```
+* 위의 if 포현을 switch case로 변경하면?
+```c
+/* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    if (HAL_UART_Receive(&huart2, &ch, sizeof(ch), 10) == HAL_OK)
+    {
+      switch (ch)
+      {
+        case 's':
+          printf("Down\r\n");
+          if (pos_tilt + STEP <= MAX)
+            pos_tilt += STEP;
+          else
+            pos_tilt = MAX;
+          break;
+
+        case 'w':
+          printf("Up\r\n");
+          if (pos_tilt - STEP >= MIN)
+            pos_tilt -= STEP;
+          else
+            pos_tilt = MIN;
+          break;
+
+        case 'a':
+          printf("Left\r\n");
+          if (pos_pan + STEP <= MAX)
+            pos_pan += STEP;
+          else
+            pos_pan = MAX;
+          break;
+
+        case 'd':
+          printf("Right\r\n");
+          if (pos_pan - STEP >= MIN)
+            pos_pan -= STEP;
+          else
+            pos_pan = MIN;
+          break;
+
+        case 'i':
+          printf("Center\r\n");
+          pos_pan = CENTER;
+          pos_tilt = CENTER;
+          break;
+
+        default:
+          // 정의되지 않은 키가 입력되었을 때의 처리 (선택 사항)
+          break;
+      }
+
+      // PWM 듀티 사이클 업데이트
+      __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pos_pan);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pos_tilt);
+
+      printf("Pan: %d, Tilt: %d\r\n", pos_pan, pos_tilt);
+
+      HAL_Delay(50); // 서보 응답 시간
+    }
+    /* USER CODE END WHILE */
+```
 
 ---
 # 각도표시
