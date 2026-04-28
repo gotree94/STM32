@@ -54,6 +54,17 @@ $$
   * "90" (~2 ms pulse) is all the way to the right, 
   * "-90" (~1 ms pulse) is all the way to the left.
 
+* CCR은 Capture/Compare Register
+   * Compare (비교): 타이머의 현재 카운트 값(CNT)과 내가 설정한 CCR 값을 계속 비교합니다.
+   * 동작 원리: PWM 모드에서는 카운트 값이 CCR보다 작을 때는 High(1)를 유지하다가, CCR 값에 도달하는 순간 Low(0)로 떨어뜨립니다. 즉, CCR 값은 PWM의 High 구간(Duty Cycle)의 길이를 결정하는 핵심 레지스터입니다.
+   * CCR 1당 0.02ms를 의미하는 셈입니다. ($20ms / 1000 = 0.02ms$)
+
+| 각도 | 펄스 폭 (ms) | 계산식 (ARR=1000 기준) | CCR 값 | 
+|:---:|:---:|:---:|:---:|
+| 0°| 1.0 ms| 1000×(1ms/20ms)=50| 50 | 
+| 90°| 1.5 ms| 1000×(1.5ms/20ms)=75| 75 | 
+| 180°| 2.0 ms| 1000×(2ms/20ms)=100| 100 | 
+
 - **1 ms** 펄스 폭  
 $$\frac{1 \, \text{ms}}{20 \, \mu\text{s}} = 50 \quad \Rightarrow \quad \text{CCR} = 50$$
 
