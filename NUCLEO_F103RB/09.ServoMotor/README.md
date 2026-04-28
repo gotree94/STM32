@@ -87,25 +87,25 @@ $$\frac{2.5 \, \text{ms}}{20 \, \mu\text{s}} = 120 \quad \Rightarrow \quad \text
 - 90° → 1.5 ms → CCR = 75  
 - 180° → 2.5 ms → CCR = 125  
 
-<img src="TEK0004.JPG" width="50%">
+<img src="TEK0005.JPG" width="50%">
 
 ```c
 // 0도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 25);
 ```
-<img src="TEK0001.JPG" width="50%">
+<img src="TEK0006.JPG" width="50%">
 
 ```c
 // 90도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 75);
 ```
-<img src="TEK0002.JPG" width="50%">
+<img src="TEK0007.JPG" width="50%">
 
 ```c
 // 180도
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 125);
 ```
-<img src="TEK0003.JPG" width="50%">
+<img src="TEK0008.JPG" width="50%">
 
 ```c
 SG90_SetAngle(0);   // 0도
