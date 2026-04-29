@@ -3,10 +3,10 @@
 <img width="392" height="258" alt="126" src="https://github.com/user-attachments/assets/00230408-09ac-4b1c-a794-f1aadc8087e6" />
 <br>
 
-<img src="001.png" width="60%"><br>
+<img src="001.png" height="50%" width="60%"><br>
 <img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/e67d445b-c3b0-483c-92b6-4100a39a662e" />
 <br>
-<img src="003.png" width="60%"><br>
+<img src="003.png" height="50%" width="60%"><br>
 <br>
 
 <img width="600" height="520" alt="ultrasonic_001" src="https://github.com/user-attachments/assets/1827803d-4843-4b12-a703-df4b046097b6" />
