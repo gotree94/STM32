@@ -150,7 +150,34 @@ uint32_t echo(void) {
 }
 ```
 
+---
 
+## Node.js
+
+```
+	          printf("Distance = %d(mm)\n", dist);
+```
+
+```
+	          printf("Distance1 = %d(mm)\n", dist1);
+	          printf("Distance2 = %d(mm)\n", dist2);
+```
+
+```
+hcsr04-dashboard/
+├── server.js
+└── public/
+    └── index.html
+```
+
+```
+npm init -y
+npm install express socket.io
+```
+
+```
+node server.js 3000 COM3
+```
 
 <img width="600" height="480" alt="shield-001" src="https://github.com/user-attachments/assets/4c7f5dc6-ffe6-4f62-bcb1-376dc55e13a9" />
 <br>
