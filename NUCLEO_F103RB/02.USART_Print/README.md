@@ -68,7 +68,7 @@ PUTCHAR_PROTOTYPE
 
 # 파형 분석
 
-
+<img src="TEK0009.JPG">
 
 # UART 115200bps 파형 분석 — 문자 `'1'` (0x31)
 
