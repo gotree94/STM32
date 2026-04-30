@@ -68,8 +68,6 @@ PUTCHAR_PROTOTYPE
 
 # 파형 분석
 
-<img src="TEK0009.JPG">
-
 # UART 115200bps 파형 분석 — 문자 `'1'` (0x31)
 
 > 오실로스코프(Tektronix)로 캡처한 UART 송신 파형을 분석합니다.  
