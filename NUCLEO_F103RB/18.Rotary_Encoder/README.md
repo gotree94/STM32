@@ -167,9 +167,9 @@
 
 ### 컴파일러 설정 (printf 사용을 위해)
 1. **Project Properties** → **C/C++ Build** → **Settings**
-2. **Tool Settings** → **MCU GCC Linker** → **Libraries**
+~~2. **Tool Settings** → **MCU GCC Linker** → **Libraries**~~
 3. **Use float with printf from newlib-nano (-u _printf_float)**: Yes
-4. **Small printf from newlib-nano**: Yes
+~~4. **Small printf from newlib-nano**: Yes~~
 
 ---
 
