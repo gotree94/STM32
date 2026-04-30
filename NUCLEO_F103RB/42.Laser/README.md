@@ -2,9 +2,9 @@
 
 <img src="Laser.jpg"><br>
 
-"S" - Laser_GPIO_Port
-" " - NC
-"-" - GND
+* "S" - Laser_GPIO_Port
+* " " - NC
+* "-" - GND
 
 <img src="Laser_001.png"><br>
 <img src="Laser_002.png"><br>
