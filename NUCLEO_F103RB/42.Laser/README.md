@@ -13,7 +13,7 @@
   {
 	  HAL_GPIO_WritePin(Laser_GPIO_Port, Laser_Pin, 1);
 	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(Laser_GPIO_Port, Laser_Pin, 1);
+	  HAL_GPIO_WritePin(Laser_GPIO_Port, Laser_Pin, 0);
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
