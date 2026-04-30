@@ -1,4 +1,4 @@
-# LAser Projects for STM32F103
+# Laser Projects for STM32F103
 
 <img src="Laser.jpg"><br>
 
