@@ -1,4 +1,4 @@
-# Rotary_Encoder
+# Rotary_Encoder_TIM
 
 <img src="Rotary_Encoder.png">
 
