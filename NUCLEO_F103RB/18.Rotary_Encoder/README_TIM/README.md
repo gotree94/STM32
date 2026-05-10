@@ -20,6 +20,7 @@ C:\work\stm32_rotary_encoder\
 ## 🔌 하드웨어 연결 (NUCLEO-F103RB)
 
 | 신호	| 핀 | 	TIM3 매핑	|  보드 커넥터 | 
+|:------:|:------:|:------:|:------:|
 | Encoder Phase A |	PA6	| TIM3_CH1	| D12 |
 | Encoder Phase B |	PA7	| TIM3_CH2	| D11 |
 | USART2 TX	| PA2	| - |	- |
