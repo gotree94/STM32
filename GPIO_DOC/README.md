@@ -18,7 +18,7 @@
    * I/O의 대체 기능 구성은 필요 시 특정 순서를 따라 잠글 수 있으며, 이는 I/O 레지스터에 불필요한 기록이 이루어지는 것을 방지하기 위함입니다.<br>
    * I/O는 APB2 버스에 연결되어 있으며, 최대 18 MHz의 토글 속도를 지원합니다.<br>
 
-<details open>
+<details>
 <summary>Click to collapse</summary>
 <img src="003.png"> <br>
 <img src="004.png"> <br>
@@ -28,6 +28,8 @@
 
 ## MemoryMap
 
+<details>
+<summary>Click to collapse</summary>
 <img width="700" height="841" alt="memory_map_000" src="https://github.com/user-attachments/assets/61b183dc-5844-4e6e-af76-f233ff1be6e5" /><br>
 <img src="007.png"> <br>
 <img width="700" height="554" alt="memory_map_001" src="https://github.com/user-attachments/assets/484f6555-89aa-4b1e-8b21-b2d93045dc71" /><br>
@@ -52,23 +54,21 @@
 <img src="017.png"> <br>
 <img width="700" height="537" alt="memory_map_011" src="https://github.com/user-attachments/assets/1705425a-930b-49b5-9602-48708ed5360e" /><br>
 <img src="018.png"> <br>
+</details>
+
 
 ## Register
-<img width="700" height="789" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/8bdea1c9-775c-49a1-9edc-1561dbcb336a" />
-<br>
-<img width="700" height="707" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/4f3f19c2-9a94-42b4-a0b5-114d87a409a4" />
-<br>
-<img width="700" height="368" alt="GPIO_Register_003" src="https://github.com/user-attachments/assets/45f106f2-e432-4dcb-bf74-c4dd08d2fef7" />
-<br>
-<img width="700" height="376" alt="GPIO_Register_004" src="https://github.com/user-attachments/assets/6c4b1f8f-dbe2-4374-8908-ee492f53d153" />
-<br>
-<img width="700" height="481" alt="GPIO_Register_005" src="https://github.com/user-attachments/assets/07bf0f6b-c3d9-465c-a002-17d2ac9a41b5" />
-<br>
-<img width="700" height="376" alt="GPIO_Register_006" src="https://github.com/user-attachments/assets/48daf395-3145-41ca-b3a3-8a4fb0201697" />
-<br>
-<img width="700" height="813" alt="GPIO_Register_007" src="https://github.com/user-attachments/assets/01aab0d6-81dd-4590-b46d-19f6201a8980" />
-<br>
 
+<details>
+<summary>Click to collapse</summary>
+<img width="700" height="789" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/8bdea1c9-775c-49a1-9edc-1561dbcb336a" /><br>
+<img width="700" height="707" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/4f3f19c2-9a94-42b4-a0b5-114d87a409a4" /><br>
+<img width="700" height="368" alt="GPIO_Register_003" src="https://github.com/user-attachments/assets/45f106f2-e432-4dcb-bf74-c4dd08d2fef7" /><br>
+<img width="700" height="376" alt="GPIO_Register_004" src="https://github.com/user-attachments/assets/6c4b1f8f-dbe2-4374-8908-ee492f53d153" /><br>
+<img width="700" height="481" alt="GPIO_Register_005" src="https://github.com/user-attachments/assets/07bf0f6b-c3d9-465c-a002-17d2ac9a41b5" /><br>
+<img width="700" height="376" alt="GPIO_Register_006" src="https://github.com/user-attachments/assets/48daf395-3145-41ca-b3a3-8a4fb0201697" /><br>
+<img width="700" height="813" alt="GPIO_Register_007" src="https://github.com/user-attachments/assets/01aab0d6-81dd-4590-b46d-19f6201a8980" /><br>
+</details>
 
 ## Test
 
