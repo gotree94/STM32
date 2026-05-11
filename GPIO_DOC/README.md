@@ -4,9 +4,9 @@
 
 ## [TOC]   
    - 1.[Architecture](#1.Architecture)
-   - 2.[MemoryMap](#2. MemoryMap)
-   - 3.[Register](#3. Register)
-   - 4.[Test](#4. Test)
+   - 2.[MemoryMap](##2.MemoryMap)
+   - 3.[Register](##3.Register)
+   - 4.[Test](##4.Test)
 
 ## 1.Architecture
 
