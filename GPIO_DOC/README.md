@@ -10,8 +10,8 @@
 
 ## Architecture
 
-<img src="arm-arch.png"> <br>
-<img src="002.png"> <br>
+<img src="./img/arm-arch.png"> <br>
+<img src="./img/002.png"> <br>
 
    * 각 GPIO 핀은 소프트웨어로 출력(푸시풀 또는 오픈 드레인), 입력(풀업 또는 풀다운 여부 선택), 또는 주변 장치의 대체 기능으로 구성할 수 있습니다.<br>
    * 대부분의 GPIO 핀은 디지털 또는 아날로그 대체 기능과 공유됩니다. 모든 GPIO는 고전류를 지원합니다.<br>
@@ -20,28 +20,28 @@
 
 <details>
 <summary>Click to collapse</summary>
-<img src="003.png"> <br>
-<img src="004.png"> <br>
-<img src="005.png"> <br>
-<img src="006.png"> <br>
+<img src="./img/003.png"> <br>
+<img src="./img/004.png"> <br>
+<img src="./img/005.png"> <br>
+<img src="./img/006.png"> <br>
 </details>
 
 ## MemoryMap
 
 <details>
 <summary>Click to collapse</summary>
-<img src="007.png"> <br>
-<img src="008.png"> <br>
-<img src="009.png"> <br>
-<img src="010.png"> <br>
-<img src="011.png"> <br>
-<img src="012.png"> <br>
-<img src="013.png"> <br>
-<img src="014.png"> <br>
-<img src="015.png"> <br>
-<img src="016.png"> <br>
-<img src="017.png"> <br>
-<img src="017-1.png"> <br>
+<img src="./img/007.png"> <br>
+<img src="./img/008.png"> <br>
+<img src="./img/009.png"> <br>
+<img src="./img/010.png"> <br>
+<img src="./img/011.png"> <br>
+<img src="./img/012.png"> <br>
+<img src="./img/013.png"> <br>
+<img src="./img/014.png"> <br>
+<img src="./img/015.png"> <br>
+<img src="./img/016.png"> <br>
+<img src="./img/017.png"> <br>
+<img src="./img/017-1.png"> <br>
 </details>
 
 
