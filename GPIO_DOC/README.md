@@ -49,13 +49,10 @@
 
 <details>
 <summary>Click to collapse</summary>
-<img width="700" height="789" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/8bdea1c9-775c-49a1-9edc-1561dbcb336a" /><br>
-<img width="700" height="707" alt="GPIO_Register_002" src="https://github.com/user-attachments/assets/4f3f19c2-9a94-42b4-a0b5-114d87a409a4" /><br>
-<img width="700" height="368" alt="GPIO_Register_003" src="https://github.com/user-attachments/assets/45f106f2-e432-4dcb-bf74-c4dd08d2fef7" /><br>
-<img width="700" height="376" alt="GPIO_Register_004" src="https://github.com/user-attachments/assets/6c4b1f8f-dbe2-4374-8908-ee492f53d153" /><br>
-<img width="700" height="481" alt="GPIO_Register_005" src="https://github.com/user-attachments/assets/07bf0f6b-c3d9-465c-a002-17d2ac9a41b5" /><br>
-<img width="700" height="376" alt="GPIO_Register_006" src="https://github.com/user-attachments/assets/48daf395-3145-41ca-b3a3-8a4fb0201697" /><br>
-<img width="700" height="813" alt="GPIO_Register_007" src="https://github.com/user-attachments/assets/01aab0d6-81dd-4590-b46d-19f6201a8980" /><br>
+<img src="./img/018.png"> <br>
+<img src="./img/019.png"> <br>
+<img src="./img/020.png"> <br>
+<img src="./img/021.png"> <br>
 </details>
 
 ## 4.Test
