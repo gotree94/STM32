@@ -6,7 +6,7 @@
       - 3.[Register](#Register)
       - 4.[Test](#Test)
 
-## Architecture
+## 1.Architecture
 
 <img src="./img/arm-arch.png"> <br>
 <img src="./img/002.png"> <br>
@@ -24,7 +24,7 @@
 <img src="./img/006.png"> <br>
 </details>
 
-## MemoryMap
+## 2. MemoryMap
 
 <details>
 <summary>Click to collapse</summary>
@@ -43,7 +43,7 @@
 </details>
 
 
-## Register
+## 3. Register
 
 <details>
 <summary>Click to collapse</summary>
@@ -56,7 +56,7 @@
 <img width="700" height="813" alt="GPIO_Register_007" src="https://github.com/user-attachments/assets/01aab0d6-81dd-4590-b46d-19f6201a8980" /><br>
 </details>
 
-## Test
+## 4. Test
 
 #### 1.	LED test 프로그램을 작성합니다.<br>
 <img width="459" height="151" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/46223b7e-ec0a-41c5-86ec-ef612250b98a" />
