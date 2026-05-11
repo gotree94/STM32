@@ -8,18 +8,19 @@
 - [3. Register](#3-register)
 - [4. Test](#4-test)
 
-## 1.Architecture
-
 <img src="./img/arm-arch.png"> <br>
-<img src="./img/002.png"> <br>
 
    * 각 GPIO 핀은 소프트웨어로 출력(푸시풀 또는 오픈 드레인), 입력(풀업 또는 풀다운 여부 선택), 또는 주변 장치의 대체 기능으로 구성할 수 있습니다.<br>
    * 대부분의 GPIO 핀은 디지털 또는 아날로그 대체 기능과 공유됩니다. 모든 GPIO는 고전류를 지원합니다.<br>
    * I/O의 대체 기능 구성은 필요 시 특정 순서를 따라 잠글 수 있으며, 이는 I/O 레지스터에 불필요한 기록이 이루어지는 것을 방지하기 위함입니다.<br>
    * I/O는 APB2 버스에 연결되어 있으며, 최대 18 MHz의 토글 속도를 지원합니다.<br>
 
+## 1.Architecture
+
 <details>
 <summary>Click to collapse</summary>
+   
+<img src="./img/002.png"> <br>
 <img src="./img/003.png"> <br>
 <img src="./img/004.png"> <br>
 <img src="./img/005.png"> <br>
