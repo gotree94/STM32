@@ -79,3 +79,4 @@
 ---
 
    - [완료] Project_Support/2025-2nd
+   - [완료] Project_Support/2026-1st
