@@ -14,7 +14,7 @@
    - [완료] 10.GM009605_LCD :  0.96" 80 * 160 I2C
    - [완료] 11.LCD-SPI : 0.96" 80 * 160 SPI
    - [완료] 12.DHT11 : 온습도 센
-   - [완료] 13.JoyStick : ADC
+   - [완료] * 13.JoyStick : ADC
    - [완료] 14.ILI9341  - 2.4" TFT LCD SHIELD :  터치(불능?) SD-32.FATFS 참고
    - [완료] 15.CDS
    - [완료] 16.I2C-EEPROM
@@ -24,24 +24,24 @@
    - [완료] 20.VL53L0X  : Time-of-Flight (ToF) ranging sensor
    - [    ] 21.OV7670-103
    - [완료] 22.I2C_EEPROM_GPIO
-   - [완료] 23.Waveshare_1.3inch_oled
-   - [완료] 24.StepMotor_NEMA-17_L298N
-   - [완료] 25.StepMotor_28BYJ-48_5V_ULN2003
-   - [완료] 26.MicroSD_Card_Adaptor_NS-SD04_microSD_Card  : NS-SD04 (아두이노호환 microSD Card 어댑터)
+   - [    ] 23.Waveshare_1.3inch_oled
+   - [    ] 24.StepMotor_NEMA-17_L298N
+   - [    ] 25.StepMotor_28BYJ-48_5V_ULN2003
+   - [    ] 26.MicroSD_Card_Adaptor_NS-SD04_microSD_Card  : NS-SD04 (아두이노호환 microSD Card 어댑터)
       * NS-SD04_ReferenceManual_KR.pdf
-   - [완료] 27.MicroSD_Card_Adaptor_Arduino_Mega_Micro_Sd_Card_Adapter  : Arduino Mega Micro Sd Card Adapter
-   - [완료] 28.USB HOST
+   - [    ] 27.MicroSD_Card_Adaptor_Arduino_Mega_Micro_Sd_Card_Adapter  : Arduino Mega Micro Sd Card Adapter
+   - [    ] 28.USB HOST
    - [    ] 29.GY-GPS6MV2
    - [완료] 30.1.28_TFT_Ver1.0_240_240_GC9A01
-   - [완료] 31.SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
+   - [    ] 31.SPI(Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
    - [완료] 32.FATFS
    - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
-   - [완료] 34.2.4TFT_SPI_240_320 
+   - [    ] 34.2.4TFT_SPI_240_320 
    - [    ] 35.RTC
    - [    ] 36.MAX98357 I2S DAC
-   - [완료] 36.Vector
-   - [완료] 37.IR_RX
-   - [완료] 38.IR_TX
+   - [완료] 36.Vector : 3Type LCD 모듈의 표정
+   - [완료] 37.IR_RX : IR 수신 모듈
+   - [    ] 38.IR_TX : IR 발신 모듈
    - [완료] 39.Shock_Sensor
    - [완료] 40.3COLOR-LED
    - [완료] 41.2COLOR-LED
@@ -49,15 +49,33 @@
    - [완료] 43.Knock_Sensor
    - [완료] 44.Tracking
    - [완료] 45.Obstacle_Detection
-   - [완료] 46.Realy
-   - [완료] 47.photo_interrupt
+   - [완료] * 46.Realy
+   - [    ] 47.photo_interrupt
    - [완료] 48.flame_detector
    - [완료] 49.Read_swtich
    - [완료] 50.touch_sensor
    - [완료] 51.linear_hall_sensor
-   - [완료] 52.hearbeat_sensor
-   - [완료] MP4-GIF
-   - [완료] Project_Support/2025-2nd
-   - [완료] SENSOR_KIT
-   - [완료] SENSOR_KIT_Arduino
+   - [   ] 52.hearbeat_sensor : 심박을 ADC 통해서 입력받고 증폭
+   - [    ] 고강도 소리 센서 모듈
+   - [    ] 소형 소리 센서 모듈
+   - [    ] 7섹 LED
+   - [    ] 각도 스위치
+   - [    ] 볼 스위치
+   - [    ] 리니어 홀 셍서 모듈
+   - [    ] 디지털 온도 센서 모듈
+   - [    ] 매짓 라이트컵 모듈
+   - [    ] 각도 스위치 모듈
+   - [    ] 아날로그 홀 센서
+   - [    ] 홀 마그네틱 센서 모듈
+   - [    ] 온도 센서 모듈
+   - [    ] 아날로스 온도 센서 모듈
 
+---
+
+   - [    ] SENSOR_KIT
+   - [    ] SENSOR_KIT_Arduino
+   - [완료] MP4-GIF
+
+---
+
+   - [완료] Project_Support/2025-2nd
