@@ -9,8 +9,7 @@
 
 
 ## Architecture
-<img width="700" height="852" alt="GPIO_Register_010" src="https://github.com/user-attachments/assets/45a3773c-c552-4388-b9bb-01d889790867" />
-<br>
+<img src"arm-arch.png"> <br>
 <img width="700" height="360" alt="GPIO_Register_011" src="https://github.com/user-attachments/assets/2eb0bbf5-16f7-4f15-a5b5-51e834e80615" />
 <br>
    * 각 GPIO 핀은 소프트웨어로 출력(푸시풀 또는 오픈 드레인), 입력(풀업 또는 풀다운 여부 선택), 또는 주변 장치의 대체 기능으로 구성할 수 있습니다.<br>
