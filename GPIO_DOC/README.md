@@ -1,14 +1,14 @@
-# GPIO
+#GPIO
    - [RM0008 Reference Manual (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
    - [DS5319 Datasheet (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
 
-## [TOC]   
-   - 1.[Architecture](#1.Architecture)
-   - 2.[MemoryMap](#2.MemoryMap)
-   - 3.[Register](#3.Register)
-   - 4.[Test](#4.Test)
+##[TOC]   
+   - 1.[Architecture](##1.Architecture)
+   - 2.[MemoryMap](##2.MemoryMap)
+   - 3.[Register](##3.Register)
+   - 4.[Test](##4.Test)
 
-## 1.Architecture
+##1.Architecture
 
 <img src="./img/arm-arch.png"> <br>
 <img src="./img/002.png"> <br>
@@ -26,7 +26,7 @@
 <img src="./img/006.png"> <br>
 </details>
 
-## 2. MemoryMap
+##2. MemoryMap
 
 <details>
 <summary>Click to collapse</summary>
@@ -45,7 +45,7 @@
 </details>
 
 
-## 3. Register
+##3. Register
 
 <details>
 <summary>Click to collapse</summary>
@@ -58,7 +58,7 @@
 <img width="700" height="813" alt="GPIO_Register_007" src="https://github.com/user-attachments/assets/01aab0d6-81dd-4590-b46d-19f6201a8980" /><br>
 </details>
 
-## 4. Test
+##4. Test
 
 #### 1.	LED test 프로그램을 작성합니다.<br>
 <img width="459" height="151" alt="GPIO_Register_001" src="https://github.com/user-attachments/assets/46223b7e-ec0a-41c5-86ec-ef612250b98a" />
