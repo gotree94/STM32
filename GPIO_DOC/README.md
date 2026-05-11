@@ -22,7 +22,7 @@
    
 <img src="./img/002.png"> <br>
 
-* **2.3.21 GPIOs (general-purpose inputs/outputs)**
+## **2.3.21 GPIOs (general-purpose inputs/outputs)**
    * Each of the GPIO pins can be configured by software as output (push-pull or open-drain), as input (with or without pull-up or pull-down) or as peripheral alternate function.
    * Most of the GPIO pins are shared with digital or analog alternate functions. All GPIOs are high current- capable.
    * The I/Os alternate function configuration can be locked if needed following a specific sequence in order to avoid spurious writing to the I/Os registers.
