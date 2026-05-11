@@ -18,11 +18,13 @@
    * I/O의 대체 기능 구성은 필요 시 특정 순서를 따라 잠글 수 있으며, 이는 I/O 레지스터에 불필요한 기록이 이루어지는 것을 방지하기 위함입니다.<br>
    * I/O는 APB2 버스에 연결되어 있으며, 최대 18 MHz의 토글 속도를 지원합니다.<br>
 
+<details>
+<summary>Click to expand</summary>
 <img src="003.png"> <br>
 <img src="004.png"> <br>
 <img src="005.png"> <br>
 <img src="006.png"> <br>
-
+</details>details>
 ## MemoryMap
 
 <img width="700" height="841" alt="memory_map_000" src="https://github.com/user-attachments/assets/61b183dc-5844-4e6e-af76-f233ff1be6e5" /><br>
