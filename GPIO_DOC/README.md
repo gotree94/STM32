@@ -2,11 +2,11 @@
    - [RM0008 Reference Manual (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
    - [DS5319 Datasheet (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
 
-## [TOC]   
-   - 1.[Architecture](#-1.Architecture)
-   - 2.[MemoryMap](#-2.MemoryMap)
-   - 3.[Register](#-3.Register)
-   - 4.[Test](#-4.Test)
+## Table of Contents
+- [1. Architecture](#1-architecture)
+- [2. MemoryMap](#2-memorymap)
+- [3. Register](#3-register)
+- [4. Test](#4-test)
 
 ## 1.Architecture
 
