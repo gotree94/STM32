@@ -2,12 +2,10 @@
 
 ## Description
   * The KY-010 Photo Interrupter module is a switch that will trigger a signal when the light between the sensor’s gap is blocked.
-
-This module is suitable for various electronic platforms like Arduino, Raspberry Pi, ESP32, and others.
+  * This module is suitable for various electronic platforms like Arduino, Raspberry Pi, ESP32, and others.
 
 ## Specifications:
   * This module consists of an optical emitter/detector and 3 male header pins on the front. On the back, there are two resistors of 10kΩ and 33Ω.
-
   * The sensor uses a beam of light between the emitter and detector to check if the path between both is being blocked by an opaque object.
 
 | Operating Voltage	| Board Dimensions | 
