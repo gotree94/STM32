@@ -1,6 +1,6 @@
 # Photo Interrupt Projects for STM32F103
 
-<img src="004.png"> <img src="006.png" width="30%">
+<img src="004.png"> <img src="006.png" width="20%">
 
 ## Description
   * The KY-010 Photo Interrupter module is a switch that will trigger a signal when the light between the sensor’s gap is blocked.
