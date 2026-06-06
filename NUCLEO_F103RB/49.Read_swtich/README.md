@@ -1,4 +1,4 @@
-# Read Switch Projects for STM32F103
+# Read Switch (KY-025) Projects for STM32F103
 
 <img src="lead_swtich.png">
 
