@@ -1,5 +1,4 @@
-# 고강도 소리 센서 모듈(High-Sensitivity Sound Sensor)과 <br>
-  소형 소리 센서 모듈(Microphone/Small Sound Sensor)
+# 고강도 소리 센서 모듈(High-Sensitivity Sound Sensor)과 소형 소리 센서 모듈(Microphone/Small Sound Sensor)
 
   * 소리 센서 모듈은 주변에서 발생하는 음파(Sound Wave)를 감지하여 전기적 신호로 변환하는 센서입니다.
   * 주로 마이크로폰(Microphone)과 신호 증폭을 위한 비교기(LM393 등)로 구성되며, <br>
