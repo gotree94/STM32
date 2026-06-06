@@ -4,6 +4,10 @@
 
 <img src="007.png"> 
 
+<img src="scope_0.png">
+
+* Photo Interrupt 사이를 가리면 '1'로 사이를 열어두면 '0'
+
 ## Description
   * The KY-010 Photo Interrupter module is a switch that will trigger a signal when the light between the sensor’s gap is blocked.
   * This module is suitable for various electronic platforms like Arduino, Raspberry Pi, ESP32, and others.
