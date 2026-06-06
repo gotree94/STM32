@@ -4,7 +4,11 @@
 
 <img src="005.gif">
 
-<img src="TEK0021.BMP">
+* Digital Output
+<img src="scope_1.png">
+
+* Analog Output
+<img src="scope_2.png">
 
 * 측정할때 위치는 센서를 옆으로 편상태에서 윗면에 자성을 인가해야 함.
 
