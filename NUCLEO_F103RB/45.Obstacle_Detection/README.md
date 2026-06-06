@@ -1,9 +1,7 @@
 # KY032 Infrared Obstacle Avoidance Sensor Module
 
 ## 타입 A : NE555 타이머 기반
-<img src="Obstacle_Detection-1.png"><br>
-
-<img src="schematic_2.png" width="30%">
+<img src="Obstacle_Detection-1.png"> <img src="schematic_2.png" width="30%">
 
 ## 타입 B : SN74LS00 Logic IC 기반
 <img src="Obstacle_Detection.png"> <br>
