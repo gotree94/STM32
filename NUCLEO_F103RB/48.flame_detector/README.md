@@ -13,9 +13,10 @@
 <img src="YG1006-001.png">
 
 
+## 상대 분광 감도 (Relative Spectral Sensitivity)
+
 <img src="YG1006-002.png">
 
-**상대 분광 감도 (Relative Spectral Sensitivity)**
  - 피크 감도 파장: ~950nm (근적외선 영역)
  - 유효 감도 범위: 700nm ~ 1100nm
  - 핵심 의미:
@@ -24,9 +25,11 @@
    * 가시광 영역(400~700nm)은 감도가 거의 없어 주변 가시광 노이즈에 강함
    * 실용 설계 시 940nm IR LED를 광원으로 사용하는 것이 표준
 
+
+##조도-컬렉터 전류 특성 (Electro-Optical Characteristics)
+
 <img src="YG1006-003.png">
 
-**조도-컬렉터 전류 특성 (Electro-Optical Characteristics)**
  - 조건: VCE = 5V, Ta = 25°C
  - X축: 조도 Ee (mW/cm²) — 로그 스케일
  - Y축: 컬렉터 전류 Ic (mA) — 로그 스케일
@@ -37,8 +40,10 @@
    * 조도가 2배 증가 시 전류도 비례 증가 → 아날로그 광량 측정 가능
    * 디지털 ON/OFF 감지뿐 아니라 선형 광센서로도 활용 가능
 
+
 <img src="YG1006-004.png">
-**상단 — 암전류 vs 온도 (Dark Current vs. Temperature)**
+
+## 상단 — 암전류 vs 온도 (Dark Current vs. Temperature)
  - 조건: VCE = 20V
  - X축: 주변 온도 Ta (°C)
  - Y축: 암전류 ICEO (A) — 로그 스케일
@@ -48,7 +53,7 @@
    * 온도 상승 시 암전류가 지수적으로 급증 → 고온 환경에서 오감지 위험
    * 실외/산업 환경 설계 시 온도 보상 회로 고려 필요
 
-**하단 — Ic vs. VCE 출력 특성 (Output Characteristics)**
+## 하단 — Ic vs. VCE 출력 특성 (Output Characteristics)
  - X축: 컬렉터-이미터 전압 VCE (V)
  - Y축: 컬렉터 전류 Ic (mA)
  - 파라미터: 조도 Ee = 0.5 ~ 1.5 mW/cm²
@@ -68,6 +73,7 @@
   * VCE = 2V 이상이면 안정적인 선형 동작 영역 확보
   * 부하 저항 설계 시 동작점을 포화 영역에 두면 안정적 출력
 
+---
 
 * 실무 설계 요약
   * 광원     : 940nm IR LED (최적 매칭)
