@@ -4,17 +4,17 @@
 
 ---
 
-DHT11 Sensor Working Principles
+## DHT11 Sensor Working Principles
 Inside the DHT11 sensor’s module, you’ll find an NTC thermistor and a humidity-sensing component on one side of the internal board. On the back side of the board, you’ll find a small microcontroller that handles data acquisition, processing, and transmission over the 1-Wire digital protocol as specified in the datasheet of the DHT11 sensor.
 
-DHT11 Temperature Sensor
+### DHT11 Temperature Sensor
 Temperature Sensing is handled by the integrated NTC thermistor inside the DHT11 module. The NTC (Negative Temperature Coefficient) Thermistor is a resistor that has a negative proportion relationship with the temperature. The resistance of the NTC drops as the temperature increases and vice versa as indicated in the diagram below.
 
 ![](Arduino-DHT11-Humidity-Sensor-Working-Principle-768x260.webp)
 
 The internal microcontroller is responsible for reading the internal NTC thermistor and calculating the corresponding temperature value using the characteristics curve of the NTC, then it sends the digital temperature value over the 1-Wire data line (once per second).
 
-DHT11 Humidity Sensor
+### DHT11 Humidity Sensor
 Humidity Sensing is handled by the internal humidity sensing component inside the DHT11 sensor’s module. The humidity sensing component in the DHT11 sensor utilizes a moisture-sensitive capacitor, which changes its capacitance based on the moisture level in the air.
 
 The DHT11 sensor’s built-in microcontroller charges and discharges the moisture-sensitive capacitor and determines its capacitance by measuring the charging/discharging time. Then it converts the capacitance value into a digital signal, which is transmitted over a 1-Wire serial interface.
@@ -35,6 +35,40 @@ Relative Humidity is typically expressed as a percentage (%). When the relative 
 
 > **Note**
 > The DHT11 sensor has a sampling rate of 1Hz which means that it does update the humidity & temperature readings once per second. However, you can still read the sensor multiple times per second but you’ll still get the same values because the sensor’s internal update rate (sampling) is fixed at 1Hz only. Reading the sensor at a higher rate is possible but not beneficial.
+
+---
+
+## DHT11 센서 작동 원리
+DHT11 센서 모듈 내부를 보면, 기판 앞면에는 NTC 서미스터와 습도 감지 부품이 부착되어 있습니다. 기판 뒷면에는 데이터 수집, 처리 및 DHT11 센서 데이터시트에 명시된 1-Wire 디지털 프로토콜을 통한 데이터 전송을 담당하는 소형 마이크로컨트롤러가 탑재되어 있습니다.
+
+### DHT11 온도 센서
+온도 감지는 DHT11 모듈 내부에 통합된 NTC 서미스터가 담당합니다. NTC(Negative Temperature Coefficient, 부특성) 서미스터는 온도와 반비례 관계를 가지는 저항기입니다. 아래 그림에서 볼 수 있듯이, 온도가 상승하면 NTC의 저항 값은 떨어지고 반대의 경우도 마찬가지입니다.
+
+![](Arduino-DHT11-Humidity-Sensor-Working-Principle-768x260.webp)
+
+내부 마이크로컨트롤러는 이 NTC 서미스터의 값을 읽고 NTC의 특성 곡선을 사용하여 해당하는 온도 값을 계산한 다음, 1-Wire 데이터 라인을 통해 디지털 온도 값을 전송합니다(초당 1회).
+
+### DHT11 습도 센서
+습도 감지는 DHT11 센서 모듈 내부에 있는 습도 감지 부품이 담당합니다. DHT11 센서의 습도 감지 부품은 공기 중의 수분 함량에 따라 정전용량(커패시턴스)이 변하는 수분 민감형 커패시터를 사용합니다.
+
+DHT11 센서에 내장된 마이크로컨트롤러는 이 수분 민감형 커패시터를 충전 및 방전시키고, 충·방전 시간을 측정하여 정전용량을 결정합니다. 그런 다음 이 정전용량 값을 디지털 신호로 변환하여 1-Wire 시리얼 인터페이스를 통해 전송합니다.
+
+![](Arduino-DHT11-Temperature-Sensor-NTC-768x277.webp)
+
+DHT11 습도 센서는 주변 환경의 상대 습도(RH%)를 측정하여 출력합니다. 상대 습도의 공식(방정식)은 다음과 같습니다.
+
+$$RH = \frac{\rho_w}{\rho_s} \times 100\%$$
+
+여기서 $RH$는 상대 습도, $\rho_w$는 특정 온도에서의 수증기 밀도, $\rho_s$는 해당 온도에서 포화 상태일 때의 수증기 밀도를 나타냅니다.
+
+상대 습도는 특정 온도에서 공기가 머금을 수 있는 최대 수증기량과 비교하여 현재 공기 중에 존재하는 수증기량을 측정하는 지표입니다. 공기가 포화 점에 도달하여 더 이상 수증기를 머금을 수 없게 되면 응결이 시작되고, 그 결과 표면에 이슬(수분)이 맺히게 됩니다.
+
+공기 중 수증기의 포화 점은 온도의 영향을 받습니다. 차가운 공기는 포화 상태에 도달하기 전까지 수증기를 머금을 수 있는 용량이 적은 반면, 뜨거운 공기는 포화 상태가 되기 전까지 더 많은 양의 수증기를 머금을 수 있습니다.
+
+상대 습도는 일반적으로 백분율(%)로 표시됩니다. 상대 습도가 100%이면 공기가 완전히 포화되어 응결이 일어나는 상태를 의미합니다. 반대로 상대 습도가 0%이면 공기가 완전히 건조하여 수증기가 전혀 없음을 나타냅니다.
+
+> **참고 (Note)**
+> DHT11 센서의 샘플링 속도는 1Hz로, 습도 및 온도 측정값을 초당 1회 업데이트합니다. 따라서 센서 값을 초당 여러 번 읽을 수는 있지만, 센서 내부의 업데이트 속도(샘플링)가 1Hz로 고정되어 있기 때문에 동일한 값을 얻게 됩니다. 센서를 이보다 빠른 속도로 읽는 것은 가능하지만 실익이 없습니다.
 
 ---
 
