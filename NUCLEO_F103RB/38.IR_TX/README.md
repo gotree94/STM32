@@ -190,3 +190,100 @@ Raw: 0x20DF9867 | Addr: 0x20 | Cmd: 0x98
 | 9	| 0x20DF9867	| 0x98  |  | 
 
 
+---
+
+작성하신 STM32F103 기반의 NEC 수신 코드가 아주 깔끔하게 잘 정리되어 있네요!수신 펌웨어가 Falling Edge 간의 시간 차이를 측정하는 방식이므로, 송신 펌웨어는 이에 정확히 대응되도록 물리적인 신호를 만들어주어야 합니다.여기서 가장 중요한 핵심은 적외선 리모컨 신호의 물리적 특성입니다. IR 수신 센서(주로 수신 모듈 내부)는 38kHz 주파수로 깜빡이는(Modulated) 빛이 들어올 때 LOW(0V)를 출력하고, 빛이 없을 때 HIGH(3,3V/5V)를 출력합니다.따라서 송신할 때는 이 반대로 신호를 쏘아주어야 수신부에서 정상적으로 인식합니다.1. ⚙️ 하드웨어 설정 (STM32 CubeMX)송신을 위해서는 38kHz 반송파(Carrier)를 생성할 타이머와 데이터 전송 타이밍(ms 단위)을 제어할 타이머가 필요합니다. 타이머 하나로 모두 처리하기 위해 TIM2를 사용한 PWM + Delay 방식을 제어하는 것이 가장 직관적입니다.TIM2 설정 (38kHz PWM 생성용 - PA0 또는 PA1 등 PWM 출력 핀)Clock Source: Internal Clock (64MHz 가정)Channel 1: PWM Generation CH1Prescaler (PSC): 0 (64MHz 그대로 사용)Counter Period (ARR): 1684 ($\frac{64MHz}{38kHz} \approx 1684$)Pulse (Duty Cycle): 842 (50% Duty Cycle 유지)TIM3 설정 (1µs 단위 마이크로초 딜레이용)Prescaler (PSC): 64-1 (1MHz 클럭 생성 -> 1카운트당 1µs)Counter Period (ARR): 655352. 💻 핵심 구현 코드 (송신 펌웨어)수신 코드의 데이터 분석 구조([Address(8)] [~Address(8)] [Command(8)] [~Command(8)])에 맞춰 32비트 데이터를 프레임으로 조립하고, NEC 규격에 맞게 PWM을 켜고 끄는 제어 코드입니다.
+
+* 마이크로초 Delay 함수 및 PWM 제어 매크로
+
+```C
+/* USER CODE BEGIN PV */
+extern TIM_HandleTypeDef htim2; // PWM용 (38kHz)
+extern TIM_HandleTypeDef htim3; // 딜레이용 (1µs 카운팅)
+
+// 1µs 단위 정밀 딜레이 함수
+void delay_us(uint16_t us) {
+    __HAL_TIM_SET_COUNTER(&htim3, 0);
+    while (__HAL_TIM_GET_COUNTER(&htim3) < us);
+}
+
+// IR LED 켜기 (38kHz PWM 출력 시작)
+void IR_LED_ON(void) {
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+}
+
+// IR LED 끄기 (PWM 출력 정지 및 핀을 LOW로 유지)
+void IR_LED_OFF(void) {
+    HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+    // 안전을 위해 출력 핀 상태를 완전히 LOW로 고정 (CubeMX 설정에 맞춰 확인 필요)
+}
+/* USER CODE END PV */
+```
+
+* NEC 프로토콜 송신 함수
+
+```C
+/* USER CODE BEGIN 4 */
+void NEC_Transmit(uint8_t address, uint8_t command) {
+    // 1. 32비트 데이터 프레임 조립
+    // 수신부 비트 시프트 방향(ir_data <<= 1)에 맞춰 MSB(최상위 비트)부터 전송하도록 배치
+    uint32_t tx_data = 0;
+    tx_data |= ((uint32_t)address) << 24;
+    tx_data |= ((uint32_t)~address & 0xFF) << 16;
+    tx_data |= ((uint32_t)command) << 8;
+    tx_data |= ((uint32_t)~command & 0xFF);
+
+    // 2. Lead Code 송신 (9ms ON + 4.5ms OFF)
+    IR_LED_ON();
+    delay_us(9000);
+    IR_LED_OFF();
+    delay_us(4500);
+
+    // 3. 32비트 데이터 순차 송신 (MSB to LSB)
+    for (int i = 31; i >= 0; i--) {
+        uint8_t bit = (tx_data >> i) & 0x01;
+
+        if (bit == 0) {
+            // Logic '0': 0.56ms ON + 0.565ms OFF (총 1.125ms)
+            IR_LED_ON();
+            delay_us(560);
+            IR_LED_OFF();
+            delay_us(565);
+        } else {
+            // Logic '1': 0.56ms ON + 1.69ms OFF (총 2.25ms)
+            IR_LED_ON();
+            delay_us(560);
+            IR_LED_OFF();
+            delay_us(1690);
+        }
+    }
+
+    // 4. Stop Bit 송신 (프레임의 끝을 알리는 0.56ms ON 후 종료)
+    IR_LED_ON();
+    delay_us(560);
+    IR_LED_OFF();
+}
+/* USER CODE END 4 */
+```
+
+* 메인 루프 실행 예시 (1번 버튼 신호 반복 송신)
+```C
+  /* USER CODE BEGIN 2 */
+  // 타이머 3 (딜레이용) 시작
+  HAL_TIM_Base_Start(&htim3);
+  /* USER CODE END 2 */
+
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+      // 예시: 2초마다 1번 버튼 데이터 (Addr: 0x20, Cmd: 0x88) 송신
+      NEC_Transmit(0x20, 0x88);
+      
+      HAL_Delay(2000); 
+      
+    /* USER CODE END WHILE */
+  }
+```
+
+3. 💡 구현 및 테스트 시 주의사항수신 데이터 비트 반전 확인: 보내시는 데이터 구조는 [Addr] [~Addr] [Cmd] [~Cmd] 형태입니다. 작성하신 수신부의 변환 코드(uint8_t address = (ir_data >> 24) & 0xFF;)에 완벽히 대응되도록 송신 코드 내에서 비트 연산(~address & 0xFF) 처리를 해두었으므로, NEC_Transmit(0x20, 0x88); 형태로 직관적으로 호출하시면 됩니다.트랜지스터 구동 회로 필수:STM32 GPIO의 출력 전류(최대 20mA 내외)만으로는 IR 송신 LED를 멀리까지 쏘아주지 못합니다. 수 센티미터 이상의 통신 거리를 확보하려면 NPN 트랜지스터(예: 2N2222)나 MOSFET을 사용하여 외부 전원으로 IR LED를 구동하는 회로를 구성하는 것이 좋습니다.
+
