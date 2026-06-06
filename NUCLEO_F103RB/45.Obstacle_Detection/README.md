@@ -1,4 +1,4 @@
-# IR-08H Infrared Obstacle Avoidance Sensor Module
+# KY032 Infrared Obstacle Avoidance Sensor Module
 
 <img src="Obstacle_Detection.png" width="30%"> <br>
 
