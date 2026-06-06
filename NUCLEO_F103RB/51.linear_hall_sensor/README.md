@@ -2,9 +2,9 @@
 
 <img src="linear_hall_sensor.png"> <img src="010.png" width="47%">
 
-<img src="005.gif">
-
 <img src="011.png">
+
+<img src="005.gif">
 
 | Digital Output | Linear/Analog Output |
 |:--------------------:|:--------------------:|
