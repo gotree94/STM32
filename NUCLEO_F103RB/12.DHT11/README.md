@@ -2,21 +2,47 @@
 
 <img width="267" height="135" alt="133" src="https://github.com/user-attachments/assets/09ede793-cb31-4652-9575-fa08fdfe5ec3" />
 
+---
+
+DHT11 Sensor Working Principles
+Inside the DHT11 sensor’s module, you’ll find an NTC thermistor and a humidity-sensing component on one side of the internal board. On the back side of the board, you’ll find a small microcontroller that handles data acquisition, processing, and transmission over the 1-Wire digital protocol as specified in the datasheet of the DHT11 sensor.
+
+DHT11 Temperature Sensor
+Temperature Sensing is handled by the integrated NTC thermistor inside the DHT11 module. The NTC (Negative Temperature Coefficient) Thermistor is a resistor that has a negative proportion relationship with the temperature. The resistance of the NTC drops as the temperature increases and vice versa as indicated in the diagram below.
 
 ![](Arduino-DHT11-Humidity-Sensor-Working-Principle-768x260.webp)
 
+The internal microcontroller is responsible for reading the internal NTC thermistor and calculating the corresponding temperature value using the characteristics curve of the NTC, then it sends the digital temperature value over the 1-Wire data line (once per second).
+
+DHT11 Humidity Sensor
+Humidity Sensing is handled by the internal humidity sensing component inside the DHT11 sensor’s module. The humidity sensing component in the DHT11 sensor utilizes a moisture-sensitive capacitor, which changes its capacitance based on the moisture level in the air.
+
+The DHT11 sensor’s built-in microcontroller charges and discharges the moisture-sensitive capacitor and determines its capacitance by measuring the charging/discharging time. Then it converts the capacitance value into a digital signal, which is transmitted over a 1-Wire serial interface.
+
 ![](Arduino-DHT11-Temperature-Sensor-NTC-768x277.webp)
+
+The DHT11 Humidity Sensor measures and outputs the relative humidity (RH%) of the surrounding environment. The formula (equation) of the relative humidity is as follows:
 
 ![](DHT11-Relative-Humidity-Formula-Equation.webp)
 
+Where RH is the relative humidity, ρw is the density of water vapor at a certain temperature, and ρs is the density of water vapor at saturation at that temperature.
+
+Relative Humidity is a measure of the amount of water vapor present in the air compared to the maximum amount of water vapor the air can hold at a given temperature. When the air reaches its saturation point, meaning it contains as much water vapor as it can hold, condensation begins to occur, resulting in the formation of dew (moisture) on surfaces.
+
+The saturation point of water vapor in the air is influenced by the temperature. Colder air has a lower capacity to hold water vapor before reaching saturation, while hotter air can hold a higher amount of water vapor before becoming saturated.
+
+Relative Humidity is typically expressed as a percentage (%). When the relative humidity is 100%, the air is fully saturated, leading to condensation. On the other hand, when the relative humidity is 0%, the air is completely dry, indicating the absence of water vapor.
+
+> **Note**
+> The DHT11 sensor has a sampling rate of 1Hz which means that it does update the humidity & temperature readings once per second. However, you can still read the sensor multiple times per second but you’ll still get the same values because the sensor’s internal update rate (sampling) is fixed at 1Hz only. Reading the sensor at a higher rate is possible but not beneficial.
+
+---
 
 <img src="TEK0011.BMP" width="60%"> <br>
 
 <img src="TEK0014.BMP" width="60%"> <br>
 
 <img src="TEK0012.BMP" width="60%"> <br>
-
-
 
 ## 1. 통신 프로토콜 개요
 * DHT11의 통신은 항상 MCU의 시작 신호로 시작되며, 다음과 같은 단계로 진행됩니다.
