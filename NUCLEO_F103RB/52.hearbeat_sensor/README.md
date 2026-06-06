@@ -16,9 +16,9 @@
 
 | 소자명 | 역할 및 특징 |
 | :--- | :--- |
-| **High-Brightness Green LED** | 혈관을 향해 특정 파장의 빛(약 550nm)을 조사합니다. 녹색광은 혈액 내 헤모글로빈에 대한 흡수율이 높아 심박 측정에 유리합니다. |
-| **APD (Ambient Light Photosensor)** | 반사된 빛을 감지하는 소자입니다. 주변 광원 노이즈를 걸러내는 필터가 포함되어 있어 정확도를 높입니다. |
-| **Op-Amp (Operational Amplifier)** | 포토 센서에서 발생한 미세한 아날로그 신호를 MCU가 인식할 수 있는 전압 크기로 증폭합니다. (예: MCP6001) |
+| **High-Brightness Green LED** | 혈관을 향해 특정 파장의 빛(약 550nm)을 조사합니다. <br> 녹색광은 혈액 내 헤모글로빈에 대한 흡수율이 높아 심박 측정에 유리합니다. |
+| **APD (Ambient Light Photosensor)** | 반사된 빛을 감지하는 소자입니다.  <br> 주변 광원 노이즈를 걸러내는 필터가 포함되어 있어 정확도를 높입니다. |
+| **Op-Amp (Operational Amplifier)** | 포토 센서에서 발생한 미세한 아날로그 신호를 MCU가  <br> 인식할 수 있는 전압 크기로 증폭합니다. (예: MCP6001) |
 | **Noise Filters (RC Filter)** | 저항(R)과 커패시터(C)를 조합하여 고주파 노이즈를 제거하고 깨끗한 맥박 파형을 만듭니다. |
 | **Voltage Regulator / Diode** | 전원을 안정적으로 공급하고 역전압으로부터 회로를 보호합니다. |
 
