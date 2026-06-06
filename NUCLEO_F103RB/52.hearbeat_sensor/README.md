@@ -4,7 +4,6 @@
 
 
 <img src="hearbeat_sensor_002.png" width="20%"> <img src="hearbeat_sensor_003.png" width="20%"> <br>
-<img src="TEK0022.BMP" width="50%"> <br>
 
 <img src="039.png">
 
@@ -78,6 +77,9 @@
    * 일단 신호의 피크들을 올바르게 찾아내기만 하면, 피크의 개수를 세거나 연속된 심박 사이의 시간 간격을 계산하여 **BPM(Beats Per Minute, 분당 심박수)**을 아주 쉽게 구해낼 수 있습니다.
 
 ---
+
+<img src="TEK0022.BMP" width="50%"> <br>
+
 
 ## 4. 핀 맵 (Pin Connection)
 
