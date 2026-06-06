@@ -6,7 +6,7 @@
 
 | Analog : A0 | Digital : D0 |
 |:-------------------:|:-------------------:|
-| <img src="TEK0013.BMP" width ="60%"> | <img src="TEK0015.BMP" width ="60%"> | 
+| <img src="TEK0013.BMP"> | <img src="TEK0015.BMP"> | 
 
 ---
 
