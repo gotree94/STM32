@@ -39,9 +39,6 @@
 마이크로컨트롤러(MCU)는 아날로그 입력 핀(ADC)으로 파형을 읽어들여, 연속된 피크(Peak) 사이의 시간 간격을 측정함으로써 분당 심박수(BPM)를 산출합니다.
 
 ---
-|  |  | 
-|:-------------------:|:-------------------:|:-------------------:|
-| <img src="001.png"> | <img src="002.png"> | <img src="003.png"> <br> | 
 
 ## 심박수 센서(Heartbeat Sensor)의 작동 원리
    * 산소 포화도(Oxygen Saturation)를 측정하기에 앞서, 먼저 심박수 센서가 어떻게 작동하는지 이해해야 합니다. 
@@ -51,14 +48,14 @@
 
    * 아래 이미지는 인터넷에서 찾은 다양한 센서 키트에 포함된 KY-039 모듈의 모습입니다.
 
-![KY-039 Sensor](https://via.placeholder.com/600x400?text=KY-039+Sensor+Image+Link+Here) 
+<img src="002.png">
 
 *(주: 원본 이미지 주소가 있다면 이 자리에 URL을 넣으세요)*
 
    * 회로도를 보면 알 수 있듯이, 이 센서는 단순히 적외선 LED가 포토다이오드를 향해 빛을 비추는 구조입니다. LED를 보호하고 센서로부터 오는 미세한 신호를 읽기 위해 두 개의 저항이 함께 구성되어 있습니다.
    * 측정할 때는 아래 사진과 같이 적외선 LED와 포토다이오드 사이에 손가락을 위치시킵니다.
 
-![Finger Positioning](https://via.placeholder.com/600x400?text=Finger+Positioning+Image+Link+Here)
+<img src="001.png"> 
 
 *(주: 원본 이미지 주소가 있다면 이 자리에 URL을 넣으세요)*
 
@@ -78,7 +75,8 @@
    * 또한 그는 신호가 상승하는 타이밍을 찾는 알고리즘도 기술했습니다. 데이터 값이 직전 값보다 연속으로 증가하는 횟수가 `N`번 이상 지속될 때를 하나의 **피크(Peak, 정점)**로 인식하는 방식입니다.
    * SerialPlot 프로그램을 사용하면 적절한 `N`값(코드 내 `rise_threshold` 상수)을 더 정확하게 정의할 수 있습니다. 아래 차트를 예로 들면, 만약 임계값(Threshold)을 7보다 큰 값으로 설정하게 되면 몇몇 심박(Beat)을 놓치게 됩니다.
 
-![SerialPlot Chart](https://via.placeholder.com/600x400?text=SerialPlot+Chart+Image+Link+Here)
+<img src="003.png">
+
 *(주: 원본 이미지 주소가 있다면 이 자리에 URL을 넣으세요)*
 
    * 일단 신호의 피크들을 올바르게 찾아내기만 하면, 피크의 개수를 세거나 연속된 심박 사이의 시간 간격을 계산하여 **BPM(Beats Per Minute, 분당 심박수)**을 아주 쉽게 구해낼 수 있습니다.
