@@ -1,4 +1,4 @@
-# KY032 Infrared Obstacle Avoidance Sensor Module
+# Infrared Obstacle Avoidance Sensor Module (KY032)
 
 ## 타입 A : NE555 타이머 기반
 <img src="Obstacle_Detection-1.png"> <img src="schematic_2.png" width="30%">
