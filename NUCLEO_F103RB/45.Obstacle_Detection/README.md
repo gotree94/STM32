@@ -1,6 +1,10 @@
 # KY032 Infrared Obstacle Avoidance Sensor Module
 
-<img src="Obstacle_Detection.png" width="30%"> <br>
+## 타입 A
+<img src="Obstacle_Detection-1.png"><br>
+
+## 타입 B
+<img src="Obstacle_Detection.png"> <br>
 
 * 장애물을 감지하면 한번의 트리거 신호만 발생함
 
