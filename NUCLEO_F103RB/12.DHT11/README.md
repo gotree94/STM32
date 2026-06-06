@@ -2,6 +2,14 @@
 
 <img width="267" height="135" alt="133" src="https://github.com/user-attachments/assets/09ede793-cb31-4652-9575-fa08fdfe5ec3" />
 
+
+![](Arduino-DHT11-Humidity-Sensor-Working-Principle-768x260.webp)
+
+![](Arduino-DHT11-Temperature-Sensor-NTC-768x277.webp)
+
+![](DHT11-Relative-Humidity-Formula-Equation.webp)
+
+
 <img src="TEK0011.BMP" width="60%"> <br>
 
 <img src="TEK0014.BMP" width="60%"> <br>
