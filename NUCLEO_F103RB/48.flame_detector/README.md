@@ -4,11 +4,9 @@
 
 <img src="024.png">
 
-## Analog : A0
-<img src="TEK0013.BMP" width ="60%">
-
-## Digital : D0
-<img src="TEK0015.BMP" width ="60%">
+| Analog : A0 | Digital : D0 |
+|:-------------------:|:-------------------:|
+| <img src="TEK0013.BMP" width ="60%"> | <img src="TEK0015.BMP" width ="60%"> | 
 
 ---
 
