@@ -3,9 +3,7 @@
 이 프로젝트는 광학식 심박수 측정 센서(Pulse Sensor)의 하드웨어 구성 소자와 동작 원리를 정리한 문서입니다. 아두이노, 라즈베리 파이 등 다양한 MCU와 연동하여 실시간 심박수(BPM) 데이터를 얻는 데 활용됩니다.
 
 
-<img src="hearbeat_sensor_002.png" width="20%"> <img src="hearbeat_sensor_003.png" width="20%"> <br>
-
-<img src="039.png" width="40%">
+<img src="hearbeat_sensor_002.png" width="30%"> <img src="hearbeat_sensor_003.png" width="30%"> <img src="039.png" width="30%">
 
 ---
 
