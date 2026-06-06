@@ -2,11 +2,13 @@
 
 <img src="linear_hall_sensor.png">
 
+<img src="010.png">
+
+
 <img src="TEK0021.BMP">
 
 <img src="005.gif">
 
-<img src="010.png">
 
 ## 1. 핵심 원리: 홀 효과 (Hall Effect)
    * 도체나 반도체에 전류가 흐르고 있는 상태에서, 수직 방향으로 자기장($B$)이 가해지면 전하(전자)가
