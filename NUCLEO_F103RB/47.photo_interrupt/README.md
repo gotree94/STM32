@@ -31,7 +31,7 @@
 | KY-010	| Arduino | 
 |:--------:|:--------:|
 | – (left)	| GND | 
-| middle	| +5V | 
+| middle	| 3.3V ~ +5V | 
 | S (right)	| Pin 3 | 
 
 ## 동작 원리
