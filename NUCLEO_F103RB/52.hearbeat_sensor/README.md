@@ -39,6 +39,9 @@
 마이크로컨트롤러(MCU)는 아날로그 입력 핀(ADC)으로 파형을 읽어들여, 연속된 피크(Peak) 사이의 시간 간격을 측정함으로써 분당 심박수(BPM)를 산출합니다.
 
 ---
+<img src="001.png"> <br>
+<img src="002.png"> <br>
+<img src="003.png"> <br>
 
 ## 2) 심박수 센서(Heartbeat Sensor)의 작동 원리
 
