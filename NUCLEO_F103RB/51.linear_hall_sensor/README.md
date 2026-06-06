@@ -2,10 +2,9 @@
 
 <img src="linear_hall_sensor.png"> <img src="010.png" width="47%">
 
+<img src="005.gif">
 
 <img src="TEK0021.BMP">
-
-<img src="005.gif">
 
 
 ## 1. 핵심 원리: 홀 효과 (Hall Effect)
