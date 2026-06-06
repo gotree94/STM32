@@ -1,4 +1,4 @@
-# Flame Detector Projects for STM32F103
+# Flame Detector (KY-026) Projects
 
 <img src="flame_detector.png">
 
