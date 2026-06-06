@@ -13,11 +13,11 @@
   * This module is suitable for various electronic platforms like Arduino, Raspberry Pi, ESP32, and others.
 
 ## 사양(Specifications) :
-  * This module consists of an optical emitter/detector and 3 male header pins on the front. On the back, there are two resistors of 10kΩ and 33Ω.
   * 이 모듈은 광학식 발광부(Emitter), 수광부(Detector), 그리고 전면의 3개 핀 헤더로 구성되어 있습니다.
   * 후면에는 10kΩ 저항과 33Ω 저항이 각각 장착되어 있습니다.
-  * The sensor uses a beam of light between the emitter and detector to check if the path between both is being blocked by an opaque object.
+  * This module consists of an optical emitter/detector and 3 male header pins on the front. On the back, there are two resistors of 10kΩ and 33Ω.
   * 센서는 발광부와 수광부 사이에 형성된 광선을 이용하여, 두 부품 사이의 경로가 불투명한 물체에 의해 차단되었는지를 감지합니다.
+  * The sensor uses a beam of light between the emitter and detector to check if the path between both is being blocked by an opaque object.
 
 | 동작 전압(Operating Voltage)	| 보드 크기(Board Dimensions) | 
 |:--------:|:--------:|
