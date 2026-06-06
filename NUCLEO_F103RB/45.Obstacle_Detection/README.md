@@ -1,4 +1,4 @@
-# Obstacle_Detection Projects for STM32F103
+# IR-08H Infrared Obstacle Avoidance Sensor Module
 
 <img src="Obstacle_Detection.png" width="30%"> <br>
 
