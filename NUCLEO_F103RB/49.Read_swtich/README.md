@@ -1,5 +1,7 @@
 # Read Switch
 
+---
+
 ## 리드 스위치(Reed Switch)란? 
 
    * 리드 스위치는 자기장에 기반하여 접점을 열고 닫는 전기 스위치이다. 충분히 강한 자기장이 존재하면 리드 스위치 내부의 연결이 닫힌다.
@@ -29,17 +31,23 @@
 
 <img src="003.png">
 
+---
+
 # Read Switch (KY-021)
 
 <img src="014.png" width="21%">  <img src="013.png">
 
 <img src="005.png">
 
-# Read Switch (KY-025) Projects for STM32F103
+---
+
+# Read Switch (KY-025) 
 
 <img src="lead_swtich.png">
 
 <img src="004.png">
+
+---
 
 | Digital  | Analog |
 |:------------------:|:------------------:|
