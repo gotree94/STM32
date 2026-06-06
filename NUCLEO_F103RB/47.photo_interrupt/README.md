@@ -1,6 +1,8 @@
 # Photo Interrupt Projects for STM32F103
 
-<img src="004.png"  width="30%"> <img src="006.png" width="18%"> <img src="007.png" width="26%"> 
+<img src="004.png"  width="30%"> <img src="006.png" width="18%"> 
+
+<img src="007.png" width="50%"> 
 
 <img src="scope_0.png" width="50%">
 
