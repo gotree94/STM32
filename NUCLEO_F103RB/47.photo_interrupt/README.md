@@ -2,9 +2,9 @@
 
 <img src="004.png"> <img src="006.png" width="23%">
 
-<img src="007.png"> 
+<img src="007.png" width="23%"> 
 
-<img src="scope_0.png">
+<img src="scope_0.png" width="35%">
 
 * Photo Interrupt 사이를 가리면 '1'로 사이를 열어두면 '0'
 
