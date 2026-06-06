@@ -4,6 +4,8 @@
 
 <img src="005.gif">
 
+<img src="011.png">
+
 | Digital Output | Linear/Analog Output |
 |:--------------------:|:--------------------:|
 | <img src="scope_1.png"> |  <img src="scope_2.png"> | 
@@ -42,6 +44,8 @@
 * 휠 속도 센서 (ABS 제동 시스템)
 * 스로틀 위치 센서 (Throttle Position Sensor)
 * 엔진 타이밍 센서 (Engine Timing Sensor)
+
+<img src="012.png">
 
 ### 2. 산업용 응용 분야 (Industrial Applications)
 * 근접 감지 (Proximity Sensing)
