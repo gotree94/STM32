@@ -10,6 +10,13 @@
 ## Digital : D0
 <img src="TEK0015.BMP" width ="60%">
 
+---
+
+<img src="YG1006-001.png">
+
+
+<img src="YG1006-002.png">
+
 Image 1 — 상대 분광 감도 (Relative Spectral Sensitivity)
 피크 감도 파장: ~950nm (근적외선 영역)
 유효 감도 범위: 700nm ~ 1100nm
@@ -20,6 +27,7 @@ YG1006은 가시광선(~700nm)보다 근적외선(NIR)에 최적화된 소자
 가시광 영역(400~700nm)은 감도가 거의 없어 주변 가시광 노이즈에 강함
 실용 설계 시 940nm IR LED를 광원으로 사용하는 것이 표준
 
+<img src="YG1006-003.png">
 
 Image 2 — 조도-컬렉터 전류 특성 (Electro-Optical Characteristics)
 조건: VCE = 5V, Ta = 25°C
@@ -34,6 +42,7 @@ Ee ≈ 1.5 mW/cm² → Ic ≈ 3~4 mA
 디지털 ON/OFF 감지뿐 아니라 선형 광센서로도 활용 가능
 
 
+<img src="YG1006-004.png">
 Image 3-상단 — 암전류 vs 온도 (Dark Current vs. Temperature)
 조건: VCE = 20V
 X축: 주변 온도 Ta (°C)
@@ -62,9 +71,9 @@ VCE = 2V 이상이면 안정적인 선형 동작 영역 확보
 부하 저항 설계 시 동작점을 포화 영역에 두면 안정적 출력
 
 
-실무 설계 요약
-광원     : 940nm IR LED (최적 매칭)
-공급전압  : VCE ≥ 2V (안정 동작)
-부하저항  : Ee 1mW/cm² → Ic ~1mA 기준으로 설계
-온도 주의 : 고온에서 암전류 급증 → 임계값 마진 확보
-활용     : 근접 센서, 물체 감지, 라인트레이서, 인코더
+* 실무 설계 요약
+  * 광원     : 940nm IR LED (최적 매칭)
+  * 공급전압  : VCE ≥ 2V (안정 동작)
+  * 부하저항  : Ee 1mW/cm² → Ic ~1mA 기준으로 설계
+  * 온도 주의 : 고온에서 암전류 급증 → 임계값 마진 확보
+  * 활용     : 근접 센서, 물체 감지, 라인트레이서, 인코더
