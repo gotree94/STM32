@@ -10,8 +10,6 @@
 
 ## 1. 고강도 소리 센서 모듈 (High-Sensitivity Sound Sensor)
 
-![High Sensitivity Sound Sensor](https://via.placeholder.com/400x250?text=High+Sensitivity+Sound+Sensor)
-
 ### 📌 특징
 * **높은 감도 (High Sensitivity):** 상대적으로 크고 정밀한 마이크 전자기판과 증폭 회로가 포함되어 있어, 아주 미세한 소리나 멀리서 나는 소리까지 감지할 수 있습니다.
 * **이중 출력 (Digital & Analog):** * `AO (Analog Output)`: 실시간 소리의 크기(전압 변화)를 연속적인 값으로 출력합니다.
@@ -26,8 +24,6 @@
 ---
 
 ## 2. 소형 소리 센서 모듈 (Small Sound Sensor / Mini Mic)
-
-![Small Sound Sensor Module](https://via.placeholder.com/400x250?text=Small+Sound+Sensor)
 
 ### 📌 특징
 * **소형화 및 경량화:** 크기가 매우 작고 가벼워 웨어러블 기기나 공간이 협소한 소형 로봇, 임베디드 시스템에 내장하기 유리합니다.
