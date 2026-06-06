@@ -1,8 +1,6 @@
 # Read Switch (KY-021)
 
-<img src="014.png">
-
-<img src="013.png">
+<img src="014.png">  <img src="013.png">
 
 
 # Read Switch (KY-025) Projects for STM32F103
