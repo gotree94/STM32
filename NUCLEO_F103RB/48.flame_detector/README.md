@@ -26,7 +26,7 @@
    * 실용 설계 시 940nm IR LED를 광원으로 사용하는 것이 표준
 
 
-##조도-컬렉터 전류 특성 (Electro-Optical Characteristics)
+## 조도-컬렉터 전류 특성 (Electro-Optical Characteristics)
 
 <img src="YG1006-003.png">
 
