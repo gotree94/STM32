@@ -1,8 +1,6 @@
 # Linear Hall Sensor Projects for STM32F103
 
-<img src="linear_hall_sensor.png">
-
-<img src="010.png">
+<img src="linear_hall_sensor.png"> <img src="010.png" width="50%">
 
 
 <img src="TEK0021.BMP">
