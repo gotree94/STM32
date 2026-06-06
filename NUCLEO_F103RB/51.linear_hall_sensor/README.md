@@ -4,7 +4,7 @@
 
 <img src="005.gif">
 
-| Digital Output | Analog Output |
+| Digital Output | Linear/Analog Output |
 |:--------------------:|:--------------------:|
 | <img src="scope_1.png"> |  <img src="scope_2.png"> | 
 
