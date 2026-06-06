@@ -33,3 +33,31 @@
    * 전류 측정: 전선 주위에 발생하는 자기장을 측정하여 비접촉식으로 전류량을 계산 (ACS712 등).
    * 속도 제어: 전동 킥보드나 전기 자전거의 스로틀(가속 손잡이) 내부에 자석과 함께 위치하여 가속도를 조절.
    * 진동 및 기울기: 미세한 자기 변화를 포착하여 기기의 떨림을 감지.
+
+## 5. 홀 효과(Hall Effect) 센서의 응용 분야
+
+* 홀 효과 센서는 다양한 산업 분야에서 폭넓게 활용되고 있습니다.
+
+### 1. 자동차 산업 (Automotive Industry)
+* 휠 속도 센서 (ABS 제동 시스템)
+* 스로틀 위치 센서 (Throttle Position Sensor)
+* 엔진 타이밍 센서 (Engine Timing Sensor)
+
+### 2. 산업용 응용 분야 (Industrial Applications)
+* 근접 감지 (Proximity Sensing)
+* 컨베이어 벨트 속도 측정
+* 비접촉식 전류 측정 (Contactless Current Measurement)
+
+### 3. 소비자 전자기기 (Consumer Electronics)
+* 스마트폰 (플립 커버 감지)
+* 키보드 (기계식 키보드의 키 입력 감지)
+* 게임 컨트롤러
+
+### 4. 의료 기기 (Medical Devices)
+* 자기공명영상장치(MRI, Magnetic Resonance Imaging)
+* 생체의료 센서 (근접 기반 의료 도구)
+
+### 5. 항공우주 및 방위 산업 (Aerospace and Defense)
+* 자기장 측정 (Magnetic Field Measurement)
+* 우주선 자세 제어 (Spacecraft Attitude Control)
+* 정밀 항법 시스템 (Precision Navigation)
