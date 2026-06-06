@@ -91,6 +91,189 @@
 
 ---
 
+* TM32F103(NUCLEO-F103RB)에서 KY-039 심박 센서의 아날로그 신호를 읽어 피크를 검출하고, 이를 파이썬으로 시각화하는 전체 시스템 가이드를 작성해 드립니다.
+
+## 1. STM32F103 (MCU) 코드 구성
+   * 이 코드는 ADC(Analog-to-Digital Converter)를 사용하여 센서 값을 읽고, 간단한 이동 평균 필터(Moving Average Filter)를 통해 노이즈를 제거한 뒤 피크를 검출합니다.
+
+* 회로 연결
+   * KY-039 VCC: 5V (또는 3.3V)
+   * KY-039 GND: GND
+   * KY-039 Signal (S): PA0 (ADC1_IN0)
+
+* STM32 C 코드 (Main 루프 핵심 부분)
+* ADC1을 10ms(100Hz) 주기로 샘플링한다고 가정합니다.
+
+```C
+#include "main.h"
+#include <stdio.h>
+
+#define SAMPLE_SIZE 10
+#define RISE_THRESHOLD 5  // 연속 상승 횟수 임계값
+
+ADC_HandleTypeDef hadc1;
+UART_HandleTypeDef huart2;
+
+// 시리얼 출력을 위한 printf 설정
+int __io_putchar(int ch) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+    return ch;
+}
+
+void SystemClock_Config(void);
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_ADC1_Init();
+    MX_USART2_UART_Init();
+
+    uint32_t adc_val = 0;
+    uint32_t samples[SAMPLE_SIZE] = {0};
+    uint8_t index = 0;
+    uint32_t last_avg = 0;
+    uint8_t rise_count = 0;
+    uint32_t last_beat_time = 0;
+
+    while (1) {
+        // 1. ADC 샘플링
+        HAL_ADC_Start(&hadc1);
+        if (HAL_ADC_PollForConversion(&hadc1, 10) == HAL_OK) {
+            adc_val = HAL_ADC_GetValue(&hadc1);
+        }
+        HAL_ADC_Stop(&hadc1);
+
+        // 2. 이동 평균 필터 (노이즈 제거)
+        samples[index] = adc_val;
+        index = (index + 1) % SAMPLE_SIZE;
+        
+        uint32_t sum = 0;
+        for(int i=0; i<SAMPLE_SIZE; i++) sum += samples[i];
+        uint32_t avg = sum / SAMPLE_SIZE;
+
+        // 3. 피크 검출 (연속 상승 로직)
+        if (avg > last_avg) {
+            rise_count++;
+            if (rise_count == RISE_THRESHOLD) {
+                // 비트 발생! 현재 시간 기록 및 BPM 계산 가능
+                uint32_t current_time = HAL_GetTick();
+                uint32_t interval = current_time - last_beat_time;
+                if (interval > 400) { // 최소 400ms 간격 (최대 150BPM 제한)
+                    int bpm = 60000 / interval;
+                    // 파이썬 전송용 데이터 포맷: "ADC값,BPM"
+                    printf("%ld,%d\n", avg, bpm);
+                    last_beat_time = current_time;
+                }
+            }
+        } else {
+            rise_count = 0;
+        }
+        
+        // 피크가 아닐 때도 그래프를 위해 ADC 값 전송
+        if(rise_count != RISE_THRESHOLD) {
+             printf("%ld,0\n", avg); 
+        }
+
+        last_avg = avg;
+        HAL_Delay(10); // 100Hz 샘플링
+    }
+}
+```
+
+## 2. PC용 파이썬 시각화 코드
+   * 파이썬의 PyQtGraph 라이브러리를 사용하여 실시간으로 심박 그래프를 그리고 BPM을 표시합니다. 이 라이브러리는 matplotlib보다 실시간 성능이 훨씬 뛰어납니다.
+
+* 사전 준비
+   * 터미널에서 아래 라이브러리를 설치하세요.
+
+```Bash
+pip install pyserial pyqtgraph PyQt5
+```
+
+* 파이썬 코드 (heart_rate_monitor.py)
+* 이 코드는 시리얼 포트(COMx 등)에서 데이터를 읽어 실시간으로 렌더링합니다.
+
+```Python
+import sys
+import serial
+import serial.tools.list_ports
+import pyqtgraph as pg
+from PyQt5 import QtWidgets, QtCore
+
+class HeartRateMonitor(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        # UI 설정
+        self.setWindowTitle("STM32 Heartbeat Monitor")
+        self.central_widget = QtWidgets.QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.layout = QtWidgets.QVBoxLayout(self.central_widget)
+
+        # BPM 표시 라벨
+        self.label = QtWidgets.QLabel("BPM: --")
+        self.label.setStyleSheet("font-size: 30px; font-weight: bold; color: red;")
+        self.layout.addWidget(self.label)
+
+        # 그래프 설정
+        self.plot_widget = pg.PlotWidget()
+        self.layout.addWidget(self.plot_widget)
+        self.curve = self.plot_widget.plot(pen=pg.mkPen('g', width=2))
+        self.data = []
+        self.max_points = 200 # 화면에 보일 데이터 개수
+
+        # 시리얼 설정 (포트는 본인의 환경에 맞춰 수정 필요)
+        self.serial_port = serial.Serial('COM3', 115200, timeout=0.1) 
+        
+        # 타이머 설정 (20ms 마다 그래프 업데이트)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update)
+        self.timer.start(20)
+
+    def update(self):
+        if self.serial_port.in_waiting > 0:
+            try:
+                line = self.serial_port.readline().decode('utf-8').strip()
+                if line:
+                    # 데이터 분리 (ADC값, BPM)
+                    raw_val, bpm = map(int, line.split(','))
+                    
+                    # 그래프 데이터 업데이트
+                    self.data.append(raw_val)
+                    if len(self.data) > self.max_points:
+                        self.data.pop(0)
+                    self.curve.setData(self.data)
+
+                    # BPM 업데이트 (0이 아닐 때만)
+                    if bpm > 0:
+                        self.label.setText(f"BPM: {bpm}")
+            except Exception as e:
+                print(f"Error: {e}")
+
+    def closeEvent(self, event):
+        self.serial_port.close()
+        event.accept()
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = HeartRateMonitor()
+    window.show()
+    sys.exit(app.exec_())
+```
+
+## 3. 작동 원리 요약
+
+   * MCU 필터링: KY-039 센서는 노이즈에 매우 취약합니다. SAMPLE_SIZE를 조절하여 이동 평균을 내면 그래프가 부드러워집니다.
+   * 피크 검출: RISE_THRESHOLD는 데이터가 연속으로 몇 번 상승했을 때 "심박의 시작"으로 볼 것인지 결정합니다. 주변 밝기에 따라 ADC 값이 변하므로 절대값이 아닌 변화량을 기준으로 합니다.
+   * 데이터 전송: printf를 통해 ADC값,BPM\n 형태의 문자열을 보냅니다. 파이썬은 이 쉼표(,)를 기준으로 데이터를 파싱합니다.
+   * PC 시각화: PyQtGraph는 수신된 ADC 값을 실시간 선 그래프로 그리고, 계산된 BPM을 화면 상단에 큰 텍스트로 보여줍니다.
+
+* 주의사항
+   * 시리얼 포트: 파이썬 코드의 COM3 부분은 장치 관리자에서 확인한 STM32의 실제 포트 번호로 수정해야 합니다 (리눅스/맥은 /dev/ttyACM0 등).
+   * 밀착도: KY-039 센서는 손가락을 너무 세게 누르면 혈류가 차단되어 측정이 안 되고, 너무 떼면 노이즈가 심해집니다. 적당한 압력을 유지하세요.
+
+---
+
 ## 5. 사용 팁 및 주의사항
 * **적정 압력:** 센서를 너무 세게 누르면 혈류가 차단되어 측정이 불가능하고, 너무 살살 대면 빛이 새어 들어와 노이즈가 발생합니다.
 * **절연 유지:** 손가락의 땀이나 유분으로 인한 회로 쇼트를 방지하기 위해 센서 전면부에 투명 필름이나 절연 처리가 되어 있는지 확인하세요.
