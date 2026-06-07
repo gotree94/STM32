@@ -31,6 +31,48 @@
 | +	| +5V | 
 | D0	| Pin 2 | 
 
+KY-028 Arduino Code
+When the temperature threshold is reached, the digital interface will send a HIGH signal turning on the LED on the Arduino (pin 13). Turn the potentiometer clockwise to increase the detection threshold and counter-clockwise to decrease it.
+
+The analog interface returns a numeric value that depends on the temperature and the potentiometer’s position. 
+
+Since the analog output pin is directly connected to the potentiometer it isn’t possible to use the Steinhart-Hart equation to calculate the temperature as we did with the KY-013, we can only use this value to measure relative changes in temperature.
+
+```
+int led = 13; // define the LED pin
+int digitalPin = 2; // KY-028 digital interface
+int analogPin = A0; // KY-028 analog interface
+int digitalVal; // digital readings
+int analogVal; //analog readings
+
+void setup()
+{
+  pinMode(led, OUTPUT);
+  pinMode(digitalPin, INPUT);
+  //pinMode(analogPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  // Read the digital interface
+  digitalVal = digitalRead(digitalPin); 
+  if(digitalVal == HIGH) // if temperature threshold reached
+  {
+    digitalWrite(led, HIGH); // turn ON Arduino's LED
+  }
+  else
+  {
+    digitalWrite(led, LOW); // turn OFF Arduino's LED
+  }
+
+  // Read the analog interface
+  analogVal = analogRead(analogPin); 
+  Serial.println(analogVal); // print analog value to serial
+
+  delay(100);
+}
+```
 
 # Analog Temperature Sensor KY-013 (HW-498)
 
@@ -91,6 +133,7 @@ The Steinhart-Hart equation converts that value into a temperature in °C.
 Because the resistance-to-temperature relationship is non-linear, you can’t read degrees straight from the ADC — you have to apply a formula. The sketches below use the Steinhart-Hart equation with coefficients derived from the KY-013’s B25/50 = 3950 K specification, tuned for accurate readings across the full −55 °C to 125 °C range.
 
 KY-013 Arduino Code
+```
 int ThermistorPin = A0;
 int Vo;
 float R1 = 10000; // value of R1 on board
@@ -111,9 +154,12 @@ void loop() {
   Serial.println(" C");
   delay(500);
 }
+```
+
 KY-013 ESP32 Code
 The ESP32 sketch works the same way as the Arduino version with two adjustments: connect the signal pin to GPIO34 (or any ADC1 pin, 32–39) and power the module from 3.3 V — the ESP32's ADC reference is 3.3 V, so using 5 V will damage the pin. The 12-bit ADC reads 0–4095 instead of 0–1023, so the resistance formula uses 4095.0 as the divisor.
 
+```
 int ThermistorPin = 34;
 int Vo;
 float R1 = 10000; // value of R1 on board
@@ -136,8 +182,10 @@ void loop() {
   Serial.println(" C");
   delay(500);
 }
-Applications
-The KY-013 (HW-498) NTC thermistor module suits any project that needs a continuous analog temperature reading. Common use cases include:
+```
+
+## Applications
+* The KY-013 (HW-498) NTC thermistor module suits any project that needs a continuous analog temperature reading. Common use cases include:
 
 Ambient temperature monitoring — log readings to Serial, an LCD, or a cloud dashboard in real time.
 Weather stations — pair with a humidity and pressure sensor (DHT22, BMP280) for a full climate station.
