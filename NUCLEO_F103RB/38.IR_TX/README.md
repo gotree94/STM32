@@ -1,8 +1,10 @@
 # IR Transmitter Module KY-005
 
    * KY-005는 Keyes 37-in-1 Arduino 키트(HW-489로도 판매)에 포함된 적외선(IR) 송신기 모듈입니다.
-   * 핵심 부품은 단일 940nm IR LED로, IRremote 라이브러리와 함께 사용하면 Arduino가 TV나 에어컨 리모컨과 동일한 38kHz 리모컨 신호를 송신할 수 있습니다.
-   * 이 매뉴얼은 핀 배치, 배선도, 최신 IRremote 코드, KY-005 + KY-022 기록 및 재생 프로젝트, 문제 해결, Fritzing 부품 다운로드를 다룹니다.
+   * 핵심 부품은 단일 940nm IR LED로, IRremote 라이브러리와 함께 사용하면 <br>
+     Arduino가 TV나 에어컨 리모컨과 동일한 38kHz 리모컨 신호를 송신할 수 있습니다.
+   * 이 매뉴얼은 핀 배치, 배선도, 최신 IRremote 코드, KY-005 + KY-022 기록 및 재생 프로젝트, <br>
+     문제 해결, Fritzing 부품 다운로드를 다룹니다.
 
    * Arduino, ESP32, ESP8266, Raspberry Pi, Pi Pico(3.3V 또는 5V 로직)와 함께 사용할 수 있습니다.
    * KY-022 IR 수신기와 함께 사용하면 실제 리모컨 코드를 캡처하고 재생할 수 있습니다.
