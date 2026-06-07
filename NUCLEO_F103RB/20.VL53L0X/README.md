@@ -2,9 +2,6 @@
 
 ## STM32CubeMX 설정 가이드
 
-<img width="200" height="100" alt="1002" src="https://github.com/user-attachments/assets/2ce67ecd-f487-4eb1-b083-e5823e572a55" />
-<br>
-
 ![](GY-VL53L0XV2.jpg)
 
 <img width="500" height="400" alt="F103RB-pin" src="https://github.com/user-attachments/assets/d80c0cce-15b0-4676-b297-6b326258817e" />
