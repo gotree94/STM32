@@ -1,44 +1,41 @@
-# Digital Temperature Sensor KY-028
+# 디지털 온도 센서 KY-028
 
 ![](001.png)
 
-* The KY-028 is a digital temperature sensor for Arduino based on an NTC thermistor.
-* It measures from -55°C to 125°C with ±0.5°C accuracy, providing both a digital output (threshold-triggered) and an analog output (relative temperature reading), with a potentiometer to set the detection threshold.
+- KY-028은 NTC 서미스터 기반 Arduino용 디지털 온도 센서입니다.
+- -55°C ~ 125°C 범위에서 ±0.5°C 정확도로 측정하며, 디지털 출력(임계값 트리거)과 아날로그 출력(상대 온도 판독)을 모두 제공하고, 감지 임계값을 설정하는 가변 저항이 장착되어 있습니다.
+- Arduino, Raspberry Pi, ESP32 및 기타 마이크로컨트롤러와 호환됩니다.
 
-* Compatible with Arduino, Raspberry Pi, ESP32, and other microcontrollers.
+## KY-028 사양
 
+- 이 모듈은 NTC 서미스터, LM393 이중 차동 비교기, 3296W 트리머 가변 저항, 6개의 저항, 2개의 LED 및 4개의 수 핀 헤더로 구성됩니다. 아날로그 및 디지털 출력을 지원합니다.
 
-## KY-028 Specifications
+| 항목 | 값 |
+|:---:|:---:|
+| 동작 전압 | 3.3V ~ 5.5V |
+| 온도 측정 범위 | -55°C ~ 125°C [-67°F ~ 257°F] |
+| 측정 정확도 | ±0.5°C |
+| 보드 크기 | 15mm x 36mm [0.6in x 1.4in] |
 
-* This module consists of an NTC thermistor, an LM393 dual differential comparator, a 3296W trimmer potentiometer, 6 resistors, 2 LEDs, and 4 male header pins. The module features analog and digital outputs.
+## 연결 다이어그램
 
-| Operating Voltage	| 3.3V ~ 5.5V | 
-|:----------------:|:----------------:|
-| Temperature Measurement Range	| -55°C to 125°C [-67°F to 257°F] | 
-| Measurement Accuracy	|  ±0.5°C | 
-| Board Dimensions	| 15mm x 36mm [0.6in x 1.4in] | 
+- 보드의 아날로그 출력(A0)을 Arduino의 A0 핀에 연결하고 디지털 출력(D0)을 핀 3에 연결합니다.
+- 전원 라인(+)과 접지(G)를 각각 5V와 GND에 연결합니다.
 
+| KY-028 | STM32F103 |
+|:------:|:---------:|
+| A0 | Pin A0 |
+| G | GND |
+| + | +5V |
+| D0 | Pin 2 |
 
-## Connection Diagram
+## KY-028 Arduino 코드
 
-* Connect the board’s analog output (A0) to pin A0 on the Arduino and the digital output (D0) to pin 3.
-* Connect the power line (+) and ground (G) to 5V and GND respectively.
+온도 임계값에 도달하면 디지털 인터페이스가 HIGH 신호를 보내 Arduino의 LED(핀 13)를 켭니다. 가변 저항을 시계 방향으로 돌리면 감지 임계값이 증가하고 반시계 방향으로 돌리면 감소합니다.
 
-| KY-028	| STM32F103 | 
-|:-------------:|:-------------:|
-| A0	| Pin A0 | 
-| G	| GND | 
-| +	| +5V | 
-| D0	| Pin 2 | 
+아날로그 인터페이스는 온도와 가변 저항 위치에 따라 달라지는 숫자 값을 반환합니다. 아날로그 출력 핀이 가변 저항에 직접 연결되어 있으므로 KY-013에서와 같이 Steinhart-Hart 방정식을 사용하여 온도를 계산할 수 없으며, 이 값을 사용하여 온도의 상대적 변화만 측정할 수 있습니다.
 
-KY-028 Arduino Code
-When the temperature threshold is reached, the digital interface will send a HIGH signal turning on the LED on the Arduino (pin 13). Turn the potentiometer clockwise to increase the detection threshold and counter-clockwise to decrease it.
-
-The analog interface returns a numeric value that depends on the temperature and the potentiometer’s position. 
-
-Since the analog output pin is directly connected to the potentiometer it isn’t possible to use the Steinhart-Hart equation to calculate the temperature as we did with the KY-013, we can only use this value to measure relative changes in temperature.
-
-```
+```cpp
 int led = 13; // define the LED pin
 int digitalPin = 2; // KY-028 digital interface
 int analogPin = A0; // KY-028 analog interface
@@ -73,68 +70,73 @@ void loop()
   delay(100);
 }
 ```
+
 ---
 
-# Analog Temperature Sensor KY-013 (HW-498)
+# 아날로그 온도 센서 KY-013 (HW-498)
 
 ![](002.png)
 
-The KY-013 — also sold as the HW-498 — is an analog temperature sensor for Arduino built around an NTC thermistor. It’s a common part in many Arduino starter kits.
+KY-013(HW-498이라고도 함)은 NTC 서미스터를 기반으로 한 Arduino용 아날로그 온도 센서입니다. 많은 Arduino 스타터 키트에서 흔히 볼 수 있는 부품입니다.
 
-It translates ambient temperature into a continuous voltage that the Arduino reads on an analog (ADC) pin, then converts to a precise reading with the Steinhart-Hart equation.
+주변 온도를 연속적인 전압으로 변환하여 Arduino가 아날로그(ADC) 핀에서 읽은 다음 Steinhart-Hart 방정식을 사용하여 정밀한 값으로 변환합니다. 단순한 임계값 기반 센서와 달리 -55°C ~ 125°C 범위에서 ±0.5°C 정확도로 측정합니다.
 
-It measures from -55°C to 125°C with ±0.5°C accuracy — unlike simpler threshold-only sensors.
+Arduino, ESP32 등 널리 사용되는 전자 플랫폼과 호환됩니다.
 
-Compatible with popular electronics platforms like Arduino and ESP32.
+## KY-013 사양
 
-KY-013 Specifications
+이 모듈은 10kΩ NTC 서미스터, 이에 대응하는 10kΩ 고정 저항(함께 전압 분배기를 형성), 3핀 수 헤더로 구성됩니다. NTC 유형이므로 온도가 상승하면 서미스터의 저항이 감소합니다. Arduino는 분배기의 출력 전압을 아날로그 핀에서 읽고 Steinhart-Hart 방정식(또는 아래 나열된 B-값을 사용하는 더 간단한 Beta 방정식)을 사용하여 온도로 변환합니다.
 
-This module consists of a 10 kΩ NTC thermistor, a matching 10 kΩ fixed resistor (which together form a voltage divider), and a 3-pin male header. Being an NTC type, the thermistor’s resistance falls as temperature rises. The Arduino reads the divider’s output voltage on an analog pin and converts it to a temperature using the Steinhart-Hart equation (or the simpler Beta equation, using the B-value listed below).
+| 항목 | 값 |
+|:---:|:---:|
+| 센서 유형 | NTC 서미스터 (MF52), 아날로그 출력 |
+| 동작 전압 | 3.3V ~ 5V |
+| 측정 범위 | -55°C ~ +125°C (-67°F ~ 257°F) |
+| 정확도 | ±0.5°C |
+| 서미스터 공칭 저항 | 25°C에서 10kΩ |
+| B-값 (B25/50) | 3950K |
+| 직렬 (분배) 저항 | 10kΩ |
+| 인터페이스 | 3핀 — S(신호), 중간(+V), –(GND) |
+| 보드 크기 | ~19 × 15mm |
 
-Specification	Value
-Sensor type	NTC thermistor (MF52), analog output
-Operating voltage	3.3 V – 5 V
-Measurement range	−55 °C to +125 °C (−67 °F to 257 °F)
-Accuracy	±0.5 °C
-Thermistor nominal resistance	10 kΩ at 25 °C
-B-value (B25/50)	3950 K
-Series (divider) resistor	10 kΩ
-Interface	3-pin — S (signal), middle (+V), − (GND)
-Board dimensions	~19 × 15 mm
+## KY-013 핀 배치
 
-KY-013 Pinout
+KY-013에는 3개의 핀이 있습니다. 기억해야 할 한 가지는 중간 핀이 신호가 아닌 전원(VCC)이라는 점입니다 — 흔한 배선 실수입니다. 신호 핀(S)은 NTC 서미스터 분배기의 아날로그 전압을 전달하고, – 핀은 접지입니다. 아래 연결 다이어그램을 참조하여 Arduino에 배선하는 방법을 확인하세요.
 
-The KY-013 has three pins. The one thing to remember is that the middle pin is power (VCC), not the signal — a common wiring mistake. The signal pin (S) carries the analog voltage from the NTC thermistor divider, and the – pin is ground. See the Connection Diagram below for how to wire them to an Arduino.
+| 라벨 | 기능 |
+|:---:|:---:|
+| S (Signal) | 아날로그 출력 — NTC 분배기의 전압 |
+| 중간 | 전원 (VCC), 3.3~5V |
+| – | 접지 |
 
-Label	Function
-S (Signal)	Analog output — voltage from the NTC divider
-Middle	Power (VCC), 3.3–5 V
-–	Ground
-Note: Pin labels and order vary between manufacturers and clone boards (the KY-013 is also sold as the HW-498) — always check the silk-screen on your module before wiring. The middle pin is power on every version, but the outer S and – pins are occasionally swapped; if your readings move the wrong way (falling as it warms), swap those two connections.
+**참고:** 핀 라벨과 순서는 제조사와 클론 보드에 따라 다릅니다(KY-013은 HW-498로도 판매됨) — 배선 전에 항상 모듈의 실크스크린을 확인하세요. 중간 핀은 모든 버전에서 전원이지만, 외부 S와 – 핀은 가끔 바뀔 수 있습니다; 판독값이 온도가 올라갈 때 반대로 움직이면(내려가면) 두 연결을 바꾸세요.
 
+## 연결 다이어그램
 
-Connection Diagram
-Connect module power line (middle) and ground (-) to 5V and GND on the Arduino respectively. Connect the module signal pin (S) to pin A0 on the Arduino.
+모듈의 전원 라인(중간)과 접지(-)를 Arduino의 5V와 GND에 각각 연결합니다. 모듈의 신호 핀(S)을 Arduino의 A0 핀에 연결합니다.
 
-Some KY-013 have a different pin arrangement. Please check your board before connecting.
+일부 KY-013은 다른 핀 배열을 가지고 있습니다. 연결하기 전에 보드를 확인하세요.
 
-KY-013	Arduino
-S	A0
-middle	5V
-–	GND
+| KY-013 | Arduino |
+|:------:|:-------:|
+| S | A0 |
+| 중간 | 5V |
+| – | GND |
 
-An analog temperature sensor like the KY-013 translates the surrounding temperature into a continuous voltage that an Arduino can read. At the heart of the module is an NTC (Negative Temperature Coefficient) thermistor — a resistor whose resistance drops as it gets warmer. The module wires this thermistor in series with a fixed 10 kΩ resistor to form a voltage divider, so the voltage on the signal pin changes smoothly with temperature.
+KY-013과 같은 아날로그 온도 센서는 주변 온도를 Arduino가 읽을 수 있는 연속적인 전압으로 변환합니다. 모듈의 핵심은 NTC(부온도계수) 서미스터로, 온도가 올라가면 저항이 감소하는 저항기입니다. 모듈은 이 서미스터를 고정 10kΩ 저항과 직렬로 연결하여 전압 분배기를 형성하므로 신호 핀의 전압이 온도에 따라 부드럽게 변화합니다.
 
-The full signal chain works like this:
+전체 신호 체인은 다음과 같이 작동합니다:
 
-A temperature change shifts the NTC thermistor’s resistance (lower resistance when it’s warmer).
-The thermistor and the fixed 10 kΩ resistor form a voltage divider that turns that resistance into a voltage.
-The Arduino’s analog-to-digital converter (ADC) reads the voltage as a 0–1023 value (0–4095 on a 12-bit ESP32 ADC).
-The Steinhart-Hart equation converts that value into a temperature in °C.
-Because the resistance-to-temperature relationship is non-linear, you can’t read degrees straight from the ADC — you have to apply a formula. The sketches below use the Steinhart-Hart equation with coefficients derived from the KY-013’s B25/50 = 3950 K specification, tuned for accurate readings across the full −55 °C to 125 °C range.
+1. 온도 변화가 NTC 서미스터의 저항을 변화시킵니다(더 따뜻하면 저항 감소).
+2. 서미스터와 고정 10kΩ 저항이 전압 분배기를 형성하여 저항을 전압으로 변환합니다.
+3. Arduino의 아날로그-디지털 변환기(ADC)가 전압을 0~1023 값(12비트 ESP32 ADC에서는 0~4095)으로 읽습니다.
+4. Steinhart-Hart 방정식이 그 값을 °C 단위의 온도로 변환합니다.
 
-KY-013 Arduino Code
-```
+저항-온도 관계가 비선형이므로, ADC 값에서 직접 온도를 읽을 수 없습니다 — 공식을 적용해야 합니다. 아래 스케치는 KY-013의 B25/50 = 3950K 사양에서 파생된 Steinhart-Hart 계수를 사용하며, 전체 -55°C ~ 125°C 범위에서 정확한 판독을 위해 조정되었습니다.
+
+## KY-013 Arduino 코드
+
+```cpp
 int ThermistorPin = A0;
 int Vo;
 float R1 = 10000; // value of R1 on board
@@ -157,10 +159,11 @@ void loop() {
 }
 ```
 
-KY-013 ESP32 Code
-The ESP32 sketch works the same way as the Arduino version with two adjustments: connect the signal pin to GPIO34 (or any ADC1 pin, 32–39) and power the module from 3.3 V — the ESP32's ADC reference is 3.3 V, so using 5 V will damage the pin. The 12-bit ADC reads 0–4095 instead of 0–1023, so the resistance formula uses 4095.0 as the divisor.
+## KY-013 ESP32 코드
 
-```
+ESP32 스케치는 두 가지 조정을 제외하고 Arduino 버전과 동일하게 작동합니다: 신호 핀을 GPIO34(또는 ADC1 핀, 32~39)에 연결하고 모듈을 3.3V로 전원 공급합니다 — ESP32의 ADC 기준 전압은 3.3V이므로 5V를 사용하면 핀이 손상됩니다. 12비트 ADC는 0~1023 대신 0~4095를 읽으므로 저항 공식에 4095.0을 제수로 사용합니다.
+
+```cpp
 int ThermistorPin = 34;
 int Vo;
 float R1 = 10000; // value of R1 on board
@@ -185,109 +188,122 @@ void loop() {
 }
 ```
 
-## Applications
-* The KY-013 (HW-498) NTC thermistor module suits any project that needs a continuous analog temperature reading. Common use cases include:
+## 응용 분야
 
-Ambient temperature monitoring — log readings to Serial, an LCD, or a cloud dashboard in real time.
-Weather stations — pair with a humidity and pressure sensor (DHT22, BMP280) for a full climate station.
-Plant and greenhouse control — trigger ventilation fans or heating mats when temperature crosses a threshold.
-Aquarium management — alert when water temperature drifts outside a safe range.
-Fan and cooling control — switch a relay or adjust PWM fan speed proportionally to temperature.
-Cold-chain and freezer logging — sample and store temperature over time to verify storage conditions.
-Arduino starter kit projects — included in most kits as an easy first sensor; pairs well with a buzzer or LED indicator.
-Troubleshooting & FAQ
-What is an analog temperature sensor?
-An analog temperature sensor converts ambient temperature into a continuous voltage. Unlike digital sensors that output pre-processed values over a data protocol, an analog sensor outputs a raw voltage your microcontroller reads on an ADC pin and converts using a formula. The KY-013 uses an NTC thermistor — its resistance drops as temperature rises, producing a varying voltage through a voltage divider.
+연속적인 아날로그 온도 판독이 필요한 모든 프로젝트에 KY-013(HW-498) NTC 서미스터 모듈이 적합합니다. 일반적인 사용 사례는 다음과 같습니다:
 
-Is the KY-013 the same as the HW-498?
-Yes. The KY-013 and HW-498 are the same module sold under different names. Both use a 10 kΩ NTC thermistor (MF52) with a 10 kΩ series resistor and a three-pin interface. The pinout and code are identical.
+- **주변 온도 모니터링** — 실시간으로 Serial, LCD 또는 클라우드 대시보드에 기록
+- **기상 관측소** — 습도 및 압력 센서(DHT22, BMP280)와 결합하여 완전한 기후 관측소 구축
+- **식물 및 온실 제어** — 온도가 임계값을 넘으면 환기 팬이나 난방 매트 작동
+- **수족관 관리** — 수온이 안전 범위를 벗어날 때 경고
+- **팬 및 냉각 제어** — 온도에 비례하여 릴레이 전환 또는 PWM 팬 속도 조정
+- **콜드체인 및 냉동고 로깅** — 보관 조건 확인을 위해 시간별 온도 샘플링 및 저장
+- **Arduino 스타터 키트 프로젝트** — 대부분의 키트에 포함된 쉬운 첫 센서; 부저 또는 LED 표시기와 함께 사용
 
-What is the difference between KY-013 and DS18B20 (KY-001)?
-The DS18B20 is a digital temperature sensor — sold standalone or as the KY-001 module. It communicates over the 1-Wire protocol and delivers a pre-calculated temperature value directly, no formula needed. The KY-013 is analog: it outputs a raw voltage you convert yourself using the Steinhart-Hart equation. The DS18B20 offers guaranteed ±0.5 °C accuracy from the IC, supports multiple sensors on a single pin, and suits longer cable runs; the KY-013 is simpler to wire and the better learning tool for understanding ADC and thermistor math.
+## 문제 해결 및 FAQ
 
-What is the difference between KY-013 and LM35?
-The LM35 is a precision analog IC that outputs 10 mV per °C — a simple linear formula converts voltage to temperature. The KY-013 uses an NTC thermistor whose resistance changes non-linearly, requiring the Steinhart-Hart equation. The LM35 is more accurate and easier to convert; the KY-013 covers a wider range (−55 °C to 125 °C vs 0–100 °C for the standard LM35) and is cheaper and more common in Arduino starter kits.
+**아날로그 온도 센서란 무엇인가요?**
+아날로그 온도 센서는 주변 온도를 연속적인 전압으로 변환합니다. 데이터 프로토콜을 통해 전처리된 값을 출력하는 디지털 센서와 달리, 아날로그 센서는 마이크로컨트롤러가 ADC 핀에서 읽고 공식을 사용하여 변환하는 원시 전압을 출력합니다. KY-013은 NTC 서미스터를 사용합니다 — 온도가 상승하면 저항이 감소하여 전압 분배기를 통해 변화하는 전압을 생성합니다.
 
-Why are my KY-013 temperature readings inverted or backwards?
-If temperature rises when you cool the sensor, the S (signal) and – (GND) pins are swapped. Remove power, swap those two outer wires, and re-test. Some clone boards print the pin labels in the wrong order.
+**KY-013과 HW-498은 동일한가요?**
+네, KY-013과 HW-498은 다른 이름으로 판매되는 동일한 모듈입니다. 둘 다 10kΩ NTC 서미스터(MF52), 10kΩ 직렬 저항 및 3핀 인터페이스를 사용합니다. 핀 배치와 코드는 동일합니다.
 
-Why are my KY-013 readings consistently off by 1–2 °C?
-Verify that R1 in the sketch matches the series resistor on your board — standard KY-013 boards use 10 kΩ, but some clones differ. Also confirm you are using the correct ADC resolution: 1023.0 for Arduino Uno, 4095.0 for ESP32. For tighter accuracy on Arduino, the 5 V rail can vary ±5%; use analogReference(EXTERNAL) with a stable reference if precision matters.
+**KY-013과 DS18B20(KY-001)의 차이점은 무엇인가요?**
+DS18B20은 디지털 온도 센서로, 단독으로 또는 KY-001 모듈로 판매됩니다. 1-Wire 프로토콜을 통해 통신하며 공식 없이 바로 사용 가능한 미리 계산된 온도 값을 제공합니다. KY-013은 아날로그입니다: Steinhart-Hart 방정식을 사용하여 직접 변환해야 하는 원시 전압을 출력합니다. DS18B20은 IC에서 보장된 ±0.5°C 정확도를 제공하고, 단일 핀에서 여러 센서를 지원하며, 더 긴 케이블에 적합합니다; KY-013은 배선이 더 간단하고 ADC 및 서미스터 계산을 배우기에 더 좋은 도구입니다.
 
-Why are my KY-013 readings noisy or jumpy?
-ADC noise is normal on analog pins. Average 5–10 readings in a loop before applying the formula to smooth the output. Keep sensor leads short and away from high-current devices.
+**KY-013과 LM35의 차이점은 무엇인가요?**
+LM35는 °C당 10mV를 출력하는 정밀 아날로그 IC입니다 — 간단한 선형 공식으로 전압을 온도로 변환합니다. KY-013은 저항이 비선형적으로 변화하는 NTC 서미스터를 사용하여 Steinhart-Hart 방정식이 필요합니다. LM35는 변환이 더 정확하고 간단하지만, KY-013은 더 넓은 범위(-55°C ~ 125°C, 표준 LM35의 0~100°C)를覆盖하고 더 저렴하며 Arduino 스타터 키트에서 더 흔합니다.
 
-Why does my ESP32 show readings pegged near 0 or at maximum?
-The ESP32 ADC reference is 3.3 V. Powering the KY-013 from 5 V drives the signal pin above 3.3 V, saturating the ADC and risking GPIO damage. Always connect VCC to the ESP32’s 3.3 V pin.
+**KY-013 온도 판독값이 반전되거나 거꾸로 나오는 이유는 무엇인가요?**
+온도가 센서를 식힐 때 상승하면 S(신호)와 –(GND) 핀이 바뀐 것입니다. 전원을 끄고 두 외부 전선을 교체한 후 다시 테스트하세요. 일부 클론 보드는 핀 라벨을 잘못된 순서로 인쇄합니다.
 
-Why do the sketch coefficients differ from other KY-013 examples?
-Most online examples use generic Steinhart-Hart constants not calibrated to the MF52 thermistor. The coefficients here are derived from the KY-013’s B25/50 = 3950 K specification: resistance was calculated at three temperatures (0 °C, 25 °C, 85 °C) using the Beta equation, then the Steinhart-Hart 3×3 system was solved. This improves accuracy by up to 0.5 °C at temperature extremes compared to the generic values.
+**KY-013 판독값이 일관되게 1~2°C 차이가 나는 이유는 무엇인가요?**
+스케치의 R1이 보드의 직렬 저항과 일치하는지 확인하세요 — 표준 KY-013 보드는 10kΩ을 사용하지만 일부 클론은 다릅니다. 또한 올바른 ADC 분해능을 사용하는지 확인하세요: Arduino Uno는 1023.0, ESP32는 4095.0입니다. Arduino에서 더 정확한 측정을 위해 5V 레일이 ±5% 변할 수 있으므로 정밀도가 중요하다면 `analogReference(EXTERNAL)`을 사용하여 안정적인 기준 전압을 사용하세요.
 
-Related Temperature Sensor Modules
-The KY-013 is one of several temperature sensors included in 37-in-1 Arduino sensor kits. Here’s how the main options compare:
+**KY-013 판독값이 노이즈가 심하거나 불규칙한 이유는 무엇인가요?**
+ADC 노이즈는 아날로그 핀에서 정상입니다. 공식을 적용하기 전에 루프에서 5~10회 판독을 평균하여 출력을 부드럽게 하세요. 센서 리드를 짧게 유지하고 고전류 장치에서 멀리 떨어뜨리세요.
 
-Feature	KY-013 (HW-498)	KY-001 DS18B20	KY-015 DHT11
-Output	Analog voltage	Digital (1-Wire)	Digital (single-wire)
-Sensor element	NTC thermistor (MF52)	Silicon bandgap IC	Capacitive humidity + thermistor
-Reading method	ADC + Steinhart-Hart	1-Wire library, no formula	DHT library, no formula
-Measures humidity	No	No	Yes (±5 % RH)
-Accuracy	±0.5 °C	±0.5 °C	±2 °C
-Range	−55 to 125 °C	−55 to 125 °C	0 to 50 °C
-Multiple on one pin	No	Yes	No
-Operating voltage	3.3–5 V	3.0–5.5 V	3.3–5 V
-For a simple temperature threshold switch (no exact reading needed), see the KY-028 digital temperature sensor.
+**ESP32에서 판독값이 0 부근에 고정되거나 최대값을 나타내는 이유는 무엇인가요?**
+ESP32의 ADC 기준 전압은 3.3V입니다. KY-013을 5V로 전원 공급하면 신호 핀이 3.3V 이상으로 올라가 ADC가 포화되고 GPIO가 손상될 위험이 있습니다. 항상 VCC를 ESP32의 3.3V 핀에 연결하세요.
+
+**스케치 계수가 다른 KY-013 예제와 다른 이유는 무엇인가요?**
+대부분의 온라인 예제는 MF52 서미스터에 보정되지 않은 일반 Steinhart-Hart 상수를 사용합니다. 여기의 계수는 KY-013의 B25/50 = 3950K 사양에서 파생되었습니다: Beta 방정식을 사용하여 세 온도(0°C, 25°C, 85°C)에서 저항을 계산한 후 Steinhart-Hart 3×3 시스템을 풀었습니다. 이는 일반 값과 비교하여 온도 극한에서 정확도를 최대 0.5°C 향상시킵니다.
+
+## 관련 온도 센서 모듈
+
+KY-013은 37-in-1 Arduino 센서 키트에 포함된 여러 온도 센서 중 하나입니다. 주요 옵션 비교:
+
+| 특징 | KY-013 (HW-498) | KY-001 DS18B20 | KY-015 DHT11 |
+|:---:|:---:|:---:|:---:|
+| 출력 | 아날로그 전압 | 디지털 (1-Wire) | 디지털 (단일 와이어) |
+| 센서 소자 | NTC 서미스터 (MF52) | 실리콘 밴드갭 IC | 정전식 습도 + 서미스터 |
+| 판독 방법 | ADC + Steinhart-Hart | 1-Wire 라이브러리, 공식 불필요 | DHT 라이브러리, 공식 불필요 |
+| 습도 측정 | 아니요 | 아니요 | 예 (±5% RH) |
+| 정확도 | ±0.5°C | ±0.5°C | ±2°C |
+| 범위 | -55 ~ 125°C | -55 ~ 125°C | 0 ~ 50°C |
+| 단일 핀에 여러 개 연결 | 아니요 | 예 | 아니요 |
+| 동작 전압 | 3.3~5V | 3.0~5.5V | 3.3~5V |
+
+정확한 온도 판독이 필요 없는 단순한 온도 임계값 스위치 용도로는 KY-028 디지털 온도 센서를 참조하세요.
 
 ---
 
-# DS18B20 Temperature Sensor KY-001
+# DS18B20 온도 센서 KY-001
 
 ![](003.png)
 
+KY-001은 37-in-1 및 유사한 Arduino 센서 키트(Keyes, ELEGOO, SunFounder, Joy-IT 등)에서 볼 수 있는 DS18B20 디지털 온도 센서 모듈입니다. Maxim/Dallas DS18B20 1-Wire 센서를 풀업 저항 및 표시 LED와 함께 소형 브레이크아웃 보드에 장착하여, 단일 데이터 라인을 통해 보정된 디지털 온도 판독값을 제공합니다 — 아날로그 배선이나 교정이 필요 없습니다.
 
-The KY-001 is a DS18B20 digital temperature sensor module found in 37-in-1 and similar Arduino sensor kits (Keyes, ELEGOO, SunFounder, Joy-IT, and others). It mounts a Maxim/Dallas DS18B20 1-Wire sensor on a small breakout board together with a pull-up resistor and an indicator LED, giving you calibrated digital temperature readings over a single data line — no analog wiring or calibration required.
+DS18B20은 -55°C ~ +125°C 범위에서 대부분의 범위에서 ±0.5°C 정확도로 측정하며, 9~12비트 분해능의 디지털 값으로 마이크로컨트롤러에 직접 온도를 보고합니다. 모듈은 3.0~5.5V에서 작동하므로 Arduino Uno 및 Mega와 같은 5V 보드뿐만 아니라 ESP32, ESP8266, Raspberry Pi와 같은 3.3V 보드에서도 작동합니다. "KY-01"로 표시되기도 합니다.
 
-The DS18B20 measures from −55 °C to +125 °C with ±0.5 °C accuracy across most of that range and reports temperature straight to your microcontroller as a digital value at 9- to 12-bit resolution. The module runs on 3.0–5.5 V, so it works with 5 V boards such as the Arduino Uno and Mega as well as 3.3 V boards like the ESP32, ESP8266, and Raspberry Pi. You may also see it listed as “KY-01”.
+DS18B20은 1-Wire 프로토콜을 사용하므로 모든 센서가 고유한 64비트 주소를 가지며, 여러 KY-001 모듈이 동일한 데이터 핀을 공유하여 개별적으로 읽힐 수 있어 다중 영역 온도 모니터링에 이상적입니다.
 
-Because the DS18B20 uses the 1-Wire protocol, every sensor carries a unique 64-bit address — so multiple KY-001 modules can share the same data pin and be read individually, which is ideal for multi-zone temperature monitoring.
+KY-001에는 1-Wire 데이터 라인에 온보드 풀업 저항(일반적으로 4.7kΩ)이 포함되어 있어, 짧은 리드의 단일 모듈은 별도의 풀업 저항이 필요 없습니다 — 베어 DS18B20과 달리 말입니다. 긴 케이블이나 여러 모듈을 하나의 버스에 연결할 때만 풀업을 추가하거나 조정하면 됩니다(이 경우 온보드 저항이 병렬로 겹쳐집니다).
 
-The KY-001 includes an onboard pull-up resistor (typically 4.7 kΩ) on the 1-Wire data line, so a single module on a short lead needs no external resistor — unlike a bare DS18B20. You only need to add or adjust a pull-up for long cable runs or when chaining several modules on one bus, where their onboard resistors stack in parallel.
+## KY-001 사양
 
-KY-001 DS18B20 Pinout
+| 항목 | 값 |
+|:---:|:---:|
+| 센서 소자 | Dallas / Maxim DS18B20 |
+| 동작 전압 | 3.0V ~ 5.5V |
+| 온도 범위 | -55°C ~ +125°C (-57°F ~ +257°F) |
+| 정확도 | ±0.5°C (-10°C ~ +85°C) |
+| 분해능 | 9 ~ 12비트, 사용자 설정 가능 (기본값: 12비트) |
+| 변환 시간 | 최대 750ms (12비트 분해능) |
+| 동작 전류 | 1mA 일반 / 1.5mA 최대 (온도 변환 중) |
+| 온보드 부품 | 풀업 저항 (일반적으로 4.7kΩ) + 표시 LED |
+| 보드 크기 | 18.5 × 15mm (0.73 × 0.59 in) |
+| 다른 이름 | DS18B20 모듈, KY-01 |
 
-KY-001 DS18B20 Specifications
+## KY-001 핀 배치
 
-Sensor element	Dallas / Maxim DS18B20
-Operating voltage	3.0 V to 5.5 V
-Temperature range	−55 °C to +125 °C (−57 °F to +257 °F)
-Accuracy	±0.5 °C (−10 °C to +85 °C)
-Resolution	9 to 12 bit, user-configurable (default: 12 bit)
-Conversion time	Up to 750 ms (at 12-bit resolution)
-Active current	1 mA typ / 1.5 mA max (during temperature conversion)
-Onboard components	Pull-up resistor (typically 4.7 kΩ) + indicator LED
-Board dimensions	18.5 × 15 mm (0.73 × 0.59 in)
-Also known as	DS18B20 module, KY-01
-KY-001 Pinout
-Pin	Label	Description
-1	S	1-Wire signal / data
-2	+	VCC — 3.0 to 5.5 V
-3	−	GND
-KY-001 Wiring Diagram
-Connect the power line (middle) and ground (-) on the module to +5V and GND on the Arduino respectively. Connect the signal pin (S) to pin 2 on the Arduino.
+| 핀 | 라벨 | 설명 |
+|:---:|:---:|:---:|
+| 1 | S | 1-Wire 신호 / 데이터 |
+| 2 | + | VCC — 3.0 ~ 5.5V |
+| 3 | – | GND |
 
-KY-001	Arduino
-S	Pin 2
-middle	+5V
-–	GND
-Arduino KY-001 connection diagram
-KY-001 Arduino Code
+## KY-001 배선도
 
-The KY-001 talks to your Arduino over the 1-Wire bus, so the sketches below use the OneWire and DallasTemperature libraries. Wire the module’s S pin to Arduino digital pin 2, + to 5 V, and − to GND.
+모듈의 전원 라인(중간)과 접지(-)를 Arduino의 +5V와 GND에 각각 연결합니다. 신호 핀(S)을 Arduino의 핀 2에 연결합니다.
 
-Links to the required libraries can be found on the Downloads section below.
+| KY-001 | Arduino |
+|:------:|:-------:|
+| S | Pin 2 |
+| 중간 | +5V |
+| – | GND |
 
-Basic Temperature Reading
-This sketch reads a single DS18B20 once per second and prints the temperature in both Celsius and Fahrenheit. The delay(1000) keeps the 1-Wire bus from being polled continuously, and the disconnect check catches the −127 °C value returned when no sensor is found.
+## KY-001 Arduino 코드
 
+KY-001은 1-Wire 버스를 통해 Arduino와 통신하므로 아래 스케치는 OneWire 및 DallasTemperature 라이브러리를 사용합니다. 모듈의 S 핀을 Arduino 디지털 핀 2에, +를 5V에, –를 GND에 연결하세요.
+
+필요한 라이브러리 링크는 아래 다운로드 섹션에서 찾을 수 있습니다.
+
+### 기본 온도 읽기
+
+이 스케치는 초당 한 번씩 단일 DS18B20을 읽고 섭씨와 화씨로 온도를 출력합니다. `delay(1000)`은 1-Wire 버스가 지속적으로 폴링되는 것을 방지하며, 연결 끊김 검사는 센서를 찾을 수 없을 때 반환되는 -127°C 값을 포착합니다.
+
+```cpp
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -320,12 +336,15 @@ void loop() {
 
   delay(1000); // one read per second
 }
-Reading Multiple DS18B20 Sensors
+```
 
-Because every DS18B20 carries a unique 64-bit address, you can put several on the same data pin and read them individually — ideal for multi-zone monitoring. One caveat specific to KY-001 modules: each board has its own onboard pull-up, so wiring several in parallel stacks those resistors (two 4.7 kΩ in parallel ≈ 2.35 kΩ). For more than two or three sensors, use bare DS18B20s with a single shared 4.7 kΩ pull-up instead.
+### 여러 DS18B20 센서 읽기
 
-The simplest approach reads each sensor by its index on the bus:
+모든 DS18B20은 고유한 64비트 주소를 가지므로 여러 개를 동일한 데이터 핀에 연결하여 개별적으로 읽을 수 있습니다 — 다중 영역 모니터링에 이상적입니다. KY-001 모듈의 한 가지 주의사항: 각 보드에는 자체 온보드 풀업이 있으므로 여러 개를 병렬로 연결하면 해당 저항이 병렬로 겹쳐집니다(4.7kΩ 두 개를 병렬 연결하면 약 2.35kΩ). 2~3개 이상의 센서는 단일 공유 4.7kΩ 풀업이 있는 베어 DS18B20을 대신 사용하세요.
 
+가장 간단한 방법은 버스에서 각 센서를 인덱스로 읽는 것입니다:
+
+```cpp
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -362,8 +381,11 @@ void loop() {
 
   delay(1000);
 }
-Index order isn’t guaranteed between power-ups, so to reliably track a specific sensor, address it by its ROM code. Run this discovery sketch once to print each sensor’s address:
+```
 
+인덱스 순서는 전원 재시작 간에 보장되지 않으므로 특정 센서를 안정적으로 추적하려면 ROM 코드로 주소를 지정하세요. 다음 발견 스케치를 한 번 실행하여 각 센서의 주소를 출력합니다:
+
+```cpp
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -399,8 +421,11 @@ void setup() {
 }
 
 void loop() {}
-Then paste the addresses into your sketch and read each sensor directly:
+```
 
+그런 다음 주소를 스케치에 붙여넣고 각 센서를 직접 읽습니다:
+
+```cpp
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -431,64 +456,76 @@ void loop() {
 
   delay(1000);
 }
-Setting the Resolution
+```
 
-The DS18B20 supports 9- to 12-bit resolution. Lower resolution converts faster but is coarser; 12-bit (the default) resolves 0.0625 °C but takes up to 750 ms per reading. Set it in setup() after sensors.begin():
+### 분해능 설정
 
+DS18B20은 9~12비트 분해능을 지원합니다. 낮은 분해능은 변환이 더 빠르지만 더 거칠습니다. 12비트(기본값)는 0.0625°C까지 분해하지만 판독당 최대 750ms가 소요됩니다. `setup()`에서 `sensors.begin()` 후에 설정하세요:
+
+```cpp
 sensors.setResolution(12); // 9, 10, 11, or 12 bits
-Resolution	Step	Max conversion time
-9-bit	0.5 °C	93.75 ms
-10-bit	0.25 °C	187.5 ms
-11-bit	0.125 °C	375 ms
-12-bit (default)	0.0625 °C	750 ms
-Troubleshooting & FAQ
-The DS18B20 reads −127 °C
-−127 °C is the DallasTemperature library’s DEVICE_DISCONNECTED_C sentinel — the Arduino received no valid reply from the sensor. Check that the data line is on the pin your sketch declares (#define ONE_WIRE_BUS 2 in the examples above); confirm VCC and GND are not swapped; verify the pull-up resistor is present (the KY-001’s onboard ~4.7 kΩ covers a single module); look for a cold solder joint or loose jumper; and for long cables, check that the pull-up is low enough for the line to reach a valid logic HIGH.
+```
 
-The DS18B20 reads a constant 85 °C
-85 °C is the DS18B20’s power-on reset default — its temperature register holds +85 °C until the first conversion completes. A persistent 85 °C almost always means a power problem: an undersized supply, a brownout, or parasite power that can’t sustain the conversion current. Make sure power is stable, call requestTemperatures() and let it finish before reading (in non-blocking mode add up to 750 ms delay at 12-bit), and power the module from its + pin rather than using parasite mode.
+| 분해능 | 스텝 | 최대 변환 시간 |
+|:------:|:----:|:--------------:|
+| 9-bit | 0.5°C | 93.75ms |
+| 10-bit | 0.25°C | 187.5ms |
+| 11-bit | 0.125°C | 375ms |
+| 12-bit (기본값) | 0.0625°C | 750ms |
 
-Garbage or fluctuating readings / CRC errors
-Wildly jumping values or CRC errors are signal-integrity problems, not a faulty sensor. Long or unshielded cables pick up noise and add capacitance the pull-up must overcome. For runs beyond ~1 m, use shielded or twisted-pair cable, lower the pull-up to 3.3 kΩ or 2.2 kΩ, and keep the data line away from motors, relays, and mains wiring.
+## 문제 해결 및 FAQ
 
-How many DS18B20 sensors can share one data line?
-Many — the DS18B20 supports a 1-Wire bus with multiple sensors on a single pin, each addressed by its unique 64-bit ROM code (see the Reading Multiple DS18B20 Sensors section above). For KY-001 modules, keep it to two or three per bus: each module has its own onboard pull-up, and paralleling them lowers total resistance until the bus stops working reliably. For larger arrays, use bare DS18B20s with a single shared 4.7 kΩ pull-up. If one sensor reads but others don’t, address by ROM code rather than by index — index order is not guaranteed across power-ups.
+**DS18B20이 -127°C를 읽습니다**
+-127°C는 DallasTemperature 라이브러리의 `DEVICE_DISCONNECTED_C` 센티널 값입니다 — Arduino가 센서로부터 유효한 응답을 받지 못했습니다. 데이터 라인이 스케치에서 선언한 핀에 연결되어 있는지 확인하고(`#define ONE_WIRE_BUS 2`), VCC와 GND가 바뀌지 않았는지 확인하고, 풀업 저항이 있는지 확인하며(KY-001의 온보드 ~4.7kΩ은 단일 모듈에 충분함), 납땜 불량이나 느슨한 점퍼를 확인하고, 긴 케이블의 경우 풀업이 라인이 유효한 논리 HIGH에 도달할 만큼 충분히 낮은지 확인하세요.
 
-How do I convert the DS18B20 reading to Fahrenheit?
-The DallasTemperature library includes a static helper: DallasTemperature::toFahrenheit(tempC). Pass your Celsius float to it and it returns the equivalent Fahrenheit value. The basic sketch in the code section above already uses this.
+**DS18B20이 일정하게 85°C를 읽습니다**
+85°C는 DS18B20의 전원 켜짐 리셋 기본값입니다 — 온도 레지스터는 첫 번째 변환이 완료될 때까지 +85°C를 유지합니다. 지속적인 85°C는 거의 항상 전원 문제를 의미합니다: 공급 용량 부족, 브라운아웃, 또는 변환 전류를 공급할 수 없는 기생 전원입니다. 전원이 안정적인지 확인하고, `requestTemperatures()`를 호출하고 읽기 전에 완료될 때까지 기다리세요(논블로킹 모드에서 12비트의 경우 최대 750ms 지연 추가), 기생 모드를 사용하지 말고 모듈의 + 핀에서 전원을 공급하세요.
 
-What is the DS18B20’s default resolution and how do I change it?
-The default is 12-bit (0.0625 °C steps, up to 750 ms conversion time). See the Setting the Resolution section above for the full step-by-step and a conversion-time table comparing 9-bit through 12-bit.
+**불규칙하거나 튀는 판독값 / CRC 오류**
+급격하게 변하는 값이나 CRC 오류는 신호 무결성 문제이지 센서 결함이 아닙니다. 길거나 차폐되지 않은 케이블은 노이즈를 포착하고 풀업이 극복해야 할 커패시턴스를 추가합니다. 약 1m 이상의 거리에는 차폐 또는 연선 케이블을 사용하고, 풀업을 3.3kΩ 또는 2.2kΩ으로 낮추고, 데이터 라인을 모터, 릴레이 및 전원선에서 멀리 유지하세요.
 
-Which Arduino sensor kit includes the KY-001?
-The KY-001 is included in the popular 37-in-1 Arduino sensor kit, available from several manufacturers including Keyes, ELEGOO, SunFounder, and Joy-IT. The exact modules in each kit can vary by seller and edition, so check the contents list before buying.
+**하나의 데이터 라인에 몇 개의 DS18B20 센서를 공유할 수 있나요?**
+많이 사용할 수 있습니다 — DS18B20은 고유한 64비트 ROM 코드로 각각 주소가 지정되는 단일 핀에 여러 센서가 있는 1-Wire 버스를 지원합니다(위의 여러 DS18B20 센서 읽기 섹션 참조). KY-001 모듈의 경우 버스당 2~3개로 유지하세요: 각 모듈에는 자체 온보드 풀업이 있으며, 병렬로 연결하면 총 저항이 낮아져 버스가 안정적으로 작동하지 않게 됩니다. 더 큰 배열의 경우 단일 공유 4.7kΩ 풀업이 있는 베어 DS18B20을 사용하세요. 하나의 센서는 읽히지만 다른 센서가 읽히지 않으면 인덱스가 아닌 ROM 코드로 주소를 지정하세요 — 인덱스 순서는 전원 재시작 간에 보장되지 않습니다.
 
-Does the KY-001 work with ESP32, ESP8266, and Raspberry Pi?
-Yes — no level shifting needed. The module runs on 3.0–5.5 V, so it works with 3.3 V boards like the ESP32 and ESP8266 as well as 5 V Arduino boards. Connect S to any GPIO, + to 3.3 V or 5 V, and − to GND. The same OneWire and DallasTemperature libraries run on ESP32 and ESP8266. On Raspberry Pi, enable the w1-gpio overlay in /boot/config.txt or use a Python library such as w1thermsensor.
+**DS18B20 판독값을 화씨로 변환하는 방법은 무엇인가요?**
+DallasTemperature 라이브러리에는 정적 헬퍼인 `DallasTemperature::toFahrenheit(tempC)`가 포함되어 있습니다. 섭씨 float 값을 전달하면 해당 화씨 값을 반환합니다. 위 코드 섹션의 기본 스케치에서 이미 이것을 사용하고 있습니다.
 
-What is the difference between the DS18B20 (KY-001) and the DHT22 or LM35?
-The DS18B20 measures temperature only (−55 to +125 °C, ±0.5 °C accuracy), uses a 1-Wire digital output, and supports multiple sensors on one pin — making it the best choice for temperature-only readings over long distances or from several points at once. The DHT22 also reads humidity but cannot be daisy-chained on one pin. The LM35 outputs an analog voltage proportional to temperature: simpler to wire, but loses precision over long cable runs and ties up an ADC pin.
+**DS18B20의 기본 분해능은 무엇이며 어떻게 변경하나요?**
+기본값은 12비트(0.0625°C 스텝, 최대 750ms 변환 시간)입니다. 위의 분해능 설정 섹션에서 전체 단계별 설명과 9비트에서 12비트까지의 변환 시간 표를 참조하세요.
 
-KY-001 Applications
+**어떤 Arduino 센서 키트에 KY-001이 포함되어 있나요?**
+KY-001은 인기 있는 37-in-1 Arduino 센서 키트에 포함되어 있으며, Keyes, ELEGOO, SunFounder, Joy-IT 등 여러 제조사에서 구매할 수 있습니다. 각 키트의 정확한 모듈은 판매자와 에디션에 따라 다를 수 있으므로 구매 전에 구성품 목록을 확인하세요.
 
-The DS18B20’s digital output and multi-sensor capability make the KY-001 a good fit for projects that need accurate, reliable temperature readings over a single wire.
+**KY-001이 ESP32, ESP8266, Raspberry Pi에서 작동하나요?**
+네 — 레벨 시프팅이 필요하지 않습니다. 모듈은 3.0~5.5V에서 작동하므로 5V Arduino 보드뿐만 아니라 ESP32 및 ESP8266과 같은 3.3V 보드에서도 작동합니다. S를 GPIO에, +를 3.3V 또는 5V에, –를 GND에 연결하세요. 동일한 OneWire 및 DallasTemperature 라이브러리가 ESP32 및 ESP8266에서 실행됩니다. Raspberry Pi에서는 `/boot/config.txt`에서 w1-gpio 오버레이를 활성화하거나 `w1thermsensor`와 같은 Python 라이브러리를 사용하세요.
 
-Thermostat and HVAC control — monitor ambient temperature and trigger a relay or fan to maintain a set point
-3D printer temperature monitoring — log enclosure or bed temperature to keep prints consistent across long jobs
-Aquarium and terrarium management — track water or air temperature and trigger heaters or coolers automatically
-Home brewing and sous-vide — maintain precise fermentation or cooking temperatures where ±0.5 °C accuracy matters
-Multi-zone temperature logging — chain several DS18B20 sensors on one data line to monitor multiple rooms, pipes, or enclosures from a single Arduino pin
-Weather station and data logging — log outdoor temperature to an SD card or IoT platform alongside other environmental sensors
-Related Temperature Sensor Modules
-If the KY-001 doesn’t suit your project, here are the other temperature sensor modules in the KY series.
+**DS18B20(KY-001)과 DHT22 또는 LM35의 차이점은 무엇인가요?**
+DS18B20은 온도만 측정하며(-55 ~ +125°C, ±0.5°C 정확도), 1-Wire 디지털 출력을 사용하고, 하나의 핀에서 여러 센서를 지원하므로 장거리 또는 여러 지점에서 온도 전용 판독에 가장 적합합니다. DHT22는 습도도 읽지만 하나의 핀에 여러 개를 연결할 수 없습니다. LM35는 온도에 비례하는 아날로그 전압을 출력합니다: 배선은 더 간단하지만 긴 케이블에서 정밀도가 떨어지고 ADC 핀을 사용합니다.
 
-Module	Sensor	Output	Range	Accuracy
-KY-001 (this page)	DS18B20	Digital temperature value (1-Wire)	−55 to +125 °C	±0.5 °C
-KY-013	NTC thermistor	Analog voltage	−55 to +125 °C	±0.5 °C
-KY-028	NTC + LM393	Digital threshold trigger — not a temperature value	—	—
-KY-015	DHT11	Digital temperature + humidity	0 to +50 °C	±2 °C
-See also: KY-013 Analog Temperature Sensor, KY-028 Digital Temperature Sensor, and KY-015 DHT11 Temperature & Humidity Sensor.
+## KY-001 응용 분야
 
+DS18B20의 디지털 출력과 다중 센서 기능은 KY-001을 단일 와이어로 정확하고 안정적인 온도 판독이 필요한 프로젝트에 적합하게 만듭니다.
 
-* https://arduinomodules.info/
+- **온도 조절기 및 HVAC 제어** — 주변 온도를 모니터링하고 설정 지점을 유지하기 위해 릴레이 또는 팬 작동
+- **3D 프린터 온도 모니터링** — 긴 작업에서 일관된 출력을 위해 인클로저 또는 베드 온도 기록
+- **수족관 및 테라리움 관리** — 수온 또는 공기 온도를 추적하고 자동으로 히터 또는 쿨러 작동
+- **홈 브루잉 및 수비드** — ±0.5°C 정확도가 중요한 정밀 발효 또는 조리 온도 유지
+- **다중 영역 온도 로깅** — 단일 Arduino 핀에서 여러 DS18B20 센서를 연결하여 여러 방, 파이프 또는 인클로저 모니터링
+- **기상 관측소 및 데이터 로깅** — 다른 환경 센서와 함께 외부 온도를 SD 카드 또는 IoT 플랫폼에 기록
 
+## 관련 온도 센서 모듈
+
+KY-001이 프로젝트에 적합하지 않은 경우, KY 시리즈의 다른 온도 센서 모듈은 다음과 같습니다:
+
+| 모듈 | 센서 | 출력 | 범위 | 정확도 |
+|:---:|:---:|:---:|:---:|:---:|
+| KY-001 | DS18B20 | 디지털 온도 값 (1-Wire) | -55 ~ +125°C | ±0.5°C |
+| KY-013 | NTC 서미스터 | 아날로그 전압 | -55 ~ +125°C | ±0.5°C |
+| KY-028 | NTC + LM393 | 디지털 임계값 트리거 (온도 값 아님) | — | — |
+| KY-015 | DHT11 | 디지털 온도 + 습도 | 0 ~ +50°C | ±2°C |
+
+참고: [KY-013 아날로그 온도 센서](./README_kr.md#아날로그-온도-센서-ky-013-hw-498), [KY-028 디지털 온도 센서](./README_kr.md#디지털-온도-센서-ky-028), [KY-015 DHT11 온도 및 습도 센서](https://arduinomodules.info/)
+
+---
+
+*출처: https://arduinomodules.info/*
