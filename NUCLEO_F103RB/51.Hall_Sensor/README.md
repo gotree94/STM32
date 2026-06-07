@@ -1,4 +1,4 @@
-# Linear Hall Sensor Projects for STM32F103
+# Linear Hall Sensor KY-024
 
 <img src="linear_hall_sensor.png"> <img src="010.png" width="47%">
 
