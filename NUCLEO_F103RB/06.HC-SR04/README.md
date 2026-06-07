@@ -7,6 +7,33 @@
 ![](Fig.NUCLEO-F103RB.png)
 
 
+![](001.png)
+
+![](002.png)
+
+![](003.png)
+
+![](010.png)
+
+![](011.png)
+
+![](101.png)
+
+![](102.png)
+
+![](103.png)
+
+![](104.png)
+
+![](201.png)
+
+![](202.png)
+
+![](203.png)
+
+
+
+
 <img src="001.png" height="30%" width="60%"> <br>
 <img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/e67d445b-c3b0-483c-92b6-4100a39a662e" />
 <br>
