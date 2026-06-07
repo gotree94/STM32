@@ -70,6 +70,7 @@
 
 # Analog Hall Sensor KY-035
 
+![](KY-035.png)
 
 The KY-035 is an analog hall sensor for Arduino that detects magnetic fields and measures their polarity and relative strength using a 49E linear Hall-effect sensor. Unlike KY-024, it has a single analog output and no potentiometer — simpler wiring for applications that only need analog magnetic readings.
 
@@ -128,6 +129,8 @@ Use Tools > Serial Plotter on the Arduino IDE to visualize changes on intensity 
 ---
 
 # Hall Effect Sensor KY-003 
+
+![](KY-003.png)
 
 The KY-003 is a hall effect magnetic sensor module for Arduino built around the A3144 unipolar hall switch. It produces a clean digital output — the signal pin goes LOW when a magnet’s south pole faces the marked side of the chip — making it ideal for proximity detection, RPM/speed measurement and position sensing. The KY-003 is also included in popular 37-in-1 Arduino sensor kits from brands such as Elegoo and Keyestudio.
 
