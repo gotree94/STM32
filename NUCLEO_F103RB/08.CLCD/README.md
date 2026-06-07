@@ -1,11 +1,13 @@
 # I2C CLCD
 
-<img width="706" height="170" alt="129" src="https://github.com/user-attachments/assets/8fdba439-49cd-47d9-8069-223c4ea9305b" />
+![](CLCD.png)
 
   * VCC - 5V
   * GND - GND
   * PB8 - SCL
   * PB9 - SDA
+
+![](Fig.NUCLEO-F103RB.png)
 
 <img width="644" height="586" alt="F103RB-pin" src="https://github.com/user-attachments/assets/5a174c00-4edc-4481-a59f-00297ecf229d" />
 <br><br>
