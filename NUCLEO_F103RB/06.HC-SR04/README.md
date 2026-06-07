@@ -10,9 +10,7 @@
 
  <img src="101.png" width="30%"> <img src="102.png" width="58%">
 
-![](103.png)
-
-![](104.png)
+<img src="103.png" width="30%"> <img src="104.png" width="30%">
 
 ![](201.png)
 
