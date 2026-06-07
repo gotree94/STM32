@@ -20,31 +20,6 @@
 
 ![](203.png)
 
-
-
-
-<img src="001.png" height="30%" width="60%"> <br>
-<img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/e67d445b-c3b0-483c-92b6-4100a39a662e" />
-<br>
-<img src="003.png" height="40%" width="60%"><br>
-<br>
-
-<img width="600" height="520" alt="ultrasonic_001" src="https://github.com/user-attachments/assets/1827803d-4843-4b12-a703-df4b046097b6" />
-<br>
-<img width="600" height="450" alt="ultrasonic_002" src="https://github.com/user-attachments/assets/4fcc69d9-bb62-4270-856b-af036091733e" />
-<br>
-<img width="600" height="450" alt="ultrasonic_003" src="https://github.com/user-attachments/assets/3d8242ce-dfee-400f-bc4e-84e069c0e1b2" />
-<br>
-<img width="600" height="450" alt="ultrasonic_004" src="https://github.com/user-attachments/assets/878c5a3f-8f04-4ad9-b35d-cde7ff035420" />
-<br>
-
-<img width="1392" height="908" alt="hc_sr40_001" src="https://github.com/user-attachments/assets/0957fd23-ceb9-459e-9d91-7be4f3750c26" />
-<br>
-<img width="1392" height="908" alt="hc_sr40_002" src="https://github.com/user-attachments/assets/8e359bc7-de92-41ec-9859-8f212bbca60f" />
-<br>
-<img width="995" height="550" alt="hc_sr40_003" src="https://github.com/user-attachments/assets/43f8cc02-e8e5-496e-8031-85a921506eee" />
-<br>
-
 ```c
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
