@@ -1,4 +1,4 @@
-# Linear Hall Sensor KY-024
+# KY-024 Linear Hall Sensor Module
 
 <img src="linear_hall_sensor.png"> <img src="010.png" width="47%">
 
@@ -68,7 +68,7 @@
 
 ----
 
-# Analog Hall Sensor KY-035
+# KY-035 Analog Hall Sensor Module 
 
 ![](KY-035.png)
 
@@ -128,7 +128,7 @@ Use Tools > Serial Plotter on the Arduino IDE to visualize changes on intensity 
 
 ---
 
-# Hall Effect Sensor KY-003 
+# KY-003 Hall Magnetic Sensor Module
 
 ![](KY-003.png)
 
