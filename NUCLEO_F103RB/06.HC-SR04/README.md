@@ -8,7 +8,7 @@
 |:-------:|:-------:|:-------:|
 | ![](001.png) | ![](002.png) | ![](003.png) | 
 
- <img src="101.png" width="30%"> <img src="102.png" width="55%">
+ <img src="101.png" width="30%"> <img src="102.png" width="60%">
 
 ![](103.png)
 
