@@ -1,11 +1,10 @@
 # HC-SR04
 
-<img width="392" height="258" alt="126" src="https://github.com/user-attachments/assets/00230408-09ac-4b1c-a794-f1aadc8087e6" />
-<br>
-
-![](Fig.NUCLEO-F103RB.png)
+![](011.png)
 
 ![](010.png)
+
+![](Fig.NUCLEO-F103RB.png)
 
 
 <img src="001.png" height="30%" width="60%"> <br>
