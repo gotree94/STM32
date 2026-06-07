@@ -2,7 +2,7 @@
 
 ![](011.png)
 
-![](010.png)
+<img src="010.png" width="50%">
 
 ![](Fig.NUCLEO-F103RB.png)
 
