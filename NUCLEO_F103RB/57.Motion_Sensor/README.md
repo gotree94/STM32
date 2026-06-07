@@ -6,6 +6,13 @@ Updated On
 May 27, 2024
 A passive infrared (PIR) motion sensor allows you to sense motion, almost always used to detect whether a human has moved in or out of its range. For many do-it-yourself projects or devices that need to detect when a person has entered or left a specific area or has approached, PIR sensor is a great choice.
 
+![](F3-Photodiode-Data.jpg)
+![](Fig.NUCLEO-F103RB.png)
+![](MH-SR602-Basic-Test-Circuit.jpg)
+![](MH-SR602-MODs-768x396.jpg)
+![](MH-SR602x2.jpg)
+![](SR602-Quick-Test-2.jpg)
+![](SR602-Quick-Test.jpg)
 
 In these days you can buy pretty compact, inexpensive, low-power, and easy-to-use digital PIR sensors. A great example is the MH-SR602 PIR motion sensor module. It is ideal for detecting movement at a distance of 0 to 3.5 meter. The module has high sensitivity, fast response, low static energy consumption, and a small size, so it is easy to install.
 
