@@ -2,6 +2,7 @@
 
 <img width="382" height="289" alt="124" src="https://github.com/user-attachments/assets/66e7c924-b961-4ac9-84db-a953738b1a70" />
 
+![](Fig.NUCLEO-F103RB.png)
 
 # STM32F103 + MPU-6050 CubeMX Configuration Guide
 
