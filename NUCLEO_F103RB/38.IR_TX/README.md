@@ -1,3 +1,177 @@
+# IR Transmitter Module KY-005
+
+The KY-005 is an infrared (IR) transmitter module from the Keyes 37-in-1 Arduino kit (also sold as HW-489). At heart it’s a single 940 nm IR LED — drive it with the IRremote library and your Arduino can send the same 38 kHz remote-control signals as a TV or air-conditioner remote. This tutorial covers the pinout, wiring diagram, modern IRremote code, a KY-005 + KY-022 record-&-replay project, troubleshooting, and a Fritzing part download.
+
+It works with Arduino, ESP32, ESP8266, Raspberry Pi and Pi Pico (3.3 V or 5 V logic). Pair it with the KY-022 IR receiver to capture and replay real remote codes.
+
+KY-005 Infrared Transmitter Module Fritzing part
+KEYES KY-005 Infrared transmitter module for Arduino
+KY-005 Specifications
+This module is quite simple and consists of a 5mm infrared LED and 3 male header pins. Handle with caution, do not flash IR light directly to the eyes.
+
+Parameter	Value
+Also known as	HW-489
+Operating Voltage	3.3 – 5 V
+IR LED Wavelength	940 nm
+Carrier Frequency	38 kHz
+Forward Current	30 – 60 mA
+Power Consumption	90 mW
+Operating Temperature	−10°C to +50°C
+Dimensions	18.5 × 15 mm
+KY-005 Pinout (HW-489)
+The KY-005 has three 2.54 mm header pins. The signal pin is marked S; the unmarked middle pin is VCC, and the – pin is ground.
+
+Pin	Label	Function	Connect to
+1	S	Signal — IR carrier output	IRremote send pin (pin 3 on Uno)
+2	middle (no label)	VCC	+5 V (or +3.3 V on ESP32/Pi)
+3	–	Ground	GND
+Good to know: the KY-005 is essentially a bare IR LED on a breakout — there’s no driver transistor on board. See how that affects range below.
+
+KY-005 Wiring Diagram
+Connect the board power line (middle) and ground (-) to +5 and GND on the Arduino respectively.
+
+Connect the signal pin (S) to pin 3 on the Arduino Uno.
+
+The pin number for the IR transmitter is determined by IRremote library. Other platforms might use a different pin.
+
+KY-005	Arduino Uno
+S	Pin 3
+middle	+5V
+–	GND
+Arduino KY-005 connection diagram
+KY-005 Arduino Code (IRremote)
+
+This section uses IRremote v4.x (#include <IRremote.hpp>). If you have an older version installed, update it via the Arduino Library Manager. IRremote supports Sony, NEC, RC5, Samsung, and many more protocols out of the box.
+
+Send an IR code
+The IRremote library handles the protocol encoding — you supply the function name and the code values. The example below sends the Sony TV power code; swap sendSony for sendNEC, sendRC5, sendSamsung, and so on. Look up your device’s address and command values in an IR database such as LIRC, or capture them with a KY-022 IR receiver.
+
+#include <IRremote.hpp>   // IRremote v4.x
+
+#define IR_SEND_PIN 3     // KY-005 signal pin (S)
+
+void setup() {
+  IrSender.begin(IR_SEND_PIN);
+}
+
+void loop() {
+  IrSender.sendSony(0xA90, 12);           // Sony TV power (hardcoded example)
+  // IrSender.sendNEC(0x04, 0x08, 0);    // NEC — replace with your values
+  delay(3000);
+}
+Protocol not recognised? If your remote’s protocol shows as UNKNOWN, use the Record & Replay project below — it captures raw IR timings that work with any device, no protocol knowledge needed.
+
+Build an IR Record & Replay Remote (KY-005 + KY-022)
+Capture any button from any IR remote using the KY-022 IR receiver, then replay it with the KY-005 transmitter. This approach captures raw IR timings — it works with any remote and any protocol, even ones IRremote does not recognise.
+
+Wiring
+Module	Pin	Arduino
+KY-022 (receiver)	S	Pin 2
+KY-022	middle (VCC)	+5 V
+KY-022	–	GND
+KY-005 (transmitter)	S	Pin 3
+KY-005	middle (VCC)	+5 V
+KY-005	–	GND
+Step 1 — Capture raw timings with the KY-022
+Upload this sketch, open the Serial Monitor at 9600 baud, and press the button you want to clone. Copy the uint16_t rawData[] array printed in the Serial Monitor.
+
+#include <IRremote.hpp>   // IRremote v4.x
+
+#define IR_RECEIVE_PIN 2  // KY-022 signal pin (S)
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+  Serial.println(F("Point a remote at the KY-022 and press a button:"));
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+    IrReceiver.printIRResultRawFormatted(&Serial, true);  // prints rawData[] array
+    Serial.println();
+    IrReceiver.resume();
+  }
+}
+Step 2 — Replay with the KY-005
+Paste the captured rawData[] array into the sketch below and upload it. The KY-005 will replay the exact same signal the original remote sent.
+
+#include <IRremote.hpp>   // IRremote v4.x
+
+#define IR_SEND_PIN 3     // KY-005 signal pin (S)
+
+// Paste the rawData[] array printed by the capture sketch here
+uint16_t rawData[] = {
+  9000, 4500,
+  560, 560, 560, 1690, 560, 560, 560, 560,
+  560, 1690, 560, 560, 560, 1690, 560, 560,
+  560
+};
+
+void setup() {
+  IrSender.begin(IR_SEND_PIN);
+}
+
+void loop() {
+  IrSender.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), 38);
+  delay(3000);
+}
+Range and line-of-sight: keep the KY-005 within 1–3 metres and aim it directly at the device’s receiver window. Most IR receivers accept ±30°. If replay is unreliable, move closer or increase the delay() between sends.
+
+KY-005 Range and the IR LED Driver
+The KY-005 circuit is minimal: a 940 nm infrared LED and a current-limiting resistor, but no transistor driver. That matters for range.
+
+An Arduino digital pin can source up to 40 mA, but the safe continuous limit is closer to 20–25 mA. For reliable operation at 5–10 metres, IR LEDs typically need 100–200 mA peak current. At 20–25 mA you will reliably cover 1–3 metres — enough for a TV remote pointed directly at the set. If your sketch sends codes but the device does not respond, short range is the most common cause.
+
+Boosting range with a transistor
+Add a small NPN transistor (2N2222 or BC547) between the Arduino and the KY-005 to drive the LED at full current:
+
+Arduino pin → 1 kΩ resistor → transistor base
+Transistor collector → KY-005 S pin
+Transistor emitter → GND (KY-005 – pin also to GND)
+KY-005 middle pin (VCC) → +5 V
+The transistor saturates and pulls full supply current through the LED — typical result is 3× to 5× the range. For most remote-control use cases (sofa to TV) the bare module works fine without the transistor.
+
+Tip: IR LEDs have a narrow beam. Keep the KY-005 aimed directly at the receiver — 30° off-axis can drop signal strength significantly. The IRremote library handles the 38 kHz carrier modulation automatically.
+
+KY-005 Infrared Transmitter Applications
+The KY-005 can control any device that responds to IR remote signals. Common use cases:
+
+TV, air-conditioner and stereo control — automate power, volume, and input switching without modifying the device.
+Home-automation IR bridge — combine with an ESP8266 or ESP32 to control IR devices over Wi-Fi or via a voice assistant.
+Robot-to-robot communication — send simple one-way signals between robots over short distances without wires.
+Simple IR data link — transmit sensor readings or commands between two Arduinos over a line-of-sight IR channel.
+Troubleshooting & FAQ
+Can the KY-005 control any IR device — TV, AC, fan?
+Yes, as long as the device uses standard IR remote control. The IRremote library supports NEC, Sony, RC5, Samsung, and many more protocols. If your device ignores commands or you see wrong behaviour: verify the protocol and exact code values match your specific model (the same brand often uses different codes across models). For any unknown protocol, use the KY-022 capture sketch on this page to read codes directly from your original remote, then replay them with the KY-005.
+
+Does the KY-005 transmit and receive?
+No — it only transmits. The KY-005 is a single IR LED with no receiver circuit. To capture signals from an existing remote and replay them, you need a KY-022 IR receiver module alongside it.
+
+What is the 38 kHz carrier frequency for?
+Most IR remotes modulate their signal at 38 kHz so the receiver can distinguish it from ambient IR sources such as sunlight and incandescent heat. The IRremote library handles the 38 kHz modulation automatically — you just supply the protocol name and code value.
+
+Can I use the KY-005 without the IRremote library?
+Yes, but you would need to generate the 38 kHz carrier and all protocol timing manually in code. The IRremote library handles all of that, which is why it is the standard choice. Use it unless you have a specific reason not to.
+
+Does the KY-005 work with ESP32 or Raspberry Pi Pico?
+Yes — both accept 3.3 V logic, which the KY-005 supports. On ESP32, IRremote uses the RMT peripheral; initialise with IrSender.begin(IR_SEND_PIN) and avoid sharing the RMT channel with other libraries (e.g. FastLED). If there is a conflict, add #define NO_LED_FEEDBACK_CODE before the include. On Raspberry Pi Pico, use the Arduino-IRremote library compiled for RP2040 — the sketches on this page work without modification.
+
+What is the difference between KY-005, KY-022, and KY-026?
+KY-005 is an IR transmitter (940 nm LED). KY-022 is an IR receiver (demodulator) — together they make a complete send-and-receive pair. KY-026 is a flame detector — a completely different sensor that uses a different IR wavelength to detect fire, not remote signals.
+
+Device doesn’t respond or the range is very short
+The KY-005 has no transistor driver — at Arduino pin current (20–25 mA) it reliably covers 1–3 metres. First, move the KY-005 closer and aim it directly at the device’s receiver window (usually a small dark lens on the front panel). Also confirm the LED is actually emitting: point it at your smartphone’s front camera and trigger a send — you should see a purple/white flash on screen. No flash means a wiring or power issue. For longer range, add an NPN transistor (2N2222 or BC547) as described in the Range section above.
+
+Signal sends intermittently — how do I diagnose it?
+Start with wiring: loose header pins are the most common cause — reseat or resolder them. Next check for ambient IR interference: direct sunlight and some fluorescent lights can saturate the receiver; try shading it or moving indoors. Finally, confirm the LED is emitting by pointing it at a smartphone camera and triggering a send — a pull/white flash confirms emission. No flash = wiring or power problem, not a code problem.
+
+Sketch won’t compile — error about IRremote.h
+You have IRremote v2.x installed. The v4 API is not backwards-compatible. Update via Arduino IDE → Sketch → Include Library → Manage Libraries → search IRremote → install the latest 4.x version. Change the include from #include <IRremote.h> to #include <IRremote.hpp> (.hpp, not .h) and replace IRsend irsend; with IrSender.begin(IR_SEND_PIN) in setup().
+
+Related modules: KY-022 IR Receiver — pairs directly with the KY-005 for capture and replay. Browse the Communication modules category for other wireless and signalling options.
+
+---
+
 # 📡 IR Remote Control Project (NEC Protocol) for STM32F103
 
 * 이 프로젝트는 **STM32F103 (Nucleo-F103RB)** 보드와 IR 수신 센서를 이용하여,
