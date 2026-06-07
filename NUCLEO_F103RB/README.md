@@ -18,29 +18,29 @@
    - [완료] 14.ILI9341 - 2.4" TFT LCD SHIELD :  터치(불능?) SD-32.FATFS 참고
    - [완료] 15.CDS
    - [완료] 16.I2C-EEPROM
-   - [   ] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
+   - [미완] 17.MPU6050 - 동작시간이 길어지면 문제 발생.
    - [완료] 18.Rotary_Encoder
    - [완료] 19.SimpleFOC_BLDC - 저RPM만 가능 : 100mA
    - [완료] 20.VL53L0X  : Time-of-Flight (ToF) ranging sensor
-   - [   ] 21.OV7670-103
+   - [미완] 21.OV7670-103
    - [완료] 22.I2C_EEPROM_GPIO
-   - [   ] 23.Waveshare_1.3inch_oled
-   - [   ] 24.StepMotor_NEMA-17_L298N
-   - [   ] 25.StepMotor_28BYJ-48_5V_ULN2003
-   - [   ] 26.MicroSD_Card_Adaptor_NS-SD04_microSD_Card  : NS-SD04 (아두이노호환 microSD Card 어댑터)
-   	      * NS-SD04_ReferenceManual_KR.pdf
-   - [   ] 27.MicroSD_Card_Adaptor_Arduino_Mega_Micro_Sd_Card_Adapter  : Arduino Mega Micro Sd Card Adapter
-   - [   ] 28.USB HOST
-   - [   ] 29.GY-GPS6MV2
+   - [미완] 23.Waveshare_1.3inch_oled
+   - [미완] 24.StepMotor_NEMA-17_L298N
+   - [미완] 25.StepMotor_28BYJ-48_5V_ULN2003
+   - [미완] 26.MicroSD_Card_Adaptor_NS-SD04_microSD_Card  : NS-SD04 (아두이노호환 microSD Card 어댑터)
+     * NS-SD04_ReferenceManual_KR.pdf
+   - [미완] 27.MicroSD_Card_Adaptor_Arduino_Mega_Micro_Sd_Card_Adapter  : Arduino Mega Micro Sd Card Adapter
+   - [미완] 28.USB HOST
+   - [미완] 29.GY-GPS6MV2
    - [완료] 30.1.28_TFT_Ver1.0_240_240_GC9A01
-   - [   ] 31.SPI_Serial_Flash_Winbond (Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
+   - [미완] 31.SPI_Serial_Flash_Winbond (Serial Peripheral Interface) 기반의 Serial Flash 메모리 : Winbond 25Q32/25Q64
    - [완료] 32.FATFS
    - [완료] 33.TRCT5000 : 적외선 라인센서 모듈
-   - [   ] 34.2.4TFT_SPI_240_320
-   - [   ] 35.RTC
+   - [미완] 34.2.4TFT_SPI_240_320
+   - [미완] 35.RTC
    - [완료] 36.Vector : 3Type LCD 모듈의 표정
    - [완료] 37.IR_RX : IR 수신 모듈
-   - [   ] 38.IR_TX : IR 발신 모듈
+   - [미완] 38.IR_TX : IR 발신 모듈
    - [완료] 39.Shock_Sensor
    - [완료] 40.3COLOR-LED
    - [완료] 41.2COLOR-LED
@@ -60,9 +60,9 @@
    - [완료] 55.Sound_Sensor_Module
    - [완료] 56.Temp_Sensor
    - [완료] 57.Motion_Sensor
-   - [    ] 58.MAX98357 I2S DAC
-   - [    ] 각도 스위치
-   - [    ] 볼 스위치
+   - [미완] 58.MAX98357 I2S DAC
+   - [미완] 각도 스위치
+   - [미완] 볼 스위치
 
 
 ---
