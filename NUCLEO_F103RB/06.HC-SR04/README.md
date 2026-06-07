@@ -5,6 +5,9 @@
 
 ![](Fig.NUCLEO-F103RB.png)
 
+![](010.png)
+
+
 <img src="001.png" height="30%" width="60%"> <br>
 <img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/e67d445b-c3b0-483c-92b6-4100a39a662e" />
 <br>
