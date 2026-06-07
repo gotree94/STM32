@@ -567,3 +567,4 @@ void NEC_Transmit(uint8_t address, uint8_t command) {
 
 3. 💡 구현 및 테스트 시 주의사항수신 데이터 비트 반전 확인: 보내시는 데이터 구조는 [Addr] [~Addr] [Cmd] [~Cmd] 형태입니다. 작성하신 수신부의 변환 코드(uint8_t address = (ir_data >> 24) & 0xFF;)에 완벽히 대응되도록 송신 코드 내에서 비트 연산(~address & 0xFF) 처리를 해두었으므로, NEC_Transmit(0x20, 0x88); 형태로 직관적으로 호출하시면 됩니다.트랜지스터 구동 회로 필수:STM32 GPIO의 출력 전류(최대 20mA 내외)만으로는 IR 송신 LED를 멀리까지 쏘아주지 못합니다. 수 센티미터 이상의 통신 거리를 확보하려면 NPN 트랜지스터(예: 2N2222)나 MOSFET을 사용하여 외부 전원으로 IR LED를 구동하는 회로를 구성하는 것이 좋습니다.
 
+* https://arduinomodules.info/
