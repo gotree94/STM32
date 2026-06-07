@@ -73,6 +73,7 @@ void loop()
   delay(100);
 }
 ```
+---
 
 # Analog Temperature Sensor KY-013 (HW-498)
 
@@ -236,7 +237,258 @@ Multiple on one pin	No	Yes	No
 Operating voltage	3.3–5 V	3.0–5.5 V	3.3–5 V
 For a simple temperature threshold switch (no exact reading needed), see the KY-028 digital temperature sensor.
 
+---
+
+# DS18B20 Temperature Sensor KY-001
+
+![](003.png)
 
 
+The KY-001 is a DS18B20 digital temperature sensor module found in 37-in-1 and similar Arduino sensor kits (Keyes, ELEGOO, SunFounder, Joy-IT, and others). It mounts a Maxim/Dallas DS18B20 1-Wire sensor on a small breakout board together with a pull-up resistor and an indicator LED, giving you calibrated digital temperature readings over a single data line — no analog wiring or calibration required.
 
+The DS18B20 measures from −55 °C to +125 °C with ±0.5 °C accuracy across most of that range and reports temperature straight to your microcontroller as a digital value at 9- to 12-bit resolution. The module runs on 3.0–5.5 V, so it works with 5 V boards such as the Arduino Uno and Mega as well as 3.3 V boards like the ESP32, ESP8266, and Raspberry Pi. You may also see it listed as “KY-01”.
+
+Because the DS18B20 uses the 1-Wire protocol, every sensor carries a unique 64-bit address — so multiple KY-001 modules can share the same data pin and be read individually, which is ideal for multi-zone temperature monitoring.
+
+The KY-001 includes an onboard pull-up resistor (typically 4.7 kΩ) on the 1-Wire data line, so a single module on a short lead needs no external resistor — unlike a bare DS18B20. You only need to add or adjust a pull-up for long cable runs or when chaining several modules on one bus, where their onboard resistors stack in parallel.
+
+KY-001 DS18B20 Pinout
+
+KY-001 DS18B20 Specifications
+
+Sensor element	Dallas / Maxim DS18B20
+Operating voltage	3.0 V to 5.5 V
+Temperature range	−55 °C to +125 °C (−57 °F to +257 °F)
+Accuracy	±0.5 °C (−10 °C to +85 °C)
+Resolution	9 to 12 bit, user-configurable (default: 12 bit)
+Conversion time	Up to 750 ms (at 12-bit resolution)
+Active current	1 mA typ / 1.5 mA max (during temperature conversion)
+Onboard components	Pull-up resistor (typically 4.7 kΩ) + indicator LED
+Board dimensions	18.5 × 15 mm (0.73 × 0.59 in)
+Also known as	DS18B20 module, KY-01
+KY-001 Pinout
+Pin	Label	Description
+1	S	1-Wire signal / data
+2	+	VCC — 3.0 to 5.5 V
+3	−	GND
+KY-001 Wiring Diagram
+Connect the power line (middle) and ground (-) on the module to +5V and GND on the Arduino respectively. Connect the signal pin (S) to pin 2 on the Arduino.
+
+KY-001	Arduino
+S	Pin 2
+middle	+5V
+–	GND
+Arduino KY-001 connection diagram
+KY-001 Arduino Code
+
+The KY-001 talks to your Arduino over the 1-Wire bus, so the sketches below use the OneWire and DallasTemperature libraries. Wire the module’s S pin to Arduino digital pin 2, + to 5 V, and − to GND.
+
+Links to the required libraries can be found on the Downloads section below.
+
+Basic Temperature Reading
+This sketch reads a single DS18B20 once per second and prints the temperature in both Celsius and Fahrenheit. The delay(1000) keeps the 1-Wire bus from being polled continuously, and the disconnect check catches the −127 °C value returned when no sensor is found.
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+// DS18B20 data line (KY-001 "S" pin) on Arduino digital pin 2
+#define ONE_WIRE_BUS 2
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+void setup() {
+  Serial.begin(9600);
+  sensors.begin();
+}
+
+void loop() {
+  // Ask every sensor on the bus for a fresh reading
+  sensors.requestTemperatures();
+
+  float tempC = sensors.getTempCByIndex(0);
+
+  if (tempC == DEVICE_DISCONNECTED_C) {
+    Serial.println("Error: no DS18B20 found (check wiring and pull-up).");
+  } else {
+    Serial.print("Temperature: ");
+    Serial.print(tempC);
+    Serial.print(" C  |  ");
+    Serial.print(DallasTemperature::toFahrenheit(tempC));
+    Serial.println(" F");
+  }
+
+  delay(1000); // one read per second
+}
+Reading Multiple DS18B20 Sensors
+
+Because every DS18B20 carries a unique 64-bit address, you can put several on the same data pin and read them individually — ideal for multi-zone monitoring. One caveat specific to KY-001 modules: each board has its own onboard pull-up, so wiring several in parallel stacks those resistors (two 4.7 kΩ in parallel ≈ 2.35 kΩ). For more than two or three sensors, use bare DS18B20s with a single shared 4.7 kΩ pull-up instead.
+
+The simplest approach reads each sensor by its index on the bus:
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 2
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+int deviceCount = 0;
+
+void setup() {
+  Serial.begin(9600);
+  sensors.begin();
+
+  deviceCount = sensors.getDeviceCount();
+  Serial.print("Found ");
+  Serial.print(deviceCount);
+  Serial.println(" sensor(s) on the bus.");
+}
+
+void loop() {
+  sensors.requestTemperatures();
+
+  for (int i = 0; i < deviceCount; i++) {
+    float tempC = sensors.getTempCByIndex(i);
+    Serial.print("Sensor ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(tempC);
+    Serial.print(" C  |  ");
+    Serial.print(DallasTemperature::toFahrenheit(tempC));
+    Serial.println(" F");
+  }
+
+  delay(1000);
+}
+Index order isn’t guaranteed between power-ups, so to reliably track a specific sensor, address it by its ROM code. Run this discovery sketch once to print each sensor’s address:
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 2
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+void setup() {
+  Serial.begin(9600);
+  sensors.begin();
+
+  int count = sensors.getDeviceCount();
+  Serial.print("Found ");
+  Serial.print(count);
+  Serial.println(" device(s):");
+
+  DeviceAddress addr;
+  for (int i = 0; i < count; i++) {
+    if (sensors.getAddress(addr, i)) {
+      Serial.print("Sensor ");
+      Serial.print(i);
+      Serial.print(" address = { ");
+      for (uint8_t b = 0; b < 8; b++) {
+        Serial.print("0x");
+        if (addr[b] < 16) Serial.print("0");
+        Serial.print(addr[b], HEX);
+        if (b < 7) Serial.print(", ");
+      }
+      Serial.println(" }");
+    }
+  }
+}
+
+void loop() {}
+Then paste the addresses into your sketch and read each sensor directly:
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 2
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+// Replace these with the addresses printed by the discovery sketch
+DeviceAddress sensor1 = { 0x28, 0xFF, 0x64, 0x1E, 0x8C, 0x16, 0x03, 0xAA };
+DeviceAddress sensor2 = { 0x28, 0xFF, 0x52, 0x1C, 0x7A, 0x11, 0x02, 0xBB };
+
+void setup() {
+  Serial.begin(9600);
+  sensors.begin();
+}
+
+void loop() {
+  sensors.requestTemperatures();
+
+  Serial.print("Sensor 1: ");
+  Serial.print(sensors.getTempC(sensor1));
+  Serial.println(" C");
+
+  Serial.print("Sensor 2: ");
+  Serial.print(sensors.getTempC(sensor2));
+  Serial.println(" C");
+
+  delay(1000);
+}
+Setting the Resolution
+
+The DS18B20 supports 9- to 12-bit resolution. Lower resolution converts faster but is coarser; 12-bit (the default) resolves 0.0625 °C but takes up to 750 ms per reading. Set it in setup() after sensors.begin():
+
+sensors.setResolution(12); // 9, 10, 11, or 12 bits
+Resolution	Step	Max conversion time
+9-bit	0.5 °C	93.75 ms
+10-bit	0.25 °C	187.5 ms
+11-bit	0.125 °C	375 ms
+12-bit (default)	0.0625 °C	750 ms
+Troubleshooting & FAQ
+The DS18B20 reads −127 °C
+−127 °C is the DallasTemperature library’s DEVICE_DISCONNECTED_C sentinel — the Arduino received no valid reply from the sensor. Check that the data line is on the pin your sketch declares (#define ONE_WIRE_BUS 2 in the examples above); confirm VCC and GND are not swapped; verify the pull-up resistor is present (the KY-001’s onboard ~4.7 kΩ covers a single module); look for a cold solder joint or loose jumper; and for long cables, check that the pull-up is low enough for the line to reach a valid logic HIGH.
+
+The DS18B20 reads a constant 85 °C
+85 °C is the DS18B20’s power-on reset default — its temperature register holds +85 °C until the first conversion completes. A persistent 85 °C almost always means a power problem: an undersized supply, a brownout, or parasite power that can’t sustain the conversion current. Make sure power is stable, call requestTemperatures() and let it finish before reading (in non-blocking mode add up to 750 ms delay at 12-bit), and power the module from its + pin rather than using parasite mode.
+
+Garbage or fluctuating readings / CRC errors
+Wildly jumping values or CRC errors are signal-integrity problems, not a faulty sensor. Long or unshielded cables pick up noise and add capacitance the pull-up must overcome. For runs beyond ~1 m, use shielded or twisted-pair cable, lower the pull-up to 3.3 kΩ or 2.2 kΩ, and keep the data line away from motors, relays, and mains wiring.
+
+How many DS18B20 sensors can share one data line?
+Many — the DS18B20 supports a 1-Wire bus with multiple sensors on a single pin, each addressed by its unique 64-bit ROM code (see the Reading Multiple DS18B20 Sensors section above). For KY-001 modules, keep it to two or three per bus: each module has its own onboard pull-up, and paralleling them lowers total resistance until the bus stops working reliably. For larger arrays, use bare DS18B20s with a single shared 4.7 kΩ pull-up. If one sensor reads but others don’t, address by ROM code rather than by index — index order is not guaranteed across power-ups.
+
+How do I convert the DS18B20 reading to Fahrenheit?
+The DallasTemperature library includes a static helper: DallasTemperature::toFahrenheit(tempC). Pass your Celsius float to it and it returns the equivalent Fahrenheit value. The basic sketch in the code section above already uses this.
+
+What is the DS18B20’s default resolution and how do I change it?
+The default is 12-bit (0.0625 °C steps, up to 750 ms conversion time). See the Setting the Resolution section above for the full step-by-step and a conversion-time table comparing 9-bit through 12-bit.
+
+Which Arduino sensor kit includes the KY-001?
+The KY-001 is included in the popular 37-in-1 Arduino sensor kit, available from several manufacturers including Keyes, ELEGOO, SunFounder, and Joy-IT. The exact modules in each kit can vary by seller and edition, so check the contents list before buying.
+
+Does the KY-001 work with ESP32, ESP8266, and Raspberry Pi?
+Yes — no level shifting needed. The module runs on 3.0–5.5 V, so it works with 3.3 V boards like the ESP32 and ESP8266 as well as 5 V Arduino boards. Connect S to any GPIO, + to 3.3 V or 5 V, and − to GND. The same OneWire and DallasTemperature libraries run on ESP32 and ESP8266. On Raspberry Pi, enable the w1-gpio overlay in /boot/config.txt or use a Python library such as w1thermsensor.
+
+What is the difference between the DS18B20 (KY-001) and the DHT22 or LM35?
+The DS18B20 measures temperature only (−55 to +125 °C, ±0.5 °C accuracy), uses a 1-Wire digital output, and supports multiple sensors on one pin — making it the best choice for temperature-only readings over long distances or from several points at once. The DHT22 also reads humidity but cannot be daisy-chained on one pin. The LM35 outputs an analog voltage proportional to temperature: simpler to wire, but loses precision over long cable runs and ties up an ADC pin.
+
+KY-001 Applications
+
+The DS18B20’s digital output and multi-sensor capability make the KY-001 a good fit for projects that need accurate, reliable temperature readings over a single wire.
+
+Thermostat and HVAC control — monitor ambient temperature and trigger a relay or fan to maintain a set point
+3D printer temperature monitoring — log enclosure or bed temperature to keep prints consistent across long jobs
+Aquarium and terrarium management — track water or air temperature and trigger heaters or coolers automatically
+Home brewing and sous-vide — maintain precise fermentation or cooking temperatures where ±0.5 °C accuracy matters
+Multi-zone temperature logging — chain several DS18B20 sensors on one data line to monitor multiple rooms, pipes, or enclosures from a single Arduino pin
+Weather station and data logging — log outdoor temperature to an SD card or IoT platform alongside other environmental sensors
+Related Temperature Sensor Modules
+If the KY-001 doesn’t suit your project, here are the other temperature sensor modules in the KY series.
+
+Module	Sensor	Output	Range	Accuracy
+KY-001 (this page)	DS18B20	Digital temperature value (1-Wire)	−55 to +125 °C	±0.5 °C
+KY-013	NTC thermistor	Analog voltage	−55 to +125 °C	±0.5 °C
+KY-028	NTC + LM393	Digital threshold trigger — not a temperature value	—	—
+KY-015	DHT11	Digital temperature + humidity	0 to +50 °C	±2 °C
+See also: KY-013 Analog Temperature Sensor, KY-028 Digital Temperature Sensor, and KY-015 DHT11 Temperature & Humidity Sensor.
+
+
+* https://arduinomodules.info/
 
