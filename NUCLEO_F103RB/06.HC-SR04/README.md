@@ -1,8 +1,6 @@
 # HC-SR04
 
-![](011.png)
-
-<img src="010.png" width="50%">
+![](011.png) <img src="010.png" width="50%">
 
 ![](Fig.NUCLEO-F103RB.png)
 
