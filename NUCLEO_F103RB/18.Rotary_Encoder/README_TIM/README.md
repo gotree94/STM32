@@ -102,6 +102,7 @@ POS:     +0  CNT:     0  DIR: CW (+)
 
 
 ```c
+/* USER CODE BEGIN PV */
 /* Encoder position tracking */
 static volatile int32_t  g_encoder_pos   = 0;    /* Cumulative encoder position */
 static          int16_t  g_last_count    = 0;    /* Previous TIM3 counter value */
@@ -111,6 +112,7 @@ static volatile uint8_t  g_btn_reset     = 0;
 
 /* User LED on/off flag for activity indication */
 static          uint8_t  g_led_active    = 0;
+/* USER CODE END PV */
 ```
 
 ```c
