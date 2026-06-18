@@ -336,6 +336,8 @@ void LCD_CreateAllCustomChars(void) {
   /* USER CODE END 2 */
 ```
 
+![](004.png)
+
 ```c
   /* USER CODE BEGIN 2 */
   LCD_INIT();
@@ -357,6 +359,8 @@ void LCD_CreateAllCustomChars(void) {
   LCD_PutCustomChar(7);
   /* USER CODE END 2 */
 ```
+
+![](005.png)
 
 ```c
   /* USER CODE BEGIN WHILE */
