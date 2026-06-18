@@ -1,4 +1,4 @@
-# CLCD-GPIO (Software I2C)
+# I2C CLCD-GPIO (Software I2C)
 
 * I2C_SDA : PC6
 * I2C_SCL : PC8
