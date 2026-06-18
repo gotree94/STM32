@@ -1,7 +1,0 @@
-# I2C CLCD
-
-
-VCC - 5V
-GND - GND
-PB8 - SCL
-PB9 - SDA
