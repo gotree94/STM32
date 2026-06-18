@@ -200,53 +200,53 @@ main.c
 ├── Include Files
 │
 ├── USER CODE BEGIN Includes
-│ 추가 헤더파일
+│      추가 헤더파일
 │
 ├── PTD
-│ typedef
-│ struct
-│ enum
+│      typedef
+│      struct
+│      enum
 │
 ├── PD
-│ #define 상수
+│      #define 상수
 │
 ├── PM
-│ 매크로 함수
+│      매크로 함수
 │
 ├── Peripheral Handle Variables
-│ UART_HandleTypeDef
-│ I2C_HandleTypeDef
-│ ADC_HandleTypeDef
+│      UART_HandleTypeDef
+│      I2C_HandleTypeDef
+│      ADC_HandleTypeDef
 │
 ├── PV
-│ 전역 변수
+│      전역 변수
 │
 ├── PFP
-│ 함수 원형 선언
+│      함수 원형 선언
 │
 ├── USER CODE 0
-│ 함수 구현부
+│      함수 구현부
 │
 └── main()
-│
-├── HAL_Init()
-│
-├── SystemClock_Config()
-│
-├── MX_GPIO_Init()
-├── MX_USART2_UART_Init()
-├── MX_ADC1_Init()
-├── ...
-│
-├── USER CODE BEGIN 2
-│ 초기화 코드
-│
-└── while(1)
-│
-├── USER CODE BEGIN WHILE
-│
-└── USER CODE BEGIN 3
-메인 루프
+      │
+      ├── HAL_Init()
+      │
+      ├── SystemClock_Config()
+      │
+      ├── MX_GPIO_Init()
+      ├── MX_USART2_UART_Init()
+      ├── MX_ADC1_Init()
+      ├── ...
+      │
+      ├── USER CODE BEGIN 2
+      │      초기화 코드
+      │
+      └── while(1)
+             │
+             ├── USER CODE BEGIN WHILE
+             │
+             └── USER CODE BEGIN 3
+                    메인 루프
 ```
 
 ---
