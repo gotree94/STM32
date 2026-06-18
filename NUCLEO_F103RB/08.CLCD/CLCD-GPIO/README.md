@@ -337,6 +337,28 @@ void LCD_CreateAllCustomChars(void) {
 ```
 
 ```c
+  /* USER CODE BEGIN 2 */
+  LCD_INIT();
+
+//  LCD_XY(0, 0); LCD_PUTS((char *)"LCD Display test");
+//  LCD_XY(0, 1); LCD_PUTS((char *)"Hello World.....");
+
+  // Uncomment to enable custom characters:
+  LCD_CreateAllCustomChars();
+  LCD_XY(0, 0); LCD_PUTS("Custom Chars:");
+  LCD_XY(0, 1);
+  LCD_PutCustomChar(0); LCD_DATA(' ');
+  LCD_PutCustomChar(1); LCD_DATA(' ');
+  LCD_PutCustomChar(2); LCD_DATA(' ');
+  LCD_PutCustomChar(3); LCD_DATA(' ');
+  LCD_PutCustomChar(4); LCD_DATA(' ');
+  LCD_PutCustomChar(5); LCD_DATA(' ');
+  LCD_PutCustomChar(6); LCD_DATA(' ');
+  LCD_PutCustomChar(7);
+  /* USER CODE END 2 */
+```
+
+```c
   /* USER CODE BEGIN WHILE */
   while (1)
   {
