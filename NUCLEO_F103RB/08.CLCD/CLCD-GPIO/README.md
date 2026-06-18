@@ -1,4 +1,4 @@
-# CLCD-GPIO
+# CLCD-GPIO (Software I2C)
 
 
 ![](Fig.NUCLEO-F103RB.png)
