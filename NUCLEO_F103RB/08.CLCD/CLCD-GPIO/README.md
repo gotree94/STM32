@@ -1,14 +1,10 @@
 # I2C CLCD-GPIO (Software I2C)
 
-* 속도 조절: I2C_DELAY (delay_us(5)) 값을 변경하여 조정 (현재 ~100kHz)
-* 타이밍 파라미터: SCL 주기 10μs, High/Low 각각 5μs, Start/Stop Setup 4.7μs
 * 하드웨어 구성: PC6(SDA)/PC8(SCL) Open-Drain, 외부 4.7kΩ 풀업 필요
    * I2C_SDA : PC6
    * I2C_SCL : PC8
-* 제한사항: 소프트웨어 I2C는 DMA/멀티마스터/Clock Stretching 미지원 (CLCD 용도로는 무관)
 
-
-* 속도 조절
+* 속도 조절: I2C_DELAY (delay_us(5)) 값을 변경하여 조정 (현재 ~100kHz)
    | I2C_DELAY	| 예상 속도	| 비고 | 
    |:-------:| :-------:|:-------:|
    | delay_us(0)	| ~330kHz	| 최대 속도, HAL 오버헤드가 주된 제한 | 
@@ -18,8 +14,8 @@
    | delay_us(50)	| ~9.6kHz	|  | 
    | delay_us(1000)	| ~0.5kHz	| 최소 속도 (실질적 하한 없음, 느리게만 동작) | 
 
-   
-
+* 타이밍 파라미터: SCL 주기 10μs, High/Low 각각 5μs, Start/Stop Setup 4.7μs
+* 제한사항: 소프트웨어 I2C는 DMA/멀티마스터/Clock Stretching 미지원 (CLCD 용도로는 무관)   
 
 ---
 
