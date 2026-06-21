@@ -17,7 +17,7 @@ Service/
 * 위 4개 파일을 대상 PC에 복사
 
 ```
-cd C:\Users\Administrator\Desktop\Service3/step1
+cd Desktop\Service3/step1
 npm install --production
 npm start 
 ```
