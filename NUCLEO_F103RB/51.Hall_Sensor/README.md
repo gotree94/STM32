@@ -80,9 +80,7 @@
 
 # KY-035 아날로그 홀 센서 모듈 (Analog Hall Sensor Module)
 
-![](KY-035.png)
-
-![](KY-035_00.jpg)
+![](KY-035.png) ![](KY-035_00.jpg)
 
 ![](KY-035_01.JPG)
 
