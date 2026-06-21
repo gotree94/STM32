@@ -44,4 +44,42 @@
 
 ## 5. 채터링
 
+* KY-036 터치 센서는 사람이 손으로 만질 때 금속 접촉면의 미세한 전위차를 감지하는데,
+* 접촉 순간 신호가 수 ms 동안 불안정하게 튀는 채터링(chattering) 현상이 발생합니다.
 
+* ReadDebounced()는 이 채터링을 소프트웨어적으로 제거합니다:
+   * s1 – 현재 GPIO 값을 1회 읽음
+   * HAL_Delay(50) – 50ms 대기 (채터링이 안정될 때까지)
+   * s2 – 같은 핀을 다시 읽음
+   * s1 == s2 – 두 값이 같으면 안정적인 상태로 간주하여 반환
+   * 다르면 한 번 더 읽어서 최종 값을 반환 (3번째 샘플로 확정)
+
+* HAL_Delay(10)은 메인 루프의 최소 주기를 10ms로 유지해 연속적인 터치를 빠짐없이 감지하면서도 CPU 점유를 낮추는 역할을 합니다.
+
+```c
+/* USER CODE BEGIN 0 */
+#define TOUCH_DEBOUNCE_MS 50
+
+static GPIO_PinState ReadDebounced(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
+{
+    GPIO_PinState s1 = HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
+    HAL_Delay(TOUCH_DEBOUNCE_MS);
+    GPIO_PinState s2 = HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
+    return (s1 == s2) ? s1 : HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
+}
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    GPIO_PinState touch = ReadDebounced(TOUCH_GPIO_Port, TOUCH_Pin);
+    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, touch);
+    HAL_Delay(10);
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+```
