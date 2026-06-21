@@ -35,12 +35,11 @@
 
 # Read Switch (KY-021)
 
-<img src="014.png" width="21%">  
-
-<img src="013.png">
+<img src="014.png" width="21%">   <img src="013.png">
 
 * 모듈을 직접 확인한 상태
-<img src="013-1.png">
+
+<img src="014-1.png" width="21%"> <img src="013-1.png">
 
 <img src="005.png">
 
