@@ -1,5 +1,8 @@
 # PAC-MAN Game — STM32F103 + ILI9341 LCD (240x320)
 
+![](031.png)
+![](032.png)
+
 ## 개요
 
 STM32F103 (Blue Pill / NUCLEO-F103RB) 에 8비트 병렬 인터페이스로 연결된 ILI9341 TFT LCD (240x320) 에서 동작하는 PAC-MAN 게임.
