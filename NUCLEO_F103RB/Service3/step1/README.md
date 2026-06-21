@@ -13,8 +13,8 @@ Service/
     └── index.html        # 웹 UI
 ```
 
-— https://nodejs.org (LTS 권장) 
-— 위 4개 파일을 대상 PC에 복사
+* 설치가 되어있지 않았다면 https://nodejs.org (LTS 권장) 
+* 위 4개 파일을 대상 PC에 복사
 
 ```
 cd Service
@@ -22,7 +22,7 @@ npm install --production
 npm start 
 ```
 
-— http://localhost:3000
+* http://localhost:3000
 
 ## 대소문자 수정 방법
 
