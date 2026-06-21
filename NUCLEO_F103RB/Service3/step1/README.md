@@ -1,4 +1,4 @@
-# 
+# Control Server (node.js)
 
 ![](029.png)
 
@@ -24,15 +24,13 @@ npm start
 
 — http://localhost:3000
 
-==================
-대소문자 수정 방법
-==================
+## 대소문자 수정 방법
+
 
 C:\Users\user\Desktop\Service\public\index.html
 
-=======
-대문자
-=======
+**대문자**
+
 ```
     <div class="dpad">
       <button class="btn-fwd" data-cmd="W">▲<br><span style="font-size:14px">W</span></button>
@@ -43,9 +41,8 @@ C:\Users\user\Desktop\Service\public\index.html
     </div>
 ```
 
-=======
-소문자
-=======
+**소문자**
+
 ```
     <div class="dpad">
       <button class="btn-fwd" data-cmd="w">▲<br><span style="font-size:14px">W</span></button>
