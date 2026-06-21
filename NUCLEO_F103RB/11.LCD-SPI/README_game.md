@@ -1,4 +1,4 @@
-# LCD-SPI
+# LCD-SPI-Game
 
 <img width="306" height="233" alt="132" src="https://github.com/user-attachments/assets/7f6424ec-fb5b-441d-ab0e-0a9dc575bf6c" />
 <br>
