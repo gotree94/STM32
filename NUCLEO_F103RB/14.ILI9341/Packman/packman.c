@@ -166,11 +166,11 @@ static const int8_t maze[MAZE_ROWS][MAZE_COLS] = {
     {1,1,1,1,1,1,2,1,1,1,1,2,1,1,2,1,1,1,1,2,1,1,1,1},
     {0,0,0,0,0,1,2,1,1,1,1,2,1,1,2,1,1,1,1,2,1,0,0,0},
     {0,0,0,0,0,1,2,1,1,0,0,0,0,0,0,0,0,1,1,2,1,0,0,0},
-    {0,0,0,0,0,1,2,1,1,0,1,1,1,1,1,1,0,1,1,2,1,0,0,0},
+    {0,0,0,0,0,1,2,1,1,0,1,1,5,1,1,1,0,1,1,2,1,0,0,0},
     {1,1,1,1,1,1,2,1,1,0,1,4,4,4,4,1,0,1,1,2,1,1,1,1},
     {2,2,2,2,2,2,2,2,2,0,1,4,4,4,4,1,0,2,2,2,2,2,2,2},
     {1,1,1,1,1,1,2,1,1,0,1,4,4,4,4,1,0,1,1,2,1,1,1,1},
-    {0,0,0,0,0,1,2,1,1,0,1,5,5,5,5,1,0,1,1,2,1,0,0,0},
+    {0,0,0,0,0,1,2,1,1,0,0,0,0,0,0,0,0,1,1,2,1,0,0,0},
     {0,0,0,0,0,1,2,1,1,0,0,0,0,0,0,0,0,1,1,2,1,0,0,0},
     {0,0,0,0,0,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,0,0,0},
     {1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1},
@@ -198,14 +198,23 @@ static uint32_t ghost_spawn_ms = 0;
 static int8_t maze_state[MAZE_ROWS][MAZE_COLS];
 static uint32_t power_start_ms = 0;
 static int8_t power_active = 0;
-static int32_t ghost_mode_timer = 0;
-static uint8_t ghost_mode_idx = 0;
-static uint32_t mode_change_ms = 0;
 static int32_t dots_total = 0;
 static int32_t dots_eaten = 0;
-static uint8_t ready_to_play = 0;
 static uint8_t ghost_eat_combo = 0;
 static uint32_t last_button_ms = 0;
+static uint32_t button_press_ms = 0;
+static uint8_t long_press_handled = 0;
+#define LONG_PRESS_MS 500
+static uint8_t fright_blink_on = 0;
+#define FRIGHT_BLINK_MS 2000
+
+// Chase/Scatter mode cycling
+static const uint32_t mode_durations_ms[] = {7000, 20000, 7000, 20000, 5000, 20000, 5000};
+#define MODE_PHASES 7
+static uint8_t mode_phase = 0;
+static uint32_t mode_phase_start = 0;
+static uint8_t ready_to_play = 0;
+static uint32_t ready_start_ms = 0;
 
 // ============================================================================
 // Ghost scatter targets (corners)
@@ -244,12 +253,14 @@ static void draw_wall(int8_t col, int8_t row) {
 static void draw_dot(int8_t col, int8_t row) {
     uint16_t x, y;
     cell_rect(col, row, &x, &y);
+    LCD_FillRect(x, y, CELL_SZ, CELL_SZ, COL_BG);
     LCD_FillRect(x + 4, y + 4, 2, 2, COL_DOT);
 }
 
 static void draw_power(int8_t col, int8_t row) {
     uint16_t x, y;
     cell_rect(col, row, &x, &y);
+    LCD_FillRect(x, y, CELL_SZ, CELL_SZ, COL_BG);
     LCD_FillCircle(x + 5, y + 5, 4, COL_POWER);
 }
 
@@ -263,8 +274,15 @@ static void draw_ghouse(int8_t col, int8_t row) {
     uint16_t x, y;
     cell_rect(col, row, &x, &y);
     LCD_FillRect(x, y, CELL_SZ, CELL_SZ, COL_BG);
-    LCD_FillRect(x + 1, y + 1, CELL_SZ - 2, 1, COL_WALL); // top rail
-    LCD_FillRect(x + 1, y + CELL_SZ - 2, CELL_SZ - 2, 1, COL_WALL);
+    // Only draw outer borders (skip if neighbor is also ghost house)
+    if (row == 0 || maze_state[row-1][col] != CELL_GHOUSE)
+        LCD_FillRect(x + 1, y + 1, CELL_SZ - 2, 1, COL_WALL); // top
+    if (row == MAZE_ROWS-1 || maze_state[row+1][col] != CELL_GHOUSE)
+        LCD_FillRect(x + 1, y + CELL_SZ - 2, CELL_SZ - 2, 1, COL_WALL); // bottom
+    if (col == 0 || maze_state[row][col-1] != CELL_GHOUSE)
+        LCD_FillRect(x + 1, y + 1, 1, CELL_SZ - 2, COL_WALL); // left
+    if (col == MAZE_COLS-1 || maze_state[row][col+1] != CELL_GHOUSE)
+        LCD_FillRect(x + CELL_SZ - 2, y + 1, 1, CELL_SZ - 2, COL_WALL); // right
 }
 
 static void draw_gdoor(int8_t col, int8_t row) {
@@ -283,47 +301,47 @@ static void draw_pacman(int8_t col, int8_t row, Dir_t dir, uint8_t mouth) {
     int16_t cx = x + 5;
     int16_t cy = y + 5;
 
-    // Clear cell first
     LCD_FillRect(x, y, CELL_SZ, CELL_SZ, COL_BG);
 
-    // Body
+    // Body circle
     LCD_FillCircle(cx, cy, 4, COL_PACMAN);
 
-    // Mouth (erase wedge with background color)
     if (mouth) {
-        int16_t mx = cx, my = cy;
-        int16_t dx = 0, dy = 0;
+        // Mouth direction vector
+        int8_t sx = 0, sy = 0;
         switch (dir) {
-            case DIR_R: dx = 3; break;
-            case DIR_L: dx = -3; break;
-            case DIR_U: dy = -3; break;
-            case DIR_D: dy = 3; break;
+            case DIR_R: sx = 1; break;
+            case DIR_L: sx = -1; break;
+            case DIR_U: sy = -1; break;
+            case DIR_D: sy = 1; break;
             default: break;
         }
-        // Erase mouth area as a small triangle
-        if (dx != 0 || dy != 0) {
-            int16_t px = cx + dx * 2;
-            int16_t py = cy + dy * 2;
-            LCD_FillRect(cx - 1, cy - 1, 3, 3, COL_BG);
-            LCD_FillRect(cx + dx, cy + dy, 2, 2, COL_BG);
-            LCD_FillRect(px - 1, py - 1, 3, 3, COL_BG);
+        // Erase triangular wedge from center to edge
+        // half-width increases with distance from center
+        for (int8_t d = 0; d <= 4; d++) {
+            int nx = cx + sx * d;
+            int ny = cy + sy * d;
+            int hw = d * 3 / 5;  // wedge half-width
+            int px = -sy * hw;
+            int py = sx * hw;
+            LCD_FillRect(nx - px, ny - py, 2 * abs(px) + 1, 2 * abs(py) + 1, COL_BG);
         }
     }
 
-    // Eye (small black dot opposite to mouth)
-    int8_t ex = 0, ey = 0;
-    switch (dir) {
-        case DIR_R: ex = 1; ey = -2; break;
-        case DIR_L: ex = -1; ey = -2; break;
-        case DIR_U: ex = 1; ey = -1; break;
-        case DIR_D: ex = 1; ey = 1; break;
-        default: ex = 1; ey = -2; break;
+    // Eye (opposite mouth direction)
+    if (dir == DIR_NONE) {
+        LCD_FillCircle(cx + 1, cy - 2, 1, COL_PUPIL);
+    } else {
+        int8_t ex = 0, ey = 0;
+        switch (dir) {
+            case DIR_R: ex = 1; ey = -2; break;
+            case DIR_L: ex = -1; ey = -2; break;
+            case DIR_U: ex = 1; ey = -1; break;
+            case DIR_D: ex = 1; ey = 1; break;
+            default: break;
+        }
+        LCD_FillCircle(cx + ex, cy + ey, 1, COL_PUPIL);
     }
-    LCD_FillCircle(cx + ex, cy + ey, 1, COL_PUPIL);
-
-    // Redraw borders if needed (prevent artifacts)
-    LCD_FillRect(x, y, 1, CELL_SZ, COL_BG);
-    LCD_FillRect(x, y + CELL_SZ - 1, CELL_SZ, 1, COL_BG);
 }
 
 // ============================================================================
@@ -333,46 +351,46 @@ static void draw_ghost(int8_t col, int8_t row, uint16_t color, Dir_t dir, GhostM
     uint16_t x, y;
     cell_rect(col, row, &x, &y);
     int16_t cx = x + 5;
-    int16_t cy = y + 4;
+    int16_t cy = y + 5;
 
     // Clear cell
     LCD_FillRect(x, y, CELL_SZ, CELL_SZ, COL_BG);
 
     if (mode == GM_EATEN) {
         // Just draw eyes floating back to house
-        LCD_FillCircle(cx - 2, cy - 1, 1, COL_EYE);
-        LCD_FillCircle(cx + 2, cy - 1, 1, COL_EYE);
+        LCD_FillCircle(cx - 2, cy - 2, 1, COL_EYE);
+        LCD_FillCircle(cx + 2, cy - 2, 1, COL_EYE);
         return;
     }
 
     uint16_t body_color = color;
     if (mode == GM_FRIGHT) {
-        body_color = COL_FRIGHT;
+        body_color = fright_blink_on ? COL_FWHITE : COL_FRIGHT;
     }
 
-    // Ghost body (rounded top + body)
-    LCD_FillCircle(cx, cy - 1, 4, body_color);
-    LCD_FillRect(cx - 4, cy - 1, 8, 5, body_color);
+    // Ghost body (rounded top + body) — stays within cell (y to y+9)
+    LCD_FillCircle(cx, cy - 1, 4, body_color);  // center (cx, y+4), radius 4 → top y, bottom y+8
+    LCD_FillRect(cx - 4, cy - 1, 8, 4, body_color); // y+4 to y+7
 
     // Wavy bottom skirt
-    LCD_FillRect(cx - 4, cy + 4, 2, 2, body_color);
-    LCD_FillRect(cx - 1, cy + 4, 2, 2, body_color);
-    LCD_FillRect(cx + 2, cy + 4, 2, 2, body_color);
+    LCD_FillRect(cx - 4, cy + 3, 2, 2, body_color); // y+8
+    LCD_FillRect(cx - 1, cy + 3, 2, 2, body_color); // y+8
+    LCD_FillRect(cx + 2, cy + 3, 2, 2, body_color); // y+8
 
     if (mode == GM_FRIGHT) {
         // Frightened face
-        LCD_FillCircle(cx - 2, cy - 1, 1, COL_FWHITE);
-        LCD_FillCircle(cx + 2, cy - 1, 1, COL_FWHITE);
-        LCD_FillCircle(cx - 2, cy - 1, 1, COL_PUPIL);
-        LCD_FillCircle(cx + 2, cy - 1, 1, COL_PUPIL);
+        LCD_FillCircle(cx - 2, cy - 2, 1, COL_FWHITE);
+        LCD_FillCircle(cx + 2, cy - 2, 1, COL_FWHITE);
+        LCD_FillCircle(cx - 2, cy - 2, 1, COL_PUPIL);
+        LCD_FillCircle(cx + 2, cy - 2, 1, COL_PUPIL);
         // Wavy mouth
-        LCD_FillRect(cx - 2, cy + 2, 1, 1, COL_FWHITE);
-        LCD_FillRect(cx, cy + 1, 1, 1, COL_FWHITE);
-        LCD_FillRect(cx + 2, cy + 2, 1, 1, COL_FWHITE);
+        LCD_FillRect(cx - 2, cy + 1, 1, 1, COL_FWHITE);
+        LCD_FillRect(cx, cy, 1, 1, COL_FWHITE);
+        LCD_FillRect(cx + 2, cy + 1, 1, 1, COL_FWHITE);
     } else {
         // Normal eyes
-        LCD_FillCircle(cx - 2, cy - 1, 2, COL_EYE);
-        LCD_FillCircle(cx + 2, cy - 1, 2, COL_EYE);
+        LCD_FillCircle(cx - 2, cy - 2, 2, COL_EYE);
+        LCD_FillCircle(cx + 2, cy - 2, 2, COL_EYE);
         // Pupils look in direction
         int8_t px = 0, py = 0;
         switch (dir) {
@@ -382,8 +400,8 @@ static void draw_ghost(int8_t col, int8_t row, uint16_t color, Dir_t dir, GhostM
             case DIR_D: py = 1; break;
             default: break;
         }
-        LCD_FillCircle(cx - 2 + px, cy - 1 + py, 1, COL_PUPIL);
-        LCD_FillCircle(cx + 2 + px, cy - 1 + py, 1, COL_PUPIL);
+        LCD_FillCircle(cx - 2 + px, cy - 2 + py, 1, COL_PUPIL);
+        LCD_FillCircle(cx + 2 + px, cy - 2 + py, 1, COL_PUPIL);
     }
 }
 
@@ -443,16 +461,16 @@ static void draw_hud(void) {
         // Draw digit using rectangles (simplified 3x5 font)
         uint8_t ch = buf[i] - '0';
         static const uint8_t digits[10][5] = {
-            {0x0E,0x11,0x11,0x11,0x0E}, // 0
-            {0x04,0x0C,0x04,0x04,0x0E}, // 1
-            {0x0E,0x01,0x0E,0x10,0x0F}, // 2
-            {0x0E,0x01,0x06,0x01,0x0E}, // 3
-            {0x02,0x06,0x0A,0x1F,0x02}, // 4
-            {0x0F,0x10,0x0E,0x01,0x0E}, // 5
-            {0x0E,0x10,0x0E,0x11,0x0E}, // 6
+            {0x06,0x09,0x09,0x09,0x06}, // 0
+            {0x02,0x06,0x02,0x02,0x07}, // 1
+            {0x06,0x09,0x02,0x04,0x0F}, // 2
+            {0x06,0x09,0x02,0x09,0x06}, // 3
+            {0x02,0x06,0x0A,0x0F,0x02}, // 4
+            {0x0F,0x08,0x0E,0x01,0x0E}, // 5
+            {0x06,0x08,0x0E,0x09,0x06}, // 6
             {0x0F,0x01,0x02,0x04,0x04}, // 7
-            {0x0E,0x11,0x0E,0x11,0x0E}, // 8
-            {0x0E,0x11,0x0F,0x01,0x0E}, // 9
+            {0x06,0x09,0x06,0x09,0x06}, // 8
+            {0x06,0x09,0x07,0x01,0x06}, // 9
         };
         for (uint8_t row = 0; row < 5; row++) {
             for (uint8_t col = 0; col < 4; col++) {
@@ -470,9 +488,68 @@ static void draw_hud(void) {
     }
 }
 
-// ============================================================================
-// Direction cycling
-// ============================================================================
+// Draw text string using 4x5 pixel font
+static void draw_text(int16_t x, int16_t y, const char *str, uint16_t color) {
+    static const uint8_t chars[26][5] = {
+        {0x06,0x09,0x0F,0x09,0x09}, // A
+        {0x0E,0x09,0x0E,0x09,0x0E}, // B
+        {0x06,0x09,0x08,0x09,0x06}, // C
+        {0x0E,0x09,0x09,0x09,0x0E}, // D
+        {0x0F,0x08,0x0E,0x08,0x0F}, // E
+        {0x0F,0x08,0x0E,0x08,0x08}, // F
+        {0x06,0x09,0x0B,0x09,0x06}, // G
+        {0x09,0x09,0x0F,0x09,0x09}, // H
+        {0x07,0x02,0x02,0x02,0x07}, // I
+        {0x01,0x01,0x01,0x09,0x06}, // J
+        {0x09,0x0A,0x0C,0x0A,0x09}, // K
+        {0x08,0x08,0x08,0x08,0x0F}, // L
+        {0x09,0x0F,0x0F,0x09,0x09}, // M
+        {0x09,0x0D,0x0B,0x09,0x09}, // N
+        {0x06,0x09,0x09,0x09,0x06}, // O
+        {0x0E,0x09,0x0E,0x08,0x08}, // P
+        {0x06,0x09,0x09,0x09,0x06}, // Q (same as O)
+        {0x0E,0x09,0x0E,0x0A,0x09}, // R
+        {0x07,0x08,0x07,0x01,0x0E}, // S
+        {0x0F,0x02,0x02,0x02,0x02}, // T
+        {0x09,0x09,0x09,0x09,0x06}, // U
+        {0x09,0x05,0x05,0x02,0x02}, // V
+        {0x09,0x09,0x0B,0x0D,0x09}, // W
+        {0x09,0x09,0x06,0x09,0x09}, // X
+        {0x09,0x09,0x06,0x02,0x02}, // Y
+        {0x0F,0x01,0x02,0x04,0x0F}, // Z
+    };
+    while (*str) {
+        uint8_t ch = *str - 'A';
+        if (*str == ' ') {
+            x += 16;
+            str++;
+            continue;
+        }
+        if (*str == '!') {
+            // Exclamation mark
+            static const uint8_t excl[5] = {0x04,0x04,0x04,0x00,0x04};
+            for (uint8_t row = 0; row < 5; row++) {
+                for (uint8_t col = 0; col < 4; col++) {
+                    if (excl[row] & (0x08 >> col))
+                        LCD_FillRect(x + col * 2, y + row * 3, 2, 2, color);
+                }
+            }
+            x += 12;
+            str++;
+            continue;
+        }
+        if (ch <= 25) {
+            for (uint8_t row = 0; row < 5; row++) {
+                for (uint8_t col = 0; col < 4; col++) {
+                    if (chars[ch][row] & (0x08 >> col))
+                        LCD_FillRect(x + col * 2, y + row * 3, 2, 2, color);
+                }
+            }
+        }
+        x += 14;
+        str++;
+    }
+}
 static Dir_t next_dir_cycle(Dir_t current) {
     switch (current) {
         case DIR_NONE: return DIR_R;
@@ -661,13 +738,51 @@ static void move_ghost(Ghost_t *g) {
         int8_t target_row = g->scatter_row;
 
         if (g->mode == GM_CHASE) {
-            // Different ghosts target differently
-            // Blinky (index 0): target pacman directly
-            // Pinky (index 1): target 4 cells ahead of pacman
-            // Inky (index 2): complex - simplified to pacman
-            // Clyde (index 3): target pacman if far, scatter if close
-            target_col = pac.col;
-            target_row = pac.row;
+            int8_t idx = (int8_t)(g - ghosts);
+            switch (idx) {
+                case 0: // Blinky: direct chase
+                    target_col = pac.col;
+                    target_row = pac.row;
+                    break;
+                case 1: // Pinky: 4 cells ahead of Pacman
+                    target_col = pac.col;
+                    target_row = pac.row;
+                    switch (pac.dir) {
+                        case DIR_R: target_col += 4; break;
+                        case DIR_L: target_col -= 4; break;
+                        case DIR_U: target_row -= 4; break;
+                        case DIR_D: target_row += 4; break;
+                        default: break;
+                    }
+                    break;
+                case 2: // Inky: double vector from Blinky to 2 cells ahead
+                {
+                    int8_t ac = pac.col, ar = pac.row;
+                    switch (pac.dir) {
+                        case DIR_R: ac += 2; break;
+                        case DIR_L: ac -= 2; break;
+                        case DIR_U: ar -= 2; break;
+                        case DIR_D: ar += 2; break;
+                        default: break;
+                    }
+                    target_col = 2 * ac - ghosts[0].col;
+                    target_row = 2 * ar - ghosts[0].row;
+                    break;
+                }
+                case 3: // Clyde: chase if far, scatter if close
+                {
+                    int32_t d2 = (g->col - pac.col) * (g->col - pac.col)
+                               + (g->row - pac.row) * (g->row - pac.row);
+                    if (d2 > 64) {
+                        target_col = pac.col;
+                        target_row = pac.row;
+                    } else {
+                        target_col = g->scatter_col;
+                        target_row = g->scatter_row;
+                    }
+                    break;
+                }
+            }
         }
 
         int32_t best_dist = 99999;
@@ -785,10 +900,11 @@ static void release_ghosts(void) {
 
     for (int i = 0; i < 4; i++) {
         if (ghosts[i].in_house && now - last_release > 4000 + i * 3000) {
-            ghosts[i].in_house = 0;
-            ghosts[i].col = 14;
-            ghosts[i].row = 11;
-            ghosts[i].dir = DIR_L;
+        // Place ghost at door position; it will exit via door (12,12) → corridor
+        ghosts[i].col = 12;
+        ghosts[i].row = 13;  // inside ghost house, below door
+        ghosts[i].dir = DIR_U;
+        ghosts[i].in_house = 0;
             ghosts[i].mode = GM_CHASE;
             last_release = now;
             break;
@@ -823,9 +939,9 @@ void Packman_Init(void) {
                 dots_total++;
 
     // Init Pacman
-    pac.col = 12;
+    pac.col = 11;
     pac.row = 23;
-    pac.dir = DIR_NONE;
+    pac.dir = DIR_R;
     pac.next_dir = DIR_NONE;
     pac.mouth_frame = 0;
     pac.move_counter = 0;
@@ -873,12 +989,17 @@ void Packman_Init(void) {
             draw_ghost(ghosts[i].col, ghosts[i].row, ghosts[i].color, ghosts[i].dir, ghosts[i].mode);
     }
 
+    mode_phase = 0;
+    mode_phase_start = HAL_GetTick();
+
     last_tick_ms = HAL_GetTick();
     ghost_spawn_ms = HAL_GetTick();
     last_button_ms = HAL_GetTick();
 
     g_game_state = GS_PLAY;
-    ready_to_play = 1;
+    ready_to_play = 0;
+    ready_start_ms = HAL_GetTick();
+    draw_text(70, 142, "READY", COL_POWER);
 }
 
 // ============================================================================
@@ -886,29 +1007,53 @@ void Packman_Init(void) {
 // ============================================================================
 void Packman_Tick(void) {
     if (g_game_state == GS_GAMEOVER) {
-        static uint8_t flash = 0;
-        flash = !flash;
-        if (flash) {
-            LCD_FillRect(50, 140, 140, 30, 0xF800);
-        } else {
-            LCD_FillRect(50, 140, 140, 30, COL_BG);
-        }
+        draw_text(70, 100, "GAME OVER", 0xF800);
         return;
     }
     if (g_game_state == GS_WIN) {
-        static uint8_t flash = 0;
-        flash = !flash;
-        if (flash) {
-            LCD_FillRect(50, 140, 140, 30, COL_POWER);
-        } else {
-            LCD_FillRect(50, 140, 140, 30, COL_BG);
+        draw_text(70, 100, "YOU WIN", COL_POWER);
+        draw_text(70, 120, "PRESS KEY", COL_SCR);
+        return;
+    }
+
+    uint32_t now = HAL_GetTick();
+
+    // Long press detection (works in both PLAY and PAUSE)
+    if (button_press_ms && !long_press_handled && now - button_press_ms > LONG_PRESS_MS) {
+        long_press_handled = 1;
+        if (g_game_state == GS_PLAY) {
+            draw_text(70, 142, "PAUSE", COL_SCR);
+            g_game_state = GS_PAUSE;
+            return;
+        } else if (g_game_state == GS_PAUSE) {
+            LCD_FillRect(70, 140, 80, 20, COL_BG);
+            g_game_state = GS_PLAY;
+            // Reset mode phase timer to avoid time jump
+            mode_phase_start = now;
+            return;
+        }
+    }
+
+    if (g_game_state == GS_PAUSE) return;
+    if (g_game_state != GS_PLAY) return;
+
+    // Show READY! message for 2 seconds before starting play
+    if (!ready_to_play) {
+        if (HAL_GetTick() - ready_start_ms > 2000) {
+            // Restore maze cells covered by READY text (rows 12-13, cols 0-23)
+            for (int c = 0; c < MAZE_COLS; c++) {
+                draw_maze_cell(c, 12);
+                draw_maze_cell(c, 13);
+            }
+            // Restore ghosts in those rows too
+            for (int i = 0; i < 4; i++) {
+                if (!ghosts[i].in_house)
+                    draw_ghost(ghosts[i].col, ghosts[i].row, ghosts[i].color, ghosts[i].dir, ghosts[i].mode);
+            }
+            ready_to_play = 1;
         }
         return;
     }
-    if (g_game_state != GS_PLAY) return;
-    if (!ready_to_play) return;
-
-    uint32_t now = HAL_GetTick();
 
     // Move pacman
     move_pacman();
@@ -936,13 +1081,19 @@ void Packman_Tick(void) {
 
     // Check fright timer
     if (power_active) {
-        if (now - power_start_ms > FRIGHT_MS) {
+        uint32_t fright_elapsed = now - power_start_ms;
+        if (fright_elapsed > FRIGHT_MS) {
             power_active = 0;
             for (int i = 0; i < 4; i++) {
                 if (ghosts[i].mode == GM_FRIGHT) {
                     ghosts[i].mode = GM_CHASE;
                 }
             }
+        } else if (fright_elapsed > FRIGHT_MS - FRIGHT_BLINK_MS) {
+            // Blink every tick (160ms) during last 2 seconds
+            fright_blink_on = !fright_blink_on;
+        } else {
+            fright_blink_on = 0;
         }
     }
 
@@ -951,6 +1102,29 @@ void Packman_Tick(void) {
 
     // Release ghosts from house
     release_ghosts();
+
+    // Update Chase/Scatter mode cycling
+    {
+        uint32_t elapsed = now - mode_phase_start;
+        uint32_t dur = (mode_phase < MODE_PHASES) ? mode_durations_ms[mode_phase] : 20000;
+        if (elapsed >= dur) {
+            mode_phase++;
+            mode_phase_start = now;
+            uint8_t new_scatter = (mode_phase % 2 == 0);
+            for (int i = 0; i < 4; i++) {
+                if (ghosts[i].in_house || ghosts[i].mode == GM_FRIGHT || ghosts[i].mode == GM_EATEN) continue;
+                ghosts[i].mode = new_scatter ? GM_SCATTER : GM_CHASE;
+                // Reverse direction
+                switch (ghosts[i].dir) {
+                    case DIR_R: ghosts[i].dir = DIR_L; break;
+                    case DIR_L: ghosts[i].dir = DIR_R; break;
+                    case DIR_U: ghosts[i].dir = DIR_D; break;
+                    case DIR_D: ghosts[i].dir = DIR_U; break;
+                    default: break;
+                }
+            }
+        }
+    }
 
     // Check win
     check_win();
@@ -962,7 +1136,7 @@ void Packman_Tick(void) {
 }
 
 // ============================================================================
-// Public: Button press (cycle direction)
+// Public: Button press (short = cycle direction, long = pause)
 // ============================================================================
 void Packman_OnButton(void) {
     uint32_t now = HAL_GetTick();
@@ -974,10 +1148,15 @@ void Packman_OnButton(void) {
         return;
     }
 
+    if (g_game_state == GS_PLAY || g_game_state == GS_PAUSE) {
+        button_press_ms = now;
+        long_press_handled = 0;
+    }
+
     if (g_game_state == GS_PLAY) {
-        // Cycle direction
+        // Short press: cycle direction
         if (pac.dir == DIR_NONE) {
-            pac.dir = DIR_R;
+    pac.dir = DIR_L;
         } else {
             pac.next_dir = next_dir_cycle(pac.dir);
         }
