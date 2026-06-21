@@ -44,29 +44,82 @@
 
 ## 5. 채터링
 
-* KY-036 터치 센서는 사람이 손으로 만질 때 금속 접촉면의 미세한 전위차를 감지하는데,
-* 접촉 순간 신호가 수 ms 동안 불안정하게 튀는 채터링(chattering) 현상이 발생합니다.
+이 코드는 KY-036 터치 센서의 신호 패턴을 인식하는 비블로킹(non-blocking) 구현입니다.
 
-* ReadDebounced()는 이 채터링을 소프트웨어적으로 제거합니다:
-   * s1 – 현재 GPIO 값을 1회 읽음
-   * HAL_Delay(50) – 50ms 대기 (채터링이 안정될 때까지)
-   * s2 – 같은 핀을 다시 읽음
-   * s1 == s2 – 두 값이 같으면 안정적인 상태로 간주하여 반환
-   * 다르면 한 번 더 읽어서 최종 값을 반환 (3번째 샘플로 확정)
+__io_putchar – printf 표준 출력을 USART2(UART)로 리다이렉션하여 시리얼 터미널에 문자열을 출력할 수 있게 합니다.
 
-* HAL_Delay(10)은 메인 루프의 최소 주기를 10ms로 유지해 연속적인 터치를 빠짐없이 감지하면서도 CPU 점유를 낮추는 역할을 합니다.
+상수:
+
+TICK_MS 1 – 1ms마다 한 번씩 GPIO를 샘플링
+WINDOW_MS 150 – rising edge를 카운트할 시간 창(150ms)
+EDGE_THRESHOLD 6 – 터치로 판단할 최소 rising edge 개수
+ProcessTouch() 동작 흐름:
+
+HAL_GetTick() 기반 1ms 주기로 GPIO를 읽어 rising edge(0→1)를 감지하고 카운트
+150ms가 지날 때마다 윈도우 내의 rising edge 개수를 확인
+6개 이상이면 터치 패턴(120ms 동안 23ms HIGH + 78ms LOW × 8회)이 발생했다고 판단하고 touchState 갱신
+touchState가 0→1로 변한 순간에만 HAL_GPIO_TogglePin()으로 LD2를 토글하고, 시리얼로 상태와 시각을 출력
+패턴이 없으면 touchState를 0으로 리셋 (터치 해제)
+장점:
+
+HAL_Delay()를 사용하지 않아 비블로킹 → 다른 작업을 방해하지 않음
+단순한 채터링(1~2회 edge)은 임계값 미달로 자연스럽게 필터링됨
+터치 시마다 LED가 토글되어 on/off 상태 전환에 적합
 
 ```c
 /* USER CODE BEGIN 0 */
-#define TOUCH_DEBOUNCE_MS 50
-
-static GPIO_PinState ReadDebounced(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
+int __io_putchar(int ch)
 {
-    GPIO_PinState s1 = HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
-    HAL_Delay(TOUCH_DEBOUNCE_MS);
-    GPIO_PinState s2 = HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
-    return (s1 == s2) ? s1 : HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
 }
+
+#define TICK_MS         1
+#define WINDOW_MS       150
+#define EDGE_THRESHOLD  6
+
+static void ProcessTouch(void)
+{
+    static uint32_t nextTick;
+    static uint8_t  lastPin;
+    static uint16_t risingEdges;
+    static uint32_t windowStart;
+    static uint8_t  touchState;
+
+    uint32_t now = HAL_GetTick();
+    if (now < nextTick) return;
+    nextTick = now + TICK_MS;
+
+    uint8_t pin = (HAL_GPIO_ReadPin(TOUCH_GPIO_Port, TOUCH_Pin) == GPIO_PIN_SET);
+
+    if (pin && !lastPin) risingEdges++;
+
+    if ((now - windowStart) >= WINDOW_MS) {
+        uint8_t detected = (risingEdges >= EDGE_THRESHOLD);
+        if (detected != touchState) {
+            touchState = detected;
+            printf("%s at %lu ms\r\n",
+                   touchState ? "TOUCH DETECTED" : "TOUCH RELEASED",
+                   HAL_GetTick());
+            if (touchState) {
+                HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+            }
+        }
+        risingEdges = 0;
+        windowStart = now;
+    }
+
+    lastPin = pin;
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  printf("========================\r\n");
+  printf("KY-036 Touch Sensor Test\r\n");
+  printf("========================\r\n");
+  /* USER CODE END 2 */
 ```
 
 ```c
@@ -74,12 +127,11 @@ static GPIO_PinState ReadDebounced(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    GPIO_PinState touch = ReadDebounced(TOUCH_GPIO_Port, TOUCH_Pin);
-    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, touch);
-    HAL_Delay(10);
+	  ProcessTouch();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
+}
 ```
