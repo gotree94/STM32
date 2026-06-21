@@ -1,6 +1,6 @@
 # PAC-MAN Game — STM32F103 + ILI9341 LCD (240x320)
 
-<img src="031.png" width=30%"> <img src="032.png" width=30%">
+<img src="031.png" width="30%"> <img src="032.png" width="30%">
 
 ## 개요
 
