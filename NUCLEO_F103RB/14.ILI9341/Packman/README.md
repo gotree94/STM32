@@ -396,6 +396,113 @@ static void handle_button(void) {
     }
 ```
 
+---
 
+## ioc 파일 수정 부분
+
+### 1. Mcu.Pin 목록 — LCD 핀 12개 추가
+```
+Mcu.Pin0=PC13-TAMPER-RTC
+Mcu.Pin1=PC14-OSC32_IN
+Mcu.Pin2=PC15-OSC32_OUT
+Mcu.Pin3=PD0-OSC_IN
+Mcu.Pin4=PD1-OSC_OUT
+Mcu.Pin5=PC1            # ← LCD_RST (추가)
+Mcu.Pin6=PA0-WKUP        # ← LCD_RD (추가)
+Mcu.Pin7=PA1             # ← LCD_WR (추가)
+Mcu.Pin8=PA2
+Mcu.Pin9=PA3
+Mcu.Pin10=PA4            # ← LCD_RS (추가)
+Mcu.Pin11=PA5
+Mcu.Pin12=PB0            # ← LCD_CS (추가)
+Mcu.Pin13=PB10           # ← LCD_D6 (추가)
+Mcu.Pin14=PC7            # ← LCD_D1 (추가)
+Mcu.Pin15=PA8            # ← LCD_D7 (추가)
+Mcu.Pin16=PA9            # ← LCD_D0 (추가)
+Mcu.Pin17=PA10           # ← LCD_D2 (추가)
+Mcu.Pin18=PA13
+Mcu.Pin19=PA14
+Mcu.Pin20=PB3            # ← 기존 SWO → LCD_D3 로 변경
+Mcu.Pin21=PB4            # ← LCD_D5 (추가)
+Mcu.Pin22=PB5            # ← LCD_D4 (추가)
+Mcu.Pin23=VP_SYS_VS_Systick
+Mcu.PinsNb=24
+```
+
+### 2. PB3 설정 변경 (SWO → LCD_D3)
+```
+# PB3.GPIOParameters=GPIO_Label          ← 이 줄 자체는 그대로 두고 값만 변경
+PB3.GPIO_Label=LCD_D3
+PB3.Locked=true
+# PB3.Signal=GPIO_Output                  ← SYS_JTDO-TRACESWO → GPIO_Output
+```
+
+### 3. LCD 핀 GPIO 설정 — 전부 추가
+```
+PA0-WKUP.GPIOParameters=GPIO_Label
+PA0-WKUP.GPIO_Label=LCD_RD
+PA0-WKUP.Locked=true
+PA0-WKUP.Signal=GPIO_Output
+
+PA1.GPIOParameters=GPIO_Label
+PA1.GPIO_Label=LCD_WR
+PA1.Signal=GPIO_Output
+
+PA4.GPIOParameters=GPIO_Label
+PA4.GPIO_Label=LCD_RS
+PA4.Locked=true
+PA4.Signal=GPIO_Output
+
+PA8.GPIOParameters=GPIO_Label
+PA8.GPIO_Label=LCD_D7
+PA8.Locked=true
+PA8.Signal=GPIO_Output
+
+PA9.GPIOParameters=GPIO_Label
+PA9.GPIO_Label=LCD_D0
+PA9.Locked=true
+PA9.Signal=GPIO_Output
+
+PA10.GPIOParameters=GPIO_Label
+PA10.GPIO_Label=LCD_D2
+PA10.Locked=true
+PA10.Signal=GPIO_Output
+
+PB0.GPIOParameters=GPIO_Label
+PB0.GPIO_Label=LCD_CS
+PB0.Locked=true
+PB0.Signal=GPIO_Output
+
+PB10.GPIOParameters=GPIO_Label
+PB10.GPIO_Label=LCD_D6
+PB10.Locked=true
+PB10.Signal=GPIO_Output
+
+PB4.GPIOParameters=GPIO_Label
+PB4.GPIO_Label=LCD_D5
+PB4.Locked=true
+PB4.Signal=GPIO_Output
+
+PB5.GPIOParameters=GPIO_Label
+PB5.GPIO_Label=LCD_D4
+PB5.Locked=true
+PB5.Signal=GPIO_Output
+
+PC1.GPIOParameters=GPIO_Label
+PC1.GPIO_Label=LCD_RST
+PC1.Locked=true
+PC1.Signal=GPIO_Output
+
+PC7.GPIOParameters=GPIO_Label
+PC7.GPIO_Label=LCD_D1
+PC7.Locked=true
+PC7.Signal=GPIO_Output
+```
+
+### 4. ProjectManager (선택)
+```
+ProjectManager.FirmwarePackage=STM32Cube FW_F1 V1.8.6
+# 또는 기존 V1.8.7 그대로 사용 가능 (호환됨)
+```
 
 
