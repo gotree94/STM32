@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Car Control</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 16px; }
+    .container { max-width: 460px; width: 100%; }
+
+    h1 { text-align: center; font-size: 22px; margin-bottom: 16px; color: #e94560; }
+
+    .grid { display: flex; flex-direction: column; gap: 14px; }
+
+    .block { background: #16213e; border-radius: 14px; padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .block h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #e94560; display: flex; align-items: center; gap: 6px; }
+
+    /* ── Block: Control ─────────────────────────── */
+    .port-section { display: flex; gap: 8px; margin-bottom: 10px; }
+    .port-section select { flex: 1; padding: 9px 10px; border: 1px solid #0f3460; border-radius: 8px; background: #0f3460; color: #eee; font-size: 13px; outline: none; }
+    .port-section select:focus { border-color: #e94560; }
+    .port-section select option { background: #16213e; }
+    .port-section button { padding: 9px 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+
+    .btn-refresh { background: #533483; color: #fff; }
+    .btn-refresh:hover { background: #6a3fa8; }
+    .btn-connect { background: #0f3460; color: #888; }
+    .btn-connect.connected { background: #27ae60; color: #fff; }
+    .btn-connect.connected:hover { background: #2ecc71; }
+    .btn-connect.disconnecting { background: #e74c3c; color: #fff; }
+    .btn-connect.disconnecting:hover { background: #ff6b6b; }
+
+    .status { font-size: 12px; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; background: #0f3460; color: #888; text-align: center; }
+    .status.connected { background: #1a3a2e; color: #27ae60; }
+    .status.error { background: #3a1a1a; color: #e74c3c; }
+
+    .dpad { display: grid; grid-template-columns: 80px 80px 80px; grid-template-rows: 80px 80px 80px; gap: 6px; justify-content: center; margin: 0 auto; }
+    .dpad button { border: none; border-radius: 10px; font-size: 24px; font-weight: 700; cursor: pointer; transition: .08s; display: flex; align-items: center; justify-content: center; color: #fff; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    .dpad button:active { transform: scale(0.90); }
+    .btn-fwd { background: #27ae60; grid-column: 2; grid-row: 1; }
+    .btn-fwd:hover { background: #2ecc71; }
+    .btn-left { background: #e67e22; grid-column: 1; grid-row: 2; }
+    .btn-left:hover { background: #f39c12; }
+    .btn-stop { background: #e74c3c; grid-column: 2; grid-row: 2; font-size: 16px; }
+    .btn-stop:hover { background: #ff6b6b; }
+    .btn-right { background: #3498db; grid-column: 3; grid-row: 2; }
+    .btn-right:hover { background: #5dade2; }
+    .btn-bwd { background: #8e44ad; grid-column: 2; grid-row: 3; }
+    .btn-bwd:hover { background: #a569bd; }
+
+    .info { font-size: 11px; text-align: center; color: #555; margin-top: 10px; }
+    .info kbd { background: #0f3460; padding: 2px 6px; border-radius: 4px; font-family: inherit; color: #888; }
+
+    /* ── Block: Voice ───────────────────────────── */
+    .voice-row { display: flex; align-items: center; gap: 12px; }
+    .mic-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #0f3460; color: #888; font-size: 20px; cursor: pointer; transition: .2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .mic-btn.active { background: #e74c3c; color: #fff; box-shadow: 0 0 0 0 rgba(231,76,60,.6); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231,76,60,.6); } 50% { box-shadow: 0 0 0 12px rgba(231,76,60,0); } 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0); } }
+    .voice-status { font-size: 13px; color: #888; flex: 1; }
+    .voice-status.listening { color: #e74c3c; }
+    .voice-status.recognized { color: #2ecc71; }
+    .voice-cmds { font-size: 11px; color: #555; margin-top: 8px; }
+    .voice-cmds span { display: inline-block; background: #0f3460; padding: 2px 7px; border-radius: 4px; margin: 2px; color: #888; }
+
+    /* ── Block: DroidCam ────────────────────────── */
+    .cam-controls { display: flex; gap: 6px; margin-bottom: 8px; }
+    .cam-input-wrap { flex: 1; position: relative; display: flex; }
+    .cam-input-wrap input { flex: 1; padding: 9px 10px; border: 1px solid #0f3460; border-radius: 8px; background: #0f3460; color: #eee; font-size: 13px; outline: none; }
+    .cam-input-wrap input:focus { border-color: #e94560; }
+    .cam-input-wrap input::placeholder { color: #555; }
+    .cam-clear-btn { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #555; font-size: 14px; cursor: pointer; padding: 4px; display: none; line-height: 1; }
+    .cam-clear-btn:hover { color: #e74c3c; }
+    .cam-clear-btn.show { display: block; }
+
+    .cam-controls button { padding: 9px 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; background: #0f3460; color: #888; white-space: nowrap; }
+    .cam-controls button.active { background: #27ae60; color: #fff; }
+    .cam-controls button.active:hover { background: #2ecc71; }
+    .cam-controls .btn-del { background: transparent; color: #555; font-size: 16px; padding: 9px 6px; }
+    .cam-controls .btn-del:hover { color: #e74c3c; }
+
+    .cam-history { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; min-height: 0; }
+    .cam-history:empty { display: none; }
+    .cam-history .chip { display: inline-flex; align-items: center; gap: 3px; padding: 4px 9px; border-radius: 12px; background: #0f3460; color: #aaa; font-size: 11px; cursor: pointer; border: 1px solid transparent; transition: .15s; }
+    .cam-history .chip:hover { border-color: #e94560; color: #eee; }
+    .cam-history .chip .del { font-size: 12px; color: #555; }
+    .cam-history .chip .del:hover { color: #e74c3c; }
+
+    .cam-status { font-size: 12px; color: #888; margin-bottom: 8px; text-align: center; min-height: 18px; }
+    .cam-status.connected { color: #2ecc71; }
+    .cam-status.error { color: #e74c3c; }
+
+    .cam-feed { width: 100%; aspect-ratio: 4/3; background: #0a0a1a; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #0f3460; }
+    .cam-feed img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .cam-feed .placeholder { color: #444; font-size: 13px; text-align: center; padding: 20px; }
+    .cam-feed .placeholder span { display: block; font-size: 36px; margin-bottom: 6px; }
+
+    /* ── Block: Log ─────────────────────────────── */
+    .log-wrap { position: relative; }
+    .log-toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
+    .log-toolbar button { padding: 5px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; background: #0f3460; color: #888; }
+    .log-toolbar button:hover { background: #1a4a7a; }
+    .log-toolbar .log-count { font-size: 11px; color: #555; align-self: center; margin-left: auto; }
+
+    .log-console { background: #0a0a1a; border-radius: 8px; padding: 10px; height: 180px; overflow-y: auto; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; line-height: 1.6; border: 1px solid #0f3460; }
+    .log-console::-webkit-scrollbar { width: 4px; }
+    .log-console::-webkit-scrollbar-track { background: transparent; }
+    .log-console::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 2px; }
+    .log-console .entry { color: #888; }
+    .log-console .entry .time { color: #555; margin-right: 6px; }
+    .log-console .entry .tag-sent { color: #5dade2; }
+    .log-console .entry .tag-recog { color: #2ecc71; }
+    .log-console .entry .tag-cam { color: #e67e22; }
+    .log-console .entry .tag-info { color: #888; }
+    .log-console .entry .tag-error { color: #e74c3c; }
+    .log-console .empty { color: #333; text-align: center; padding-top: 60px; font-family: inherit; }
+
+    /* ── Responsive: 2×2 on PC ──────────────────── */
+    @media (min-width: 820px) {
+      body { align-items: center; padding: 24px; }
+      .container { max-width: 960px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 16px; }
+      .block { padding: 20px; }
+      .dpad { grid-template-columns: 90px 90px 90px; grid-template-rows: 90px 90px 90px; gap: 7px; }
+      .dpad button { font-size: 26px; }
+      .log-console { height: 220px; }
+    }
+
+    @media (min-width: 1100px) {
+      .container { max-width: 1100px; }
+      .cam-feed { aspect-ratio: 16/9; }
+      .log-console { height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Car Control</h1>
+
+    <div class="grid">
+
+      <!-- ═══ Block 1: Control ═══ -->
+      <div class="block block-control">
+        <h2>🔌 Control</h2>
+        <div class="port-section">
+          <select id="portSelect"><option value="">-- Port --</option></select>
+          <button class="btn-refresh" id="btnRefresh">↻</button>
+          <button class="btn-connect" id="btnConnect">Connect</button>
+        </div>
+        <div class="status" id="statusDisplay">Disconnected</div>
+
+        <div class="dpad">
+          <button class="btn-fwd" data-cmd="w">▲<br><span style="font-size:11px">W</span></button>
+          <button class="btn-left" data-cmd="a">◀<br><span style="font-size:11px">A</span></button>
+          <button class="btn-stop" data-cmd="x">■<br><span style="font-size:11px">X</span></button>
+          <button class="btn-right" data-cmd="d">▶<br><span style="font-size:11px">D</span></button>
+          <button class="btn-bwd" data-cmd="s">▼<br><span style="font-size:11px">S</span></button>
+        </div>
+        <div class="info">
+          <kbd>W</kbd> Fwd &nbsp; <kbd>A</kbd> Left &nbsp; <kbd>D</kbd> Right &nbsp; <kbd>S</kbd> Bwd &nbsp; <kbd>X</kbd> Stop
+        </div>
+      </div>
+
+      <!-- ═══ Block 2: Voice ═══ -->
+      <div class="block block-voice">
+        <h2>🎤 Voice</h2>
+        <div class="voice-row">
+          <button class="mic-btn" id="micBtn">🎤</button>
+          <div class="voice-status" id="voiceStatus">Tap mic & speak a command</div>
+        </div>
+        <div class="voice-cmds">
+          <span>전진</span><span>후진</span><span>좌회전</span><span>우회전</span><span>정지</span>
+          <span>forward</span><span>back</span><span>left</span><span>right</span><span>stop</span>
+        </div>
+      </div>
+
+      <!-- ═══ Block 3: DroidCam ═══ -->
+      <div class="block block-cam">
+        <h2>📷 DroidCam</h2>
+        <div class="cam-controls">
+          <div class="cam-input-wrap">
+            <input type="text" id="camIp" list="camHistoryList" placeholder="IP (예: 192.168.0.10)" autocomplete="off">
+            <datalist id="camHistoryList"></datalist>
+            <button class="cam-clear-btn" id="camClearBtn">✕</button>
+          </div>
+          <button class="btn-del" id="btnDelHistory" title="Clear history">🗑</button>
+          <button id="btnCamConnect">Connect</button>
+        </div>
+        <div class="cam-history" id="camHistory"></div>
+        <div class="cam-status" id="camStatus">Enter DroidCam IP and connect</div>
+        <div class="cam-feed" id="camFeed">
+          <div class="placeholder"><span>📷</span>No video feed</div>
+        </div>
+      </div>
+
+      <!-- ═══ Block 4: Log ═══ -->
+      <div class="block block-log">
+        <h2>📋 Log</h2>
+        <div class="log-wrap">
+          <div class="log-toolbar">
+            <button id="logClear">Clear</button>
+            <button id="logAutoScroll" data-on="1">Auto ▼</button>
+            <span class="log-count" id="logCount">0 entries</span>
+          </div>
+          <div class="log-console" id="logConsole">
+            <div class="empty">No commands yet</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════════════════
+    // Log
+    // ══════════════════════════════════════════════════════════
+    const logConsole = document.getElementById('logConsole');
+    const logCount = document.getElementById('logCount');
+    const logClearBtn = document.getElementById('logClear');
+    const logAutoBtn = document.getElementById('logAutoScroll');
+    let autoScroll = true;
+    let entries = 0;
+
+    function log(tag, msg) {
+      const empty = logConsole.querySelector('.empty');
+      if (empty) empty.remove();
+
+      const now = new Date();
+      const time = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const div = document.createElement('div');
+      div.className = 'entry';
+      div.innerHTML = `<span class="time">${time}</span><span class="tag-${tag}">[${tag.toUpperCase()}]</span> ${msg}`;
+      logConsole.appendChild(div);
+
+      entries++;
+      logCount.textContent = entries + ' entries';
+
+      if (autoScroll) {
+        logConsole.scrollTop = logConsole.scrollHeight;
+      }
+    }
+
+    logClearBtn.addEventListener('click', () => {
+      logConsole.innerHTML = '<div class="empty">No commands yet</div>';
+      entries = 0;
+      logCount.textContent = '0 entries';
+    });
+
+    logAutoBtn.addEventListener('click', () => {
+      autoScroll = !autoScroll;
+      logAutoBtn.dataset.on = autoScroll ? '1' : '0';
+      logAutoBtn.textContent = autoScroll ? 'Auto ▼' : 'Auto ⊘';
+      logAutoBtn.style.opacity = autoScroll ? '1' : '.5';
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // Serial Port + Control
+    // ══════════════════════════════════════════════════════════
+    const portSelect = document.getElementById('portSelect');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnConnect = document.getElementById('btnConnect');
+    const statusDisplay = document.getElementById('statusDisplay');
+
+    let connected = false;
+
+    async function loadPorts() {
+      try {
+        const res = await fetch('/api/ports');
+        const ports = await res.json();
+        portSelect.innerHTML = '<option value="">-- Port --</option>';
+        ports.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.path;
+          opt.textContent = p.path + (p.manufacturer ? ' (' + p.manufacturer + ')' : '');
+          portSelect.appendChild(opt);
+        });
+        log('info', `Loaded ${ports.length} port(s)`);
+      } catch (err) {
+        setStatus('Failed to load ports', 'error');
+        log('error', 'Failed to load ports: ' + err.message);
+      }
+    }
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if (data.connected) {
+          connected = true;
+          setStatus('Connected: ' + data.path, 'connected');
+          btnConnect.textContent = 'Disconnect';
+          btnConnect.className = 'btn-connect connected';
+          log('info', `Serial connected: ${data.path}`);
+        } else {
+          connected = false;
+          setStatus('Disconnected', '');
+          btnConnect.textContent = 'Connect';
+          btnConnect.className = 'btn-connect';
+        }
+      } catch (err) {
+        log('error', 'Status check failed');
+      }
+    }
+
+    function setStatus(msg, type) {
+      statusDisplay.textContent = msg;
+      statusDisplay.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    async function sendCommand(cmd) {
+      if (!connected) {
+        log('error', 'Not connected — command ignored');
+        return;
+      }
+      try {
+        const res = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cmd })
+        });
+        const data = await res.json();
+        if (data.success) {
+          log('sent', `→ ${cmd.toUpperCase()}`);
+        } else {
+          log('error', `Command failed: ${data.error || 'Unknown'}`);
+        }
+      } catch (err) {
+        log('error', 'Network error');
+      }
+    }
+
+    btnRefresh.addEventListener('click', loadPorts);
+
+    btnConnect.addEventListener('click', async () => {
+      if (connected) {
+        await fetch('/api/disconnect', { method: 'POST' });
+        connected = false;
+        setStatus('Disconnected', '');
+        btnConnect.textContent = 'Connect';
+        btnConnect.className = 'btn-connect';
+        log('info', 'Serial disconnected');
+        return;
+      }
+      const path = portSelect.value;
+      if (!path) { setStatus('Please select a port', 'error'); return; }
+      try {
+        const res = await fetch('/api/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path })
+        });
+        const data = await res.json();
+        if (data.success) {
+          connected = true;
+          setStatus('Connected: ' + path, 'connected');
+          btnConnect.textContent = 'Disconnect';
+          btnConnect.className = 'btn-connect connected';
+          log('info', `Connected to ${path}`);
+        } else {
+          setStatus('Error: ' + (data.error || 'Connection failed'), 'error');
+          log('error', 'Connection failed: ' + (data.error || '?'));
+        }
+      } catch (err) {
+        setStatus('Network error', 'error');
+        log('error', 'Network error during connect');
+      }
+    });
+
+    document.querySelectorAll('.dpad button[data-cmd]').forEach(btn => {
+      btn.addEventListener('click', () => sendCommand(btn.dataset.cmd));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key;
+      if (['w', 'a', 's', 'd', 'x', 'W', 'A', 'S', 'D', 'X'].includes(key)) {
+        e.preventDefault();
+        sendCommand(key);
+      }
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // Voice Recognition (Web Speech API)
+    // ══════════════════════════════════════════════════════════
+    const micBtn = document.getElementById('micBtn');
+    const voiceStatus = document.getElementById('voiceStatus');
+    let listening = false;
+    let recognition = null;
+
+    const voiceMap = {
+      'w': 'w', 'double u': 'w', 'forward': 'w', 'front': 'w',
+      '전진': 'w', '앞으로': 'w', '포워드': 'w',
+      'a': 'a', 'left': 'a', 'turn left': 'a',
+      '좌회전': 'a', '왼쪽': 'a', '레프트': 'a', 'left turn': 'a',
+      's': 's', 'backward': 's', 'back': 's', 'rear': 's',
+      '후진': 's', '뒤로': 's', '백워드': 's', '백': 's',
+      'd': 'd', 'right': 'd', 'turn right': 'd',
+      '우회전': 'd', '오른쪽': 'd', '라이트': 'd', 'right turn': 'd',
+      'x': 'x', 'stop': 'x', 'halt': 'x', 'brake': 'x',
+      '정지': 'x', '멈춰': 'x', '스톱': 'x', '브레이크': 'x',
+    };
+
+    function normalizeVoice(text) {
+      return text.replace(/[^\w\s가-힣]/g, '').trim().toLowerCase();
+    }
+
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent);
+    }
+
+    async function warmupMic() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+      } catch (_) {}
+    }
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        voiceStatus.textContent = 'Not supported in this browser';
+        return;
+      }
+
+      if (isIOS()) warmupMic();
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ko-KR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+
+      recognition.onstart = () => {
+        listening = true;
+        micBtn.classList.add('active');
+        voiceStatus.textContent = 'Listening...';
+        voiceStatus.className = 'voice-status listening';
+        log('info', 'Voice: listening...');
+      };
+
+      recognition.onresult = (event) => {
+        for (let i = 0; i < event.results.length; i++) {
+          for (let j = 0; j < event.results[i].length; j++) {
+            const text = normalizeVoice(event.results[i][j].transcript);
+            if (voiceMap[text]) {
+              const cmd = voiceMap[text];
+              voiceStatus.textContent = `"${event.results[i][j].transcript}" → ${cmd.toUpperCase()}`;
+              voiceStatus.className = 'voice-status recognized';
+              log('recog', `"${event.results[i][j].transcript}" → ${cmd.toUpperCase()}`);
+              sendCommand(cmd);
+              return;
+            }
+          }
+        }
+        voiceStatus.textContent = `Unrecognized: "${event.results[0][0].transcript}"`;
+        voiceStatus.className = 'voice-status';
+        log('info', `Voice unrecognized: "${event.results[0][0].transcript}"`);
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error === 'no-speech' && isIOS()) {
+          stopListening();
+          return;
+        }
+        voiceStatus.textContent = `Error: ${event.error}`;
+        voiceStatus.className = 'voice-status';
+        log('error', `Voice error: ${event.error}`);
+        stopListening();
+      };
+
+      recognition.onend = () => {
+        if (listening) stopListening();
+      };
+
+      try { recognition.start(); }
+      catch (e) {
+        voiceStatus.textContent = 'Failed to start';
+        log('error', 'Voice failed to start');
+      }
+    }
+
+    function stopListening() {
+      listening = false;
+      micBtn.classList.remove('active');
+      if (recognition) {
+        try { recognition.stop(); } catch (_) {}
+        recognition = null;
+      }
+      if (voiceStatus.textContent === 'Listening...') {
+        voiceStatus.textContent = 'Tap mic & speak a command';
+        voiceStatus.className = 'voice-status';
+      }
+    }
+
+    micBtn.addEventListener('click', () => {
+      listening ? stopListening() : startListening();
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // DroidCam Camera + IP History
+    // ══════════════════════════════════════════════════════════
+    const camIp = document.getElementById('camIp');
+    const btnCamConnect = document.getElementById('btnCamConnect');
+    const camStatus = document.getElementById('camStatus');
+    const camFeed = document.getElementById('camFeed');
+    const camHistory = document.getElementById('camHistory');
+    const camHistoryList = document.getElementById('camHistoryList');
+    const camClearBtn = document.getElementById('camClearBtn');
+    const btnDelHistory = document.getElementById('btnDelHistory');
+    let camConnected = false;
+    let camImg = null;
+
+    const HISTORY_KEY = 'droidcam_ips';
+    const MAX_HISTORY = 10;
+
+    function getHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveHistory(ips) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(ips));
+    }
+
+    function addHistory(ip) {
+      let ips = getHistory().filter(i => i !== ip);
+      ips.unshift(ip);
+      if (ips.length > MAX_HISTORY) ips = ips.slice(0, MAX_HISTORY);
+      saveHistory(ips);
+      renderHistory();
+    }
+
+    function removeHistory(ip) {
+      let ips = getHistory().filter(i => i !== ip);
+      saveHistory(ips);
+      renderHistory();
+    }
+
+    function clearHistory() {
+      saveHistory([]);
+      renderHistory();
+      camIp.value = '';
+      camClearBtn.classList.remove('show');
+    }
+
+    function renderHistory() {
+      const ips = getHistory();
+      camHistory.innerHTML = ips.map(ip =>
+        `<span class="chip" data-ip="${ip}">${ip}<span class="del" data-del="${ip}">✕</span></span>`
+      ).join('');
+      camHistoryList.innerHTML = ips.map(ip => `<option value="${ip}">`).join('');
+    }
+
+    camHistory.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      const del = e.target.closest('.del');
+      if (del) {
+        e.stopPropagation();
+        removeHistory(del.dataset.del);
+        return;
+      }
+      if (chip) {
+        camIp.value = chip.dataset.ip;
+        camClearBtn.classList.add('show');
+        connectCam();
+      }
+    });
+
+    camIp.addEventListener('input', () => {
+      camClearBtn.classList.toggle('show', camIp.value.trim().length > 0);
+    });
+
+    camClearBtn.addEventListener('click', () => {
+      camIp.value = '';
+      camClearBtn.classList.remove('show');
+      camIp.focus();
+    });
+
+    btnDelHistory.addEventListener('click', () => {
+      if (getHistory().length && confirm('Clear all saved IPs?')) {
+        clearHistory();
+        log('info', 'DroidCam IP history cleared');
+      }
+    });
+
+    btnCamConnect.addEventListener('click', () => {
+      camConnected ? disconnectCam() : connectCam();
+    });
+
+    function connectCam() {
+      const ip = camIp.value.trim();
+      if (!ip) {
+        camStatus.textContent = 'Please enter DroidCam IP';
+        camStatus.className = 'cam-status error';
+        return;
+      }
+
+      camConnected = true;
+      btnCamConnect.textContent = 'Disconnect';
+      btnCamConnect.classList.add('active');
+      camStatus.textContent = 'Connecting...';
+      camStatus.className = 'cam-status';
+
+      camFeed.innerHTML = '';
+      camImg = document.createElement('img');
+      camImg.alt = 'DroidCam Feed';
+      camFeed.appendChild(camImg);
+
+      const streamUrl = `/api/camera/stream?ip=${encodeURIComponent(ip)}`;
+      camImg.src = streamUrl;
+
+      camImg.onload = () => {
+        camStatus.textContent = `Connected to ${ip}:4747`;
+        camStatus.className = 'cam-status connected';
+        addHistory(ip);
+        log('cam', `Connected to DroidCam ${ip}:4747`);
+      };
+
+      camImg.onerror = () => {
+        if (camConnected) {
+          camStatus.textContent = `Failed to connect to ${ip}:4747`;
+          camStatus.className = 'cam-status error';
+          log('error', `DroidCam connection failed: ${ip}:4747`);
+        }
+      };
+    }
+
+    function disconnectCam() {
+      camConnected = false;
+      if (camImg) { camImg.src = ''; camImg = null; }
+      camFeed.innerHTML = '<div class="placeholder"><span>📷</span>No video feed</div>';
+      btnCamConnect.textContent = 'Connect';
+      btnCamConnect.classList.remove('active');
+      camStatus.textContent = 'Enter DroidCam IP and connect';
+      camStatus.className = 'cam-status';
+      log('cam', 'DroidCam disconnected');
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Init
+    // ══════════════════════════════════════════════════════════
+    loadPorts();
+    checkStatus();
+    renderHistory();
+    log('info', 'Car Control ready');
+  </script>
+</body>
+</html>
