@@ -44,27 +44,26 @@
 
 ## 5. 채터링
 
-이 코드는 KY-036 터치 센서의 신호 패턴을 인식하는 비블로킹(non-blocking) 구현입니다.
+* 이 코드는 KY-036 터치 센서의 신호 패턴을 인식하는 비블로킹(non-blocking) 구현입니다.
 
-__io_putchar – printf 표준 출력을 USART2(UART)로 리다이렉션하여 시리얼 터미널에 문자열을 출력할 수 있게 합니다.
+* __io_putchar – printf 표준 출력을 USART2(UART)로 리다이렉션하여 시리얼 터미널에 문자열을 출력할 수 있게 합니다.
 
-상수:
+* 상수:
+   * TICK_MS 1 – 1ms마다 한 번씩 GPIO를 샘플링
+   * WINDOW_MS 150 – rising edge를 카운트할 시간 창(150ms)
+   * EDGE_THRESHOLD 6 – 터치로 판단할 최소 rising edge 개수
 
-TICK_MS 1 – 1ms마다 한 번씩 GPIO를 샘플링
-WINDOW_MS 150 – rising edge를 카운트할 시간 창(150ms)
-EDGE_THRESHOLD 6 – 터치로 판단할 최소 rising edge 개수
-ProcessTouch() 동작 흐름:
+* ProcessTouch() 동작 흐름:
+   * HAL_GetTick() 기반 1ms 주기로 GPIO를 읽어 rising edge(0→1)를 감지하고 카운트
+   * 150ms가 지날 때마다 윈도우 내의 rising edge 개수를 확인
+   * 6개 이상이면 터치 패턴(120ms 동안 23ms HIGH + 78ms LOW × 8회)이 발생했다고 판단하고 touchState 갱신
+   * touchState가 0→1로 변한 순간에만 HAL_GPIO_TogglePin()으로 LD2를 토글하고, 시리얼로 상태와 시각을 출력
+   * 패턴이 없으면 touchState를 0으로 리셋 (터치 해제)
 
-HAL_GetTick() 기반 1ms 주기로 GPIO를 읽어 rising edge(0→1)를 감지하고 카운트
-150ms가 지날 때마다 윈도우 내의 rising edge 개수를 확인
-6개 이상이면 터치 패턴(120ms 동안 23ms HIGH + 78ms LOW × 8회)이 발생했다고 판단하고 touchState 갱신
-touchState가 0→1로 변한 순간에만 HAL_GPIO_TogglePin()으로 LD2를 토글하고, 시리얼로 상태와 시각을 출력
-패턴이 없으면 touchState를 0으로 리셋 (터치 해제)
-장점:
-
-HAL_Delay()를 사용하지 않아 비블로킹 → 다른 작업을 방해하지 않음
-단순한 채터링(1~2회 edge)은 임계값 미달로 자연스럽게 필터링됨
-터치 시마다 LED가 토글되어 on/off 상태 전환에 적합
+* 장점:
+   * HAL_Delay()를 사용하지 않아 비블로킹 → 다른 작업을 방해하지 않음
+   * 단순한 채터링(1~2회 edge)은 임계값 미달로 자연스럽게 필터링됨
+   * 터치 시마다 LED가 토글되어 on/off 상태 전환에 적합
 
 ```c
 /* USER CODE BEGIN 0 */
