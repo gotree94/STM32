@@ -391,5 +391,16 @@ void LCD_CreateAllCustomChars(void) {
   /* USER CODE END 3 */
 ```
 
+---
+
+```c
+	  unsigned char temp = 0x5A;
+	  HAL_I2C_Master_Transmit(&hi2c1, ADDRESS, &temp, 1, 1000);
+	  HAL_Delay(1000);
+```
+
+![](i2c_test.png)
+
+
 
 
