@@ -6,7 +6,8 @@
 ## 타입 B : SN74LS00 Logic IC 기반
 <img src="Obstacle_Detection.png"> <br>
 
-* 장애물을 감지하면 한번의 트리거 신호만 발생함
+* 장애물을 감지하면 '1'에서 '0'으로 펄스 발생
+* 점점 가까워 질수혹 펄스가 자주 발생하다가 1cm이 되면 '0'으로 고정됨.
 
 <img src="TEK0010.BMP" width="60%"> <br>
 
