@@ -455,13 +455,13 @@ static int16_t DS18B20_GetTempRaw(void)
 
 
 ```c
-  /* USER CODE BEGIN 1 */
+/* USER CODE BEGIN 1 */
 int __io_putchar(int ch)
 {
     HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
     return ch;
 }
-  /* USER CODE END 1 */
+/* USER CODE END 1 */
 ```
 
 
