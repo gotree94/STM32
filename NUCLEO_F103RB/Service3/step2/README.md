@@ -69,7 +69,7 @@ Web Speech API는 **HTTPS(또는 localhost)** 환경에서만 동작합니다.
 ### 1. 서버 실행
 
 ```bash
-cd C:\Users\Administrator\Desktop\Service3
+cd C:\Users\Administrator\Desktop\Service3\step2
 npm install --production
 npm start
 ```
