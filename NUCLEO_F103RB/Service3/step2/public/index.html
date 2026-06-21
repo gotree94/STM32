@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serial Control</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .container { background: #16213e; border-radius: 16px; padding: 32px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    h1 { text-align: center; font-size: 22px; margin-bottom: 24px; color: #e94560; }
+
+    .port-section { display: flex; gap: 8px; margin-bottom: 16px; }
+    .port-section select { flex: 1; padding: 10px 12px; border: 1px solid #0f3460; border-radius: 8px; background: #0f3460; color: #eee; font-size: 14px; outline: none; }
+    .port-section select:focus { border-color: #e94560; }
+    .port-section select option { background: #16213e; }
+    .port-section button { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+
+    .btn-refresh { background: #533483; color: #fff; }
+    .btn-refresh:hover { background: #6a3fa8; }
+    .btn-connect { background: #0f3460; color: #888; }
+    .btn-connect.active { background: #e94560; color: #fff; }
+    .btn-connect.active:hover { background: #ff6b81; }
+    .btn-connect.connected { background: #27ae60; color: #fff; }
+    .btn-connect.connected:hover { background: #2ecc71; }
+
+    .status { text-align: center; font-size: 13px; padding: 8px; border-radius: 8px; margin-bottom: 20px; background: #0f3460; color: #888; }
+    .status.connected { background: #1a3a2e; color: #27ae60; }
+    .status.error { background: #3a1a1a; color: #e74c3c; }
+
+    .key-status { text-align: center; font-size: 14px; margin-bottom: 16px; color: #888; min-height: 20px; }
+
+    .dpad { display: grid; grid-template-columns: 100px 100px 100px; grid-template-rows: 100px 100px 100px; gap: 8px; justify-content: center; margin: 0 auto 20px; }
+    .dpad button { border: none; border-radius: 12px; font-size: 28px; font-weight: 700; cursor: pointer; transition: .1s; display: flex; align-items: center; justify-content: center; color: #fff; user-select: none; -webkit-user-select: none; }
+    .dpad button:active { transform: scale(0.92); }
+    .dpad .blank { visibility: hidden; }
+    .btn-fwd { background: #27ae60; grid-column: 2; grid-row: 1; }
+    .btn-fwd:hover { background: #2ecc71; }
+    .btn-fwd:active { background: #1e8449; }
+    .btn-left { background: #e67e22; grid-column: 1; grid-row: 2; }
+    .btn-left:hover { background: #f39c12; }
+    .btn-left:active { background: #d35400; }
+    .btn-stop { background: #e74c3c; grid-column: 2; grid-row: 2; font-size: 18px; }
+    .btn-stop:hover { background: #ff6b6b; }
+    .btn-stop:active { background: #c0392b; }
+    .btn-right { background: #3498db; grid-column: 3; grid-row: 2; }
+    .btn-right:hover { background: #5dade2; }
+    .btn-right:active { background: #2c81ba; }
+    .btn-bwd { background: #8e44ad; grid-column: 2; grid-row: 3; }
+    .btn-bwd:hover { background: #a569bd; }
+    .btn-bwd:active { background: #6c3483; }
+
+    .voice-section { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+    .mic-btn { width: 56px; height: 56px; border-radius: 50%; border: none; background: #0f3460; color: #888; font-size: 24px; cursor: pointer; transition: .2s; display: flex; align-items: center; justify-content: center; }
+    .mic-btn.active { background: #e74c3c; color: #fff; box-shadow: 0 0 0 0 rgba(231,76,60,.6); animation: pulse 1.5s infinite; }
+    .mic-btn.active:hover { background: #ff6b6b; }
+    .mic-btn:disabled { opacity: .4; cursor: not-allowed; animation: none; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231,76,60,.6); } 50% { box-shadow: 0 0 0 12px rgba(231,76,60,0); } 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0); } }
+    .voice-status { font-size: 13px; color: #888; min-height: 20px; text-align: center; }
+    .voice-status.listening { color: #e74c3c; }
+    .voice-status.recognized { color: #2ecc71; }
+
+    .info { font-size: 12px; text-align: center; color: #555; }
+    .info kbd { background: #0f3460; padding: 2px 6px; border-radius: 4px; font-family: inherit; color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Serial Control</h1>
+
+    <div class="port-section">
+      <select id="portSelect"><option value="">-- Select Port --</option></select>
+      <button class="btn-refresh" id="btnRefresh">↻</button>
+      <button class="btn-connect" id="btnConnect">Connect</button>
+    </div>
+
+    <div class="status" id="statusDisplay">Disconnected</div>
+    <div class="key-status" id="keyStatus">Press a key or click a button</div>
+
+    <div class="voice-section">
+      <button class="mic-btn" id="micBtn">🎤</button>
+      <div class="voice-status" id="voiceStatus">Tap mic to use voice</div>
+    </div>
+
+    <div class="dpad">
+      <button class="btn-fwd" data-cmd="w">▲<br><span style="font-size:14px">W</span></button>
+      <button class="btn-left" data-cmd="a">◀<br><span style="font-size:14px">A</span></button>
+      <button class="btn-stop" data-cmd="x">■<br><span style="font-size:14px">X</span></button>
+      <button class="btn-right" data-cmd="d">▶<br><span style="font-size:14px">D</span></button>
+      <button class="btn-bwd" data-cmd="s">▼<br><span style="font-size:14px">S</span></button>
+    </div>
+
+    <div class="info">
+      <kbd>W</kbd> Forward &nbsp; <kbd>A</kbd> Left &nbsp; <kbd>D</kbd> Right &nbsp; <kbd>S</kbd> Backward &nbsp; <kbd>X</kbd> Stop
+    </div>
+  </div>
+
+  <script>
+    const portSelect = document.getElementById('portSelect');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnConnect = document.getElementById('btnConnect');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const keyStatus = document.getElementById('keyStatus');
+
+    let connected = false;
+
+    async function loadPorts() {
+      try {
+        const res = await fetch('/api/ports');
+        const ports = await res.json();
+        portSelect.innerHTML = '<option value="">-- Select Port --</option>';
+        ports.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.path;
+          opt.textContent = p.path + (p.manufacturer ? ' (' + p.manufacturer + ')' : '');
+          portSelect.appendChild(opt);
+        });
+      } catch (err) {
+        setStatus('Failed to load ports', 'error');
+      }
+    }
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if (data.connected) {
+          connected = true;
+          setStatus('Connected: ' + data.path, 'connected');
+          btnConnect.textContent = 'Disconnect';
+          btnConnect.className = 'btn-connect connected';
+        } else {
+          connected = false;
+          setStatus('Disconnected', '');
+          btnConnect.textContent = 'Connect';
+          btnConnect.className = 'btn-connect';
+        }
+      } catch (err) {
+        setStatus('Error checking status', 'error');
+      }
+    }
+
+    function setStatus(msg, type) {
+      statusDisplay.textContent = msg;
+      statusDisplay.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function setKeyStatus(msg) {
+      keyStatus.textContent = msg;
+    }
+
+    async function sendCommand(cmd) {
+      if (!connected) {
+        setKeyStatus('Not connected');
+        return;
+      }
+      try {
+        const res = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cmd })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setKeyStatus('Sent: ' + data.cmd);
+        } else {
+          setKeyStatus('Error: ' + (data.error || 'Unknown'));
+        }
+      } catch (err) {
+        setKeyStatus('Network error');
+      }
+    }
+
+    btnRefresh.addEventListener('click', loadPorts);
+
+    btnConnect.addEventListener('click', async () => {
+      if (connected) {
+        await fetch('/api/disconnect', { method: 'POST' });
+        connected = false;
+        setStatus('Disconnected', '');
+        btnConnect.textContent = 'Connect';
+        btnConnect.className = 'btn-connect';
+        setKeyStatus('');
+        return;
+      }
+      const path = portSelect.value;
+      if (!path) { setStatus('Please select a port', 'error'); return; }
+      try {
+        const res = await fetch('/api/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path })
+        });
+        const data = await res.json();
+        if (data.success) {
+          connected = true;
+          setStatus('Connected: ' + path, 'connected');
+          btnConnect.textContent = 'Disconnect';
+          btnConnect.className = 'btn-connect connected';
+          setKeyStatus('Connected');
+        } else {
+          setStatus('Error: ' + (data.error || 'Connection failed'), 'error');
+        }
+      } catch (err) {
+        setStatus('Network error', 'error');
+      }
+    });
+
+    document.querySelectorAll('.dpad button[data-cmd]').forEach(btn => {
+      btn.addEventListener('click', () => sendCommand(btn.dataset.cmd));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key;
+      if (['w', 'a', 's', 'd', 'x', 'W', 'A', 'S', 'D', 'X'].includes(key)) {
+        e.preventDefault();
+        sendCommand(key);
+      }
+    });
+
+    // ─── Voice Recognition (cross-platform: PC + iPhone) ───────
+    const micBtn = document.getElementById('micBtn');
+    const voiceStatus = document.getElementById('voiceStatus');
+    let listening = false;
+    let recognition = null;
+
+    const voiceMap = {
+      'w': 'w', 'double u': 'w', 'forward': 'w', 'front': 'w',
+      '전진': 'w', '앞으로': 'w', '포워드': 'w',
+      'a': 'a', 'left': 'a', 'turn left': 'a',
+      '좌회전': 'a', '왼쪽': 'a', '레프트': 'a', 'left turn': 'a',
+      's': 's', 'backward': 's', 'back': 's', 'rear': 's',
+      '후진': 's', '뒤로': 's', '백워드': 's', '백': 's',
+      'd': 'd', 'right': 'd', 'turn right': 'd',
+      '우회전': 'd', '오른쪽': 'd', '라이트': 'd', 'right turn': 'd',
+      'x': 'x', 'stop': 'x', 'halt': 'x', 'brake': 'x',
+      '정지': 'x', '멈춰': 'x', '스톱': 'x', '브레이크': 'x',
+    };
+
+    function normalizeVoice(text) {
+      return text.replace(/[^\w\s가-힣]/g, '').trim().toLowerCase();
+    }
+
+    // iOS Safari/Chrome warmup: 마이크 권한 미리 획득
+    async function warmupMic() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+      } catch (_) { /* already granted or denied */ }
+    }
+
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent);
+    }
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        voiceStatus.textContent = 'Speech recognition not supported';
+        voiceStatus.className = 'voice-status';
+        return;
+      }
+
+      // iOS: 마이크 워밍업
+      if (isIOS()) warmupMic();
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ko-KR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+
+      recognition.onstart = () => {
+        listening = true;
+        micBtn.classList.add('active');
+        voiceStatus.textContent = 'Listening...';
+        voiceStatus.className = 'voice-status listening';
+      };
+
+      recognition.onresult = (event) => {
+        for (let i = 0; i < event.results.length; i++) {
+          for (let j = 0; j < event.results[i].length; j++) {
+            const text = normalizeVoice(event.results[i][j].transcript);
+            if (voiceMap[text]) {
+              const cmd = voiceMap[text];
+              voiceStatus.textContent = `Recognized: "${event.results[i][j].transcript}" → ${cmd.toUpperCase()}`;
+              voiceStatus.className = 'voice-status recognized';
+              sendCommand(cmd);
+              return;
+            }
+          }
+        }
+        voiceStatus.textContent = `Unrecognized: "${event.results[0][0].transcript}"`;
+        voiceStatus.className = 'voice-status';
+      };
+
+      recognition.onerror = (event) => {
+        // iOS: 'no-speech' on first-tap is normal, ignore silently
+        if (event.error === 'no-speech' && isIOS()) {
+          stopListening();
+          return;
+        }
+        voiceStatus.textContent = `Error: ${event.error}`;
+        voiceStatus.className = 'voice-status';
+        stopListening();
+      };
+
+      recognition.onend = () => {
+        if (listening) stopListening();
+      };
+
+      try {
+        recognition.start();
+      } catch (e) {
+        voiceStatus.textContent = 'Recognition failed to start';
+        voiceStatus.className = 'voice-status';
+      }
+    }
+
+    function stopListening() {
+      listening = false;
+      micBtn.classList.remove('active');
+      if (recognition) {
+        try { recognition.stop(); } catch (_) {}
+        recognition = null;
+      }
+      if (voiceStatus.textContent === 'Listening...') {
+        voiceStatus.textContent = 'Tap mic to use voice';
+        voiceStatus.className = 'voice-status';
+      }
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (listening) {
+        stopListening();
+      } else {
+        startListening();
+      }
+    });
+
+    loadPorts();
+    checkStatus();
+  </script>
+</body>
+</html>
