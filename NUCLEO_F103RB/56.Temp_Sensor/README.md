@@ -398,7 +398,6 @@ LOW    └────────────────┘                   
 /* USER CODE END Includes */
 ```
 
-
 ```c
 /* USER CODE BEGIN 0 */
 
@@ -529,7 +528,8 @@ int __io_putchar(int ch)
     } else {
         int16_t whole = raw / 16;
         uint16_t frac = (raw < 0 ? -raw : raw) % 16 * 625;
-        printf("TEMP: %d.%04u C\r\n", whole, frac);
+        printf("RAW=0x%04X (%5d)  TEMP: %d.%04u C\r\n",
+               (uint16_t)raw, raw, whole, frac);
     }
     HAL_Delay(1000);
     /* USER CODE END WHILE */
@@ -539,22 +539,11 @@ int __io_putchar(int ch)
 
 ```
 DS18B20 ready
-TEMP: 22.1250 C
-TEMP: 22.0000 C
-TEMP: 22.0000 C
-TEMP: 22.0000 C
-TEMP: 21.9375 C
-TEMP: 23.0625 C
-TEMP: 24.5625 C
-TEMP: 25.4375 C
-TEMP: 25.9375 C
-TEMP: 25.5625 C
-TEMP: 25.0625 C
-TEMP: 24.6250 C
-TEMP: 24.2500 C
-TEMP: 23.8750 C
-TEMP: 23.6250 C
-TEMP: 23.3750 C
+RAW=0x0160 (  352)  TEMP: 22.0000 C
+RAW=0x0161 (  353)  TEMP: 22.0625 C
+RAW=0x0162 (  354)  TEMP: 22.1250 C
+RAW=0x0162 (  354)  TEMP: 22.1250 C
+RAW=0x0161 (  353)  TEMP: 22.0625 C
 ```
 
 ---
