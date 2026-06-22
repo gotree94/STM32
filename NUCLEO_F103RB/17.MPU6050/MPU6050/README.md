@@ -199,11 +199,20 @@ MPU6050/
 
 ### 5.1 `main.c` — 전체 애플리케이션
 
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+/* USER CODE END Includes */
+```
+
 MPU6050 드라이버 코드는 별도의 파일로 분리하지 않고 `main.c` 내에 `static` 함수로 구현되어 있습니다.
 
 #### 상수 정의 (`main.c:36-44`)
 
 ```c
+/* USER CODE BEGIN PD */
 #define MPU6050_ADDR         0x68    // MPU6050 I2C 주소 (AD0=GND)
 #define MPU6050_WHO_AM_I     0x75    // WHO_AM_I 레지스터
 #define MPU6050_PWR_MGMT_1   0x6B    // 전원 관리 레지스터
@@ -213,14 +222,26 @@ MPU6050 드라이버 코드는 별도의 파일로 분리하지 않고 `main.c` 
 #define ACCEL_SCALE          16384.0f  // ±2g 기준 스케일 팩터
 #define GYRO_SCALE           131.0f    // ±250°/s 기준 스케일 팩터
 #define GYRO_CALIB_SAMPLES   64        // 자이로 캘리브레이션 샘플 수
+/* USER CODE END PD */
 ```
 
 #### 정적 변수 (`main.c:58-60`)
 
 ```c
+/* USER CODE BEGIN PV */
 static uint8_t mpu6050_rx_buf[14];   // I2C 수신 버퍼 (14바이트)
 static char uart_tx_buf[128];        // UART 송신 버퍼
 static volatile int16_t gyro_bias_x, gyro_bias_y, gyro_bias_z; // 자이로 바이어스
+/* USER CODE END PV */
+```
+
+```c
+/* USER CODE BEGIN PFP */
+static void I2C_Scan(void);
+static HAL_StatusTypeDef MPU6050_Init(void);
+static void MPU6050_CalibrateGyro(void);
+static void MPU6050_ReadData(void);
+/* USER CODE END PFP */
 ```
 
 #### 함수 목록
@@ -249,6 +270,176 @@ for (i = 1; i < 127; i++) {
     }
 }
 ```
+
+```c
+/* USER CODE BEGIN 0 */
+static void I2C_Scan(void)
+{
+  HAL_StatusTypeDef ret;
+  uint8_t i;
+  uint8_t found = 0;
+
+  sprintf(uart_tx_buf, "\r\nI2C Scanning...\r\n");
+  HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+
+  for (i = 1; i < 127; i++)
+  {
+    ret = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i << 1), 1, 10);
+    if (ret == HAL_OK)
+    {
+      sprintf(uart_tx_buf, "I2C device found at 0x%02X\r\n", i);
+      HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+      found++;
+    }
+  }
+
+  if (found == 0)
+  {
+    sprintf(uart_tx_buf, "No I2C devices found!\r\n");
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+  }
+  else
+  {
+    sprintf(uart_tx_buf, "Found %d device(s)\r\n", found);
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+  }
+}
+
+static HAL_StatusTypeDef MPU6050_Init(void)
+{
+  uint8_t whoami;
+  uint8_t pwr;
+
+  HAL_Delay(100);
+
+  HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR << 1, MPU6050_WHO_AM_I, I2C_MEMADD_SIZE_8BIT, &whoami, 1, 100);
+  sprintf(uart_tx_buf, "WHO_AM_I = 0x%02X\r\n", whoami);
+  HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+
+  if (whoami != 0x68 && whoami != 0x98)
+  {
+    sprintf(uart_tx_buf, "Unknown device! (WHO_AM_I = 0x%02X)\r\n", whoami);
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+    return HAL_ERROR;
+  }
+
+  pwr = 0x00;
+  if (HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR << 1, MPU6050_PWR_MGMT_1, I2C_MEMADD_SIZE_8BIT, &pwr, 1, 100) != HAL_OK)
+  {
+    sprintf(uart_tx_buf, "PWR_MGMT_1 write failed!\r\n");
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+    return HAL_ERROR;
+  }
+
+  HAL_Delay(100);
+
+  sprintf(uart_tx_buf, "MPU6050 initialized\r\n");
+  HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+
+  return HAL_OK;
+}
+
+static void MPU6050_CalibrateGyro(void)
+{
+  int32_t sum_x = 0, sum_y = 0, sum_z = 0;
+  uint8_t i;
+
+  sprintf(uart_tx_buf, "Gyro calibrating... keep sensor still\r\n");
+  HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+
+  for (i = 0; i < GYRO_CALIB_SAMPLES; i++)
+  {
+    if (HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR << 1, MPU6050_GYRO_XOUT_H, I2C_MEMADD_SIZE_8BIT, mpu6050_rx_buf, 6, 100) == HAL_OK)
+    {
+      sum_x += (int16_t)((mpu6050_rx_buf[0] << 8) | mpu6050_rx_buf[1]);
+      sum_y += (int16_t)((mpu6050_rx_buf[2] << 8) | mpu6050_rx_buf[3]);
+      sum_z += (int16_t)((mpu6050_rx_buf[4] << 8) | mpu6050_rx_buf[5]);
+    }
+    HAL_Delay(5);
+  }
+
+  gyro_bias_x = (int16_t)(sum_x / GYRO_CALIB_SAMPLES);
+  gyro_bias_y = (int16_t)(sum_y / GYRO_CALIB_SAMPLES);
+  gyro_bias_z = (int16_t)(sum_z / GYRO_CALIB_SAMPLES);
+
+  sprintf(uart_tx_buf, "Gyro bias: %4d %4d %4d\r\n", gyro_bias_x, gyro_bias_y, gyro_bias_z);
+  HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+}
+
+static void MPU6050_ReadData(void)
+{
+  int16_t accel_x, accel_y, accel_z;
+  int16_t gyro_x, gyro_y, gyro_z;
+  int16_t temp_raw;
+  int16_t temp_int, temp_whole, temp_frac;
+  float ax, ay, az;
+  int16_t roll, pitch;
+
+  if (HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR << 1, MPU6050_ACCEL_XOUT_H, I2C_MEMADD_SIZE_8BIT, mpu6050_rx_buf, 14, 100) != HAL_OK)
+  {
+    sprintf(uart_tx_buf, "I2C read failed!\r\n");
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+    return;
+  }
+
+  accel_x = (int16_t)((mpu6050_rx_buf[0] << 8) | mpu6050_rx_buf[1]);
+  accel_y = (int16_t)((mpu6050_rx_buf[2] << 8) | mpu6050_rx_buf[3]);
+  accel_z = (int16_t)((mpu6050_rx_buf[4] << 8) | mpu6050_rx_buf[5]);
+  temp_raw = (int16_t)((mpu6050_rx_buf[6] << 8) | mpu6050_rx_buf[7]);
+  gyro_x  = (int16_t)((mpu6050_rx_buf[8] << 8) | mpu6050_rx_buf[9]) - gyro_bias_x;
+  gyro_y  = (int16_t)((mpu6050_rx_buf[10] << 8) | mpu6050_rx_buf[11]) - gyro_bias_y;
+  gyro_z  = (int16_t)((mpu6050_rx_buf[12] << 8) | mpu6050_rx_buf[13]) - gyro_bias_z;
+
+  ax = (float)accel_x / ACCEL_SCALE;
+  ay = (float)accel_y / ACCEL_SCALE;
+  az = (float)accel_z / ACCEL_SCALE;
+
+  roll  = (int16_t)(atan2f(-ay, az) * 57.29578f);
+  pitch = (int16_t)(atan2f(ax, sqrtf(ay*ay + az*az)) * 57.29578f);
+
+  temp_int = (int16_t)(((int32_t)temp_raw * 100 / 340) + 3653);
+  temp_whole = temp_int / 100;
+  temp_frac = temp_int % 100;
+  if (temp_frac < 0) temp_frac = -temp_frac;
+
+  sprintf(uart_tx_buf, "ACC: %6d %6d %6d  GYRO: %6d %6d %6d  RPY: %4d %4d %4d  TEMP: %d.%02d C\r\n",
+          accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z,
+          roll, pitch, 0,
+          temp_whole, temp_frac);
+  HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  HAL_Delay(500);
+
+  I2C_Scan();
+
+  ret = MPU6050_Init();
+  if (ret != HAL_OK)
+  {
+    sprintf(uart_tx_buf, "MPU6050 init failed. Check wiring!\r\n");
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+    while (1);
+  }
+
+  MPU6050_CalibrateGyro();
+
+  HAL_Delay(200);
+  /* USER CODE END 2 */
+```
+
+```c
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    MPU6050_ReadData();
+    HAL_Delay(500);
+    /* USER CODE END WHILE */
+```
+
 
 - MPU6050의 기본 주소는 `0x68`입니다.
 - 발견된 모든 장치 주소를 UART로 출력합니다.
