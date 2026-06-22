@@ -77,7 +77,8 @@ STM32 CubeIDE에서 프로젝트의 main.c 파일을 위 코드로 교체하세�
       * "ST7735S" (시안색)
       * "80x160" (노란색)
 
-<img width="800" height="600" alt="LCD-SPI" src="https://github.com/user-attachments/assets/beee2466-55d7-44cf-956a-0a860e1a189a" />
+![](001.png)
+
 <br>
 <img width="800" height="600" alt="LCD-SPI_008" src="https://github.com/user-attachments/assets/8acc11bd-f882-4708-a598-880511e50ea9" />
 <br>
