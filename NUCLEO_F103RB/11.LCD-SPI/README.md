@@ -392,16 +392,18 @@ void LCD_Init(void) {
     LCD_WriteData(0x0E);
 
     // Display inversion off
-    LCD_WriteCommand(ST7735_INVOFF);
+    //LCD_WriteCommand(ST7735_INVOFF);
+    LCD_WriteCommand(ST7735_INVON);
 
     // Memory access control (rotation)
     LCD_WriteCommand(ST7735_MADCTL);
+    LCD_WriteData(0x68);  // MV=1, MX=1, BGR=1
     // 1. 기본 90도 회전 (추천)
     //LCD_WriteData(0x20); // MY=0, MX=0, MV=1
     // 2. 현재 사용중
     //LCD_WriteData(0xE0); // MY=1, MX=1, MV=1
     // 3. 90도 + X축만 미러링
-    LCD_WriteData(0x60); // MY=0, MX=1, MV=1
+    //LCD_WriteData(0x60); // MY=0, MX=1, MV=1
     // 4. 90도 + Y축만 미러링
     //LCD_WriteData(0xA0); // MY=1, MX=0, MV=1
 
