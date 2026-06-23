@@ -17,7 +17,7 @@
 
 ![](KY-005-01.png)
 
-<img src="IR_LED-2.jpg" width="40%">  <img src="IR_LED.jpg" width="40%">
+<img src="IR_LED.jpg" width="40%"> <img src="IR_LED-2.jpg" width="40%">
 
 
    * 이 모듈은 매우 간단하며, 5mm 적외선 LED와 3개의 수핀 헤더 핀으로 구성되어 있습니다.
