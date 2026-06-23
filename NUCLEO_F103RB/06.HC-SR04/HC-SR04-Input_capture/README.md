@@ -1,179 +1,190 @@
-# HC-SR04
-
-![](011.png) <img src="010.png" width="50%">
+# HC-SR04 Input Capture
 
 ![](Fig.NUCLEO-F103RB.png)
 
-|       |       |
-|:-------:|:-------:|
-| ![](002.png) | ![](003.png) | 
 
- <img src="101.png" width="30%"> <img src="102.png" width="58%">
-
-<img src="103.png" width="55%"> <img src="104.png" width="40%">
-
-![](201.png)
-
-![](202.png)
-
-![](203.png)
 
 ```c
-/* Includes ------------------------------------------------------------------*/
-#include "main.h"
-
-/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>
 #include <stdio.h>
 /* USER CODE END Includes */
 ```
 
 ```c
-/* USER CODE BEGIN PD */
-#define HIGH 1
-#define LOW 0
-long unsigned int echo_time;
-int dist;
-/* USER CODE END PD */
+/* USER CODE BEGIN PV */
+
+/* Input capture state */
+static volatile uint32_t ic_rising_tick = 0;
+static volatile uint32_t ic_falling_tick = 0;
+static volatile uint8_t  ic_measurement_done = 0;
+static volatile uint8_t  ic_edge = 0;   /* 0=wait rising, 1=wait falling */
+static volatile uint8_t  ic_overflow = 0; /* timeout via update event */
+
+/* USER CODE END PV */
 ```
 
 ```c
-/* USER CODE BEGIN 0 */
-#ifdef __GNUC__
-/* With GCC, small printf (option LD Linker->Libraries->Small printf
-   set to 'Yes') calls __io_putchar() */
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
-
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
-PUTCHAR_PROTOTYPE
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the USART1 and Loop until the end of transmission */
-  if (ch == '\n')
-    HAL_UART_Transmit (&huart2, (uint8_t*) "\r", 1, 0xFFFF);
-  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
-
-  return ch;
-}
-
-void timer_start(void)
-{
-   HAL_TIM_Base_Start(&htim1);
-}
-
-void delay_us(uint16_t us)
-{
-   __HAL_TIM_SET_COUNTER(&htim1, 0); // initislize counter to start from 0
-   while((__HAL_TIM_GET_COUNTER(&htim1))<us); // wait count until us
-}
-
-void trig(void)
-{
-   HAL_GPIO_WritePin(TRIG1_GPIO_Port, TRIG1_Pin, HIGH);
-   delay_us(10);
-   HAL_GPIO_WritePin(TRIG1_GPIO_Port, TRIG1_Pin, LOW);
-}
-
-/**
-* @brief echo 신호가 HIGH를 유지하는 시간을 (㎲)단위로 측정하여 리턴한다.
-* @param no param(void)
-*/
-long unsigned int echo(void)
-{
-   long unsigned int echo = 0;
-
-   while(HAL_GPIO_ReadPin(ECHO1_GPIO_Port, ECHO1_Pin) == LOW){}
-        __HAL_TIM_SET_COUNTER(&htim1, 0);
-        while(HAL_GPIO_ReadPin(ECHO1_GPIO_Port, ECHO1_Pin) == HIGH);
-        echo = __HAL_TIM_GET_COUNTER(&htim1);
-   if( echo >= 240 && echo <= 23000 ) return echo;
-   else return 0;
-}
+/* USER CODE BEGIN PFP */
+static void delay_us(uint32_t us);
+static void HCSR04_Trigger(void);
+/* USER CODE END PFP */
 ```
 
 ```c
   /* USER CODE BEGIN 2 */
-  timer_start();
-  printf("Ranging with HC-SR04\n");
+  printf("HC-SR04 Input Capture initialized\r\n");
+  printf("System Clock: %lu Hz\r\n", HAL_RCC_GetSysClockFreq());
   /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  trig();
-	      echo_time = echo();
-	      if( echo_time != 0){
-	          dist = (int)(17 * echo_time / 100);
-	          printf("Distance = %d(mm)\n", dist);
-	      }
-	      else printf("Out of Range!\n");
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
 ```
 
 ```c
-uint32_t echo(void) {
-    uint32_t start_tick, start_time, end_time;
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    uint32_t pulse_width = 0;
+    float distance_cm = 0.0f;
 
-    // ECHO HIGH 대기 (최대 10ms)
-    start_tick = HAL_GetTick();
-    while (HAL_GPIO_ReadPin(ECHO1_GPIO_Port, ECHO1_Pin) == GPIO_PIN_RESET) {
-        if ((HAL_GetTick() - start_tick) > 10) return 0;  // 10ms 초과 → 실패
+    /* Send trigger pulse */
+    HCSR04_Trigger();
+
+    /* Wait for measurement with timeout */
+    uint32_t tick_start = HAL_GetTick();
+    while (ic_measurement_done == 0)
+    {
+      if ((HAL_GetTick() - tick_start) > TIMEOUT_MS)
+      {
+        /* Timeout - no echo received */
+        HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_3);
+        ic_edge = 0;
+        break;
+      }
     }
-    start_time = __HAL_TIM_GET_COUNTER(&htim1);
 
-    // ECHO LOW 대기 (최대 30ms = HC-SR04 최대 측정 시간)
-    start_tick = HAL_GetTick();
-    while (HAL_GPIO_ReadPin(ECHO1_GPIO_Port, ECHO1_Pin) == GPIO_PIN_SET) {
-        if ((HAL_GetTick() - start_tick) > 30) return 0;  // 30ms 초과 → 범위 초과
+    if (ic_measurement_done)
+    {
+      /* Calculate pulse width using hardware overflow flag */
+      if (ic_overflow)
+      {
+        /* Timer overflowed between rising and falling edges */
+        pulse_width = (IC_PERIOD - ic_rising_tick) + ic_falling_tick;
+      }
+      else
+      {
+        /* No overflow */
+        pulse_width = ic_falling_tick - ic_rising_tick;
+      }
+
+      /* Convert to distance (58 us per cm at sea level) */
+      distance_cm = (float)pulse_width / SOUND_SPEED_FACTOR;
+
+      printf("Pulse: %lu us  Distance: %.1f cm\r\n", pulse_width, distance_cm);
+
+      ic_measurement_done = 0;
+      ic_overflow = 0;
     }
-    end_time = __HAL_TIM_GET_COUNTER(&htim1);
+    else
+    {
+      printf("Timeout - no object detected\r\n");
+    }
 
-    return end_time - start_time;
+    HAL_Delay(200); /* Wait 200ms between measurements */
+    /* USER CODE END WHILE */
+```
+
+```c
+/* USER CODE BEGIN 4 */
+
+/**
+  * @brief  Retarget printf to UART2
+  */
+int __io_putchar(int ch)
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
 }
+
+int __io_getchar(void)
+{
+  uint8_t ch;
+  HAL_UART_Receive(&huart2, &ch, 1, HAL_MAX_DELAY);
+  return ch;
+}
+
+/**
+  * @brief  Microsecond delay using DWT cycle counter
+  *         Uses Cortex-M3 DWT CYCCNT (independent of TIM3)
+  *         SystemCoreClock = 64 MHz → 64 cycles = 1 us
+  */
+static void delay_us(uint32_t us)
+{
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+  uint32_t start = DWT->CYCCNT;
+  uint32_t cycles = us * (SystemCoreClock / 1000000UL);
+  while ((DWT->CYCCNT - start) < cycles);
+}
+
+/**
+  * @brief  Send 10us trigger pulse to HC-SR04 and start input capture
+  */
+static void HCSR04_Trigger(void)
+{
+  /* Reset state */
+  ic_measurement_done = 0;
+  ic_edge = 0;
+  ic_overflow = 0;
+
+  /* Send 10 us HIGH pulse on TRIG pin */
+  HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_SET);
+  delay_us(TRIG_PULSE_US);
+  HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);
+
+  /* Start input capture on rising edge */
+  __HAL_TIM_SET_CAPTUREPOLARITY(&htim3, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_RISING);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+}
+
+/**
+  * @brief  HAL TIM IC Capture Callback
+  *         Called on each capture event (rising -> falling edge)
+  */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM3)
+  {
+    if (ic_edge == 0)
+    {
+      /* Rising edge captured - save timestamp, switch to falling edge */
+      ic_rising_tick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_3);
+      ic_edge = 1;
+      __HAL_TIM_SET_CAPTUREPOLARITY(&htim3, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_FALLING);
+    }
+    else
+    {
+      /* Falling edge captured - save timestamp, stop capture */
+      ic_falling_tick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_3);
+      HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_3);
+      ic_measurement_done = 1;
+    }
+  }
+}
+
+/**
+  * @brief  HAL TIM Period Elapsed Callback (overflow handler)
+  *         Used to detect timeout when no echo is received
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM3)
+  {
+    ic_overflow = 1;
+  }
+}
+
+/* USER CODE END 4 */
 ```
 
----
 
-## Node.js
 
-```
-	          printf("Distance = %d(mm)\n", dist);
-```
-
-```
-	          printf("Distance1 = %d(mm)\n", dist1);
-	          printf("Distance2 = %d(mm)\n", dist2);
-```
-
-```
-hcsr04-dashboard/
-├── server.js
-└── public/
-    └── index.html
-```
-
-```
-npm init -y
-npm install express socket.io
-npm install serialport 
-```
-
-```
-node server.js 3000 COM3
-```
-
-<img width="600" height="480" alt="shield-001" src="https://github.com/user-attachments/assets/4c7f5dc6-ffe6-4f62-bcb1-376dc55e13a9" />
-<br>
-<img width="600" height="480" alt="shield-002" src="https://github.com/user-attachments/assets/48183bb9-3a11-42a8-9ab9-c07975e4e6f8" />
-<br>
