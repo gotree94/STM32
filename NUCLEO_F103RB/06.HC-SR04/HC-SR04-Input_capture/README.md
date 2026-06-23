@@ -266,7 +266,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       printf("Pulse: %lu us  Distance: %.1f cm\r\n", pulse_width, distance_cm);
 ```
 
-1. 중간값 필터 (Median Filter, N=5)
+### 1. 중간값 필터 (Median Filter, N=5)
    * 필요 변수 — USER CODE BEGIN PV 영역에 추가:
 ```c
 /* Median filter */
@@ -294,7 +294,7 @@ static uint8_t dist_idx = 0;
       distance_cm = sorted[MEDIAN_WINDOW / 2];
 ```
 
-2. 글리치 제거 (Outlier Rejection)
+### 2. 글리치 제거 (Outlier Rejection)
    * 필요 변수 — USER CODE BEGIN PV 영역:
 ```c
 /* Glitch filter */
@@ -336,7 +336,7 @@ static uint8_t glitch_count = 0;
 
 >주의: 이 필터를 쓰려면 printf 아래에 if (glitch_count... ) { continue; } 블록이 필요하므로 printf를 감싸는 구조가 됩니다. 복잡하면 말씀 주세요 — 더 간단한 버전도 가능합니다.
 
-3. 이동 평균 (Moving Average, N=8)
+### 3. 이동 평균 (Moving Average, N=8)
    * 필요 변수 — USER CODE BEGIN PV 영역:
 ```c
 /* Moving average */
@@ -356,7 +356,8 @@ static uint8_t ma_filled = 0;
       for (int i = 0; i < count; i++) sum += ma_buffer[i];
       distance_cm = sum / (float)count;
 ```
-4. IIR 저역 통과 (Exponential Moving Average)
+
+### 4. IIR 저역 통과 (Exponential Moving Average)
    * 필요 변수 — USER CODE BEGIN PV 영역:
 ```c
 /* IIR EMA filter */
@@ -377,7 +378,7 @@ static uint8_t ema_first = 1;
       distance_cm = filtered_dist;
 ```
 
-* 요약
+### 요약
    * 필터	저장 변수	계산량	응답 지연	튀는 값 제거
    1. Median	N=5개 버퍼	중간	5회 지연	매우 우수
    2. Glitch	2개 변수	최소	없음	튀는 값만 제거
