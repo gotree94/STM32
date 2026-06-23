@@ -55,7 +55,6 @@
 static volatile uint32_t ic_rising_tick = 0;
 static volatile uint32_t ic_falling_tick = 0;
 static volatile uint8_t  ic_measurement_done = 0;
-static volatile uint8_t  ic_edge = 0;   /* 0=wait rising, 1=wait falling */
 static volatile uint8_t  ic_overflow = 0; /* timeout via update event */
 
 /* USER CODE END PV */
@@ -91,9 +90,9 @@ static void HCSR04_Trigger(void);
     {
       if ((HAL_GetTick() - tick_start) > TIMEOUT_MS)
       {
-        /* Timeout - no echo received */
+        /* Timeout - no echo received, stop both channels */
         HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_3);
-        ic_edge = 0;
+        HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_4);
         break;
       }
     }
@@ -170,7 +169,6 @@ static void HCSR04_Trigger(void)
 {
   /* Reset state */
   ic_measurement_done = 0;
-  ic_edge = 0;
   ic_overflow = 0;
 
   /* Send 10 us HIGH pulse on TRIG pin */
@@ -178,9 +176,14 @@ static void HCSR04_Trigger(void)
   delay_us(TRIG_PULSE_US);
   HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);
 
-  /* Start input capture on rising edge */
-  __HAL_TIM_SET_CAPTUREPOLARITY(&htim3, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_RISING);
+  /* Reset timer counter for consistent baseline */
+  __HAL_TIM_SET_COUNTER(&htim3, 0);
+
+  /* Start input capture on both edges simultaneously:
+   *   CH3 = RISING edge  (direct TI3)
+   *   CH4 = FALLING edge (indirect TI3) - no polarity toggle needed */
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
 }
 
 /**
@@ -191,18 +194,17 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM3)
   {
-    if (ic_edge == 0)
+    if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
     {
-      /* Rising edge captured - save timestamp, switch to falling edge */
+      /* CH3: Rising edge on TI3 (direct) - save timestamp, keep both channels running */
       ic_rising_tick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_3);
-      ic_edge = 1;
-      __HAL_TIM_SET_CAPTUREPOLARITY(&htim3, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_FALLING);
     }
-    else
+    else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
     {
-      /* Falling edge captured - save timestamp, stop capture */
-      ic_falling_tick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_3);
+      /* CH4: Falling edge on TI3 (indirect) - capture complete, stop both channels */
+      ic_falling_tick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_4);
       HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_3);
+      HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_4);
       ic_measurement_done = 1;
     }
   }
