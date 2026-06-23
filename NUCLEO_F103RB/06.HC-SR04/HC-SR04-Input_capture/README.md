@@ -294,7 +294,7 @@ static uint8_t dist_idx = 0;
       distance_cm = sorted[MEDIAN_WINDOW / 2];
 ```
 
-![](img/010.png)
+![](010.png)
 
 ### 2. 글리치 제거 (Outlier Rejection)
    * 필요 변수 — USER CODE BEGIN PV 영역:
