@@ -1,7 +1,15 @@
 # HC-SR04 Input Capture
 
-![](Fig.NUCLEO-F103RB.png)
+![](img/001.png) <br>
+![](img/002.png) <br>
+![](img/003.png) <br>
+![](img/004.png) <br>
+![](img/005.png) <br>
+![](img/006.png) <br>
+![](img/007.png) <br>
 
+
+![](Fig.NUCLEO-F103RB.png)
 
 
 ```c
