@@ -52,10 +52,15 @@ HSI 8MHz → PLL x16 → SYSCLK 64MHz
 | Counter Mode | UP | — |
 | Period (ARR) | `65535` | max 65.535ms (1 tick = 1µs) |
 | AutoReloadPreload | Disable | — |
-| ClockDivision | No Division | — |
+| ClockDivision | Div1 | — |
 | CH3 | Input Capture direct TI3, RISING | 에코 시작 |
 | CH4 | Input Capture indirect TI3, FALLING | 에코 끝 |
-| Update IT | Enabled | 오버플로우 타임아웃 감지 |
+| Update IT | `__HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE)` (CODE) | 오버플로우 타임아웃 감지, `USER CODE`에 수동 추가 |
+
+> ⚠ **NVIC 활성화도 별도 필요**: CubeMX **NVIC Settings** 탭에서 `TIM3_IRQn=true`로 설정해야 Update IT가 실제로 CPU에 전달됨.
+> `Update IT`는 **어떤 이벤트**를 인터럽트로 받을지 선택하는 TIM 내부 마스크이고,
+> `NVIC TIM3_IRQn`은 **인터럽트 자체를 CPU로 라우팅**하는 게이트 역할.
+> CubeMX에서는 NVIC Settings 탭에서만 설정 가능하며, `USER CODE`에서는 불가능.
 
 ---
 
