@@ -266,7 +266,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       printf("Pulse: %lu us  Distance: %.1f cm\r\n", pulse_width, distance_cm);
 ```
 
-### 1. 중간값 필터 (Median Filter, N=5)
+### 1. 중간값 필터 (Median Filter, N=5) : 결과는 가장 좋음
    * 필요 변수 — USER CODE BEGIN PV 영역에 추가:
 ```c
 /* Median filter */
