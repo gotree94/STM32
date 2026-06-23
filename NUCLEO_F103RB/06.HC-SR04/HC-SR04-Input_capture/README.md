@@ -344,8 +344,10 @@ static uint8_t glitch_count = 0;
 static float ma_buffer[MA_WINDOW] = {0};
 static uint8_t ma_idx = 0;
 static uint8_t ma_filled = 0;
-삽입할 코드:
+```
 
+* 삽입할 코드:
+```c
       /* Moving average */
       ma_buffer[ma_idx] = distance_cm;
       ma_idx = (ma_idx + 1) % MA_WINDOW;
@@ -366,7 +368,8 @@ static float filtered_dist = 0.0f;
 static uint8_t ema_first = 1;
 ```
 
-삽입할 코드:
+* 삽입할 코드:
+
 ```c
       /* IIR Exponential Moving Average */
       if (ema_first) {
