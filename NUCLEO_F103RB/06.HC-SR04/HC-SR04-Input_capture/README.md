@@ -230,11 +230,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 * 가까운 거리에서는 잘 측정이 되는데, 먼 거리로 가면 값이 반으로 나오거나 하는 문제가 발생함.
 * TX 와 RX 사이에 슬릿으로 가리면 문제가 개선됨.
 
-![](img/test001.png)
+<img src="img/test001.png" width=50%"> <img src="img/test002.png" width=50%">
 
-![](img/test002.png)
 
-![](img/010.png)
 
 
 ---
@@ -303,7 +301,7 @@ static uint8_t dist_idx = 0;
       distance_cm = sorted[MEDIAN_WINDOW / 2];
 ```
 
-![](010.png)
+![](img/010.png)
 
 ### 2. 글리치 제거 (Outlier Rejection)
    * 필요 변수 — USER CODE BEGIN PV 영역:
