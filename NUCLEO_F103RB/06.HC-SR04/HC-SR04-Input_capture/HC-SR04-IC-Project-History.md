@@ -52,7 +52,7 @@ HSI 8MHz → PLL x16 → SYSCLK 64MHz
 | Counter Mode | UP | — |
 | Period (ARR) | `65535` | max 65.535ms (1 tick = 1µs) |
 | AutoReloadPreload | Disable | — |
-| ClockDivision | Div1 | — |
+| ClockDivision | No Division | — |
 | CH3 | Input Capture direct TI3, RISING | 에코 시작 |
 | CH4 | Input Capture indirect TI3, FALLING | 에코 끝 |
 | Update IT | `__HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE)` (CODE) | 오버플로우 타임아웃 감지, `USER CODE`에 수동 추가 |
