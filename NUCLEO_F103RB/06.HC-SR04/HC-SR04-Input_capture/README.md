@@ -12,6 +12,35 @@
 ![](Fig.NUCLEO-F103RB.png)
 
 
+---
+
+## main.h
+
+```c
+/* USER CODE BEGIN Private defines */
+
+/* HC-SR04 pin definitions */
+#define TRIG_PIN    TRIG1_Pin
+#define TRIG_PORT   TRIG1_GPIO_Port
+#define ECHO_PIN    ECHO1_Pin
+#define ECHO_PORT   ECHO1_GPIO_Port
+
+/* HC-SR04 timing constants */
+#define TRIG_PULSE_US       10      /* 10 us trigger pulse */
+#define TIMEOUT_MS          100     /* 100 ms measurement timeout */
+#define SOUND_SPEED_FACTOR  58      /* distance (cm) = pulse_width(us) / 58 */
+
+/* TIM3 input capture */
+#define IC_PRESCALER        63      /* 64MHz / 64 = 1MHz -> 1 tick = 1 us */
+#define IC_PERIOD           65535   /* max 65.535 ms overflow */
+
+/* USER CODE END Private defines */
+```
+
+---
+
+## main.c
+
 ```c
 /* USER CODE BEGIN Includes */
 #include <string.h>
