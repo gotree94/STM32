@@ -1,6 +1,6 @@
 # 7 Color Flash LED (KY-034)
 
-<img src="033.png">
+<img src="033.png"> <img src="7color.png">
 
 * 7색 플래시 LED는 약 2~3초 주기로 7가지 색상이 자동 전환되는 모듈입니다. 
 * 색상 제어 로직이 LED 내부에 내장되어 있어, <br>
