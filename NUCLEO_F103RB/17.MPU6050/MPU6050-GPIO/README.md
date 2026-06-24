@@ -5,18 +5,6 @@
    * I2C_SCL → PC8 (GPIOC, Pin 8)
 
 ---
-# Core/Inc/main.h 
-
-
-```c
-/* USER CODE BEGIN Private defines */
-/* Software I2C pin definitions - Bit-bang mode */
-#define I2C_SDA_PIN  GPIO_PIN_6
-#define I2C_SDA_PORT GPIOC
-#define I2C_SCL_PIN  GPIO_PIN_8
-#define I2C_SCL_PORT GPIOC
-/* USER CODE END Private defines */
-```
 
 
 ---
