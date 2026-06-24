@@ -3,6 +3,10 @@
 2D SLAM 프로젝트를 확장하여 초음파 센서를 **90° 틀어서 수직(Elevation) 스캔**이 가능하도록 하고,
 3차원 점군(Point Cloud)을 생성하여 3D SLAM을 수행합니다.
 
+![](slam3d-cy.gif)
+
+![](slam3d-sq.gif)
+
 ---
 
 ## 1. 개요
