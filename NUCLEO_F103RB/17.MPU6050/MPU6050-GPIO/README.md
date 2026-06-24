@@ -66,11 +66,11 @@ static void MPU6050_ReadData(void);
  * I2C_SDA: PC6, I2C_SCL: PC8
  ******************************************************************************/
 
-#define I2C_SDA_LOW()   HAL_GPIO_WritePin(I2C_SDA_PORT, I2C_SDA_PIN, GPIO_PIN_RESET)
-#define I2C_SDA_HIGH()  HAL_GPIO_WritePin(I2C_SDA_PORT, I2C_SDA_PIN, GPIO_PIN_SET)
-#define I2C_SCL_LOW()   HAL_GPIO_WritePin(I2C_SCL_PORT, I2C_SCL_PIN, GPIO_PIN_RESET)
-#define I2C_SCL_HIGH()  HAL_GPIO_WritePin(I2C_SCL_PORT, I2C_SCL_PIN, GPIO_PIN_SET)
-#define I2C_SDA_READ()  HAL_GPIO_ReadPin(I2C_SDA_PORT, I2C_SDA_PIN)
+#define I2C_SDA_LOW()   HAL_GPIO_WritePin(I2C_SDA_GPIO_Port, I2C_SDA_Pin, GPIO_PIN_RESET)
+#define I2C_SDA_HIGH()  HAL_GPIO_WritePin(I2C_SDA_GPIO_Port, I2C_SDA_Pin, GPIO_PIN_SET)
+#define I2C_SCL_LOW()   HAL_GPIO_WritePin(I2C_SCL_GPIO_Port, I2C_SCL_Pin, GPIO_PIN_RESET)
+#define I2C_SCL_HIGH()  HAL_GPIO_WritePin(I2C_SCL_GPIO_Port, I2C_SCL_Pin, GPIO_PIN_SET)
+#define I2C_SDA_READ()  HAL_GPIO_ReadPin(I2C_SDA_GPIO_Port, I2C_SDA_Pin)
 
 static void I2C_Delay(void)
 {
@@ -83,11 +83,11 @@ static void I2C_InitPins(void)
 
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
-  GPIO_InitStruct.Pin = I2C_SCL_PIN | I2C_SDA_PIN;
+  GPIO_InitStruct.Pin = I2C_SCL_Pin | I2C_SDA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(I2C_SCL_PORT, &GPIO_InitStruct);
+  HAL_GPIO_Init(I2C_SCL_GPIO_Port, &GPIO_InitStruct);
 
   I2C_SDA_HIGH();
   I2C_SCL_HIGH();
