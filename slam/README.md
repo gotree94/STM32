@@ -4,6 +4,13 @@
 150x150cm 공간을 주행하며 수집한 센서 데이터를 시뮬레이션하고,
 이를 Occupancy Grid Mapping으로 시각화하는 도구입니다.
 
+
+![](slam-custom.gif)
+
+![](slam-cy.gif)
+
+![](slam-sq.gif)
+
 ---
 
 ## 1. 개발 컨셉
