@@ -375,7 +375,13 @@ static void MPU6050_ReadData(void)
 ```
 
 ```c
+  /* USER CODE BEGIN 1 */
+  uint8_t ret;
+  /* USER CODE END 1 */
+```
 
+```c
+  /* USER CODE BEGIN 2 */
   I2C_InitPins();
   HAL_Delay(500);
 
@@ -393,7 +399,6 @@ static void MPU6050_ReadData(void)
 
   HAL_Delay(200);
   /* USER CODE END 2 */
-
 ```
 
 ```c
