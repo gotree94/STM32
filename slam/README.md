@@ -5,11 +5,9 @@
 이를 Occupancy Grid Mapping으로 시각화하는 도구입니다.
 
 
-![](slam-custom.gif)
+![](slam-cy.gif) ![](slam-sq.gif)
 
-![](slam-cy.gif)
-
-![](slam-sq.gif)
+![](001.png)
 
 ---
 
