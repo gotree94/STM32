@@ -1,9 +1,8 @@
 # MPU6050 - GPIO I2C
 
-GPIO 핀 설정
-
-I2C_SDA → PC6 (GPIOC, Pin 6)
-I2C_SCL → PC8 (GPIOC, Pin 8)
+* GPIO 핀 설정
+   * I2C_SDA → PC6 (GPIOC, Pin 6)
+   * I2C_SCL → PC8 (GPIOC, Pin 8)
 
 ---
 # Core/Inc/main.h 
