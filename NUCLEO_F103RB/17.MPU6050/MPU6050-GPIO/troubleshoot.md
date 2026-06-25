@@ -1,5 +1,7 @@
 # Troubleshooting: MPU6050 모듈 동작 불량
 
+![](001.png) ![](002.png)
+
 ## 1. 증상
 
 MPU6050(GY-521) 모듈을 STM32F411(NUCLEO-F411RE)에 연결했을 때 모듈별로 다른 증상 발생:
