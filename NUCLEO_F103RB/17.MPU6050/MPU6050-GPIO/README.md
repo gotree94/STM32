@@ -59,6 +59,7 @@ static uint8_t I2C_IsDeviceReady(uint8_t addr);
 static uint8_t I2C_Mem_Write(uint8_t dev_addr, uint8_t mem_addr, uint8_t *data, uint16_t len);
 static uint8_t I2C_Mem_Read(uint8_t dev_addr, uint8_t mem_addr, uint8_t *data, uint16_t len);
 static void I2C_Scan(void);
+static void I2C_ResetBus(void);
 static uint8_t MPU6050_Init(void);
 static void MPU6050_CalibrateGyro(void);
 static void MPU6050_ReadData(void);
@@ -81,7 +82,7 @@ static void MPU6050_ReadData(void);
 
 static void I2C_Delay(void)
 {
-  for (volatile uint32_t i = 0; i < 100; i++);
+  for (volatile uint32_t i = 0; i < 250; i++);
 }
 
 static void I2C_InitPins(void)
@@ -90,14 +91,33 @@ static void I2C_InitPins(void)
 
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
+  I2C_SDA_HIGH();
+  I2C_SCL_HIGH();
+
   GPIO_InitStruct.Pin = I2C_SCL_Pin | I2C_SDA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(I2C_SCL_GPIO_Port, &GPIO_InitStruct);
+}
 
-  I2C_SDA_HIGH();
+static void I2C_ResetBus(void)
+{
+  I2C_InitPins();
   I2C_SCL_HIGH();
+  I2C_SDA_HIGH();
+  I2C_Delay();
+  for (int i = 0; i < 9; i++)
+  {
+    I2C_SCL_HIGH();
+    I2C_Delay();
+    I2C_SCL_LOW();
+    I2C_Delay();
+  }
+  I2C_Start();
+  I2C_Delay();
+  I2C_Stop();
+  I2C_Delay();
 }
 
 static void I2C_Start(void)
@@ -150,6 +170,7 @@ static uint8_t I2C_ReadByte(uint8_t ack)
 {
   uint8_t data = 0;
   I2C_SDA_HIGH();
+  I2C_Delay();
   for (uint32_t i = 0; i < 8; i++)
   {
     data <<= 1;
@@ -267,30 +288,48 @@ static uint8_t MPU6050_Init(void)
   uint8_t whoami;
   uint8_t pwr;
 
+  pwr = 0x80;
+  I2C_Mem_Write(MPU6050_ADDR, MPU6050_PWR_MGMT_1, &pwr, 1);
   HAL_Delay(100);
 
-  if (I2C_Mem_Read(MPU6050_ADDR, MPU6050_WHO_AM_I, &whoami, 1))
+  I2C_ResetBus();
+
+  for (uint8_t retry = 0; retry < 3; retry++)
   {
-    sprintf(uart_tx_buf, "WHO_AM_I read failed!\r\n");
-    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
-    return 1;
+    if (I2C_Mem_Read(MPU6050_ADDR, MPU6050_WHO_AM_I, &whoami, 1) == 0)
+      break;
+    I2C_ResetBus();
+    HAL_Delay(50);
+    if (retry == 2)
+    {
+      sprintf(uart_tx_buf, "WHO_AM_I read failed!\r\n");
+      HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+      return 1;
+    }
   }
 
   sprintf(uart_tx_buf, "WHO_AM_I = 0x%02X\r\n", whoami);
   HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
 
-  if (whoami != 0x68 && whoami != 0x98)
+  if (whoami != 0x68 && whoami != 0x98 && whoami != 0x70)
   {
     sprintf(uart_tx_buf, "Unknown device! (WHO_AM_I = 0x%02X)\r\n", whoami);
     HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
     return 1;
   }
 
-  pwr = 0x00;
+  if (whoami == 0x70)
+  {
+    sprintf(uart_tx_buf, "Detected MPU6500 (compatible mode)\r\n");
+    HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+  }
+
+  pwr = 0x01;
   if (I2C_Mem_Write(MPU6050_ADDR, MPU6050_PWR_MGMT_1, &pwr, 1))
   {
     sprintf(uart_tx_buf, "PWR_MGMT_1 write failed!\r\n");
     HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+    I2C_ResetBus();
     return 1;
   }
 
@@ -312,7 +351,14 @@ static void MPU6050_CalibrateGyro(void)
 
   for (i = 0; i < GYRO_CALIB_SAMPLES; i++)
   {
-    if (I2C_Mem_Read(MPU6050_ADDR, MPU6050_GYRO_XOUT_H, mpu6050_rx_buf, 6) == 0)
+    uint8_t retry = 0;
+    while (I2C_Mem_Read(MPU6050_ADDR, MPU6050_GYRO_XOUT_H, mpu6050_rx_buf, 6) && retry < 3)
+    {
+      I2C_ResetBus();
+      HAL_Delay(5);
+      retry++;
+    }
+    if (retry < 3)
     {
       sum_x += (int16_t)((mpu6050_rx_buf[0] << 8) | mpu6050_rx_buf[1]);
       sum_y += (int16_t)((mpu6050_rx_buf[2] << 8) | mpu6050_rx_buf[3]);
@@ -342,6 +388,7 @@ static void MPU6050_ReadData(void)
   {
     sprintf(uart_tx_buf, "I2C read failed!\r\n");
     HAL_UART_Transmit(&huart2, (uint8_t*)uart_tx_buf, strlen(uart_tx_buf), 100);
+    I2C_ResetBus();
     return;
   }
 
@@ -409,6 +456,10 @@ static void MPU6050_ReadData(void)
     MPU6050_ReadData();
     HAL_Delay(500);
     /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
 ```
 
 ---
