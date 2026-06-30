@@ -109,7 +109,7 @@ cd ~/stm32_project
 doxygen -g Doxyfile
 ```
 
-`Doxyfile`이 생성되며 약 280개 옵션이 들어있음. 수업에서는 다음 핵심 항목만 수정하도록 안내.
+`Doxyfile`이 생성되며 약 280개 옵션이 들어있음. 수업에서는 다음 핵심 항목만 수정.
 
 ### 3-2. STM32 HAL 프로젝트용 핵심 설정값
 
@@ -161,7 +161,7 @@ WARN_IF_UNDOCUMENTED     = YES
 WARN_LOGFILE             = ./docs/warnings.log
 ```
 
-> **교육 포인트**: `WARN_IF_UNDOCUMENTED = YES` + `WARN_LOGFILE`을 켜두면, 학생이 주석을 빠뜨린 함수 목록이 로그 파일에 남습니다. 이 로그 자체를 과제 체크리스트로 활용할 수 있습니다.
+> **포인트**: `WARN_IF_UNDOCUMENTED = YES` + `WARN_LOGFILE`을 켜두면, 학생이 주석을 빠뜨린 함수 목록이 로그 파일에 남습니다. 이 로그 자체를 과제 체크리스트로 활용할 수 있습니다.
 
 ### 3-3. 문서 생성 실행
 
