@@ -63,8 +63,10 @@ do_something_heavy();
 uint32_t end_cycle = DWT->CYCCNT;
 uint32_t total_cycles = end_cycle - start_cycle;
 
+// 64MHz 기준 마이크로초(us) 변환
+float microseconds = (float)total_cycles / 64.0f; 
 // 72MHz 기준 마이크로초(us) 변환
-float microseconds = (float)total_cycles / 72.0f; 
+//float microseconds = (float)total_cycles / 72.0f; 
 ```
 
 ② 일반적인 타임아웃 및 스케줄링 (GetTick 활용)
