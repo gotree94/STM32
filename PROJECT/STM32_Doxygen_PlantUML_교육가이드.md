@@ -234,6 +234,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 ---
 
 ## 6. PlantUML 설치 (https://plantuml.com/ko/)
+* https://youtu.be/e6HMqKnJcdg
 
 ### 6-1. 사전 요구사항 — Java
 
