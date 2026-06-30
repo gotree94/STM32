@@ -247,7 +247,7 @@ Windows는 https://www.java.com 에서 JRE 설치.
 
 ### 6-2. PlantUML 설치 방법 (3가지 중 택1)
 
-**방법 A — VS Code 확장 (수업 진행 시 가장 추천)**
+**방법 A — VS Code 확장 (가장 추천)**
 
 1. VS Code Extensions에서 **"PlantUML"** (jebbs 제작) 검색 후 설치
 2. Graphviz가 이미 설치되어 있으면 (2장에서 설치함) 별도 설정 불필요
