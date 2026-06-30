@@ -1,7 +1,7 @@
 # STM32F103 NUCLEO 펌웨어 교육 — Doxygen+Graphviz / PlantUML 도입 가이드
 
 > 대상: STM32F103 NUCLEO 보드 기반 HAL 펌웨어 교육 <br>
-> 목적:
+> 목적: <br>
 >      ① Doxygen + Graphviz로 정적 API 문서 및 호출 그래프 생성 <br>
 >      ② PlantUML로 인터럽트/통신 시퀀스 흐름 시각화 <br>
 > 형식: 검토용 초안 (실제 수업 적용 전 설치 검증 목적) <br>
