@@ -1,338 +1,62 @@
-# 5조 pwm_control_with_TXRX_dma_00 프로젝트 분석 리포트
+# DWT(Data Watchpoint and Trace) Cycle Counter vs GetTick(HAL_GetTick)
 
-## 1. 프로젝트 개요
+> STM32F103(Cortex-M3 코어 기반)에서 DWT(Data Watchpoint and Trace) Cycle Counter와 <br>
+> GetTick(HAL_GetTick) 함수는 모두 시간이나 시스템의 지연(Delay)을 측정할 때 사용되지만, <br>
+> 그 작동 원리와 정밀도(Resolution)에서 엄청난 차이가 있습니다.
 
-| 항목 | 내용 |
-|---|---|
-| **MCU** | STM32F103RBT6 (NUCLEO-F103RB, LQFP64) |
-| **Clock** | 64 MHz (HSI 8MHz ÷2 → PLL x16) |
-| **IDE** | STM32CubeIDE v6.16.1, HAL FW_F1 V1.8.7 |
-| **.ioc** | `pwm_control_with_TXRX_dma_00.ioc` |
-| **주제** | **PWM 모터 제어 + UART DMA 통신 플랫폼** — PC(상위)에서 UART로 패킷 전송 → 초음파 거리 측정 + 모터 PWM + 서보 + 레이저 제어 |
+* 두 방식의 핵심 차이점과 그 의미를 정리해 드립니다.
 
-### 프로젝트 구조
+## 1. DWT Cycle Counter vs GetTick 비교항목DWT Cycle Counter (DWT->CYCCNT)HAL_GetTick ()기준 단위CPU 클럭 주기 (Cycle)밀리초 (ms, $10^{-3}$초)하드웨어 출처Cortex-M3 내장 디버그/추적 장치 (DWT)SysTick 타이머 인터럽트정밀도 (해상도)극도로 높음 (72MHz 기준 약 13.8ns)낮음 (기본 1ms)오버헤드없음 (하드웨어 레지스터 직접 읽기)매우 적으나 인터럽트 의존적카운터 오버플로우72MHz 기준 약 59.6초마다 발생기본 32비트 변수 기준 약 49.7일주요 용도함수 실행 시간 측정, 마이크로초($\mu s$) 단위 딜레이시스템 업타임 확인, 밀리초 단위 스케줄링
 
-```
-pwm_control_with_TXRX_dma_00/
-├── pwm_control_with_TXRX_dma_00.ioc
-├── backup_main.c              ← 이전 버전 백업
-├── Core/
-│   ├── Inc/
-│   │   ├── main.h
-│   │   ├── stm32f1xx_hal_conf.h
-│   │   └── stm32f1xx_it.h
-│   └── Src/
-│       ├── main.c              (808줄 — 모든 사용자 코드 포함)
-│       ├── stm32f1xx_it.c
-│       ├── stm32f1xx_hal_msp.c
-│       ├── syscalls.c, sysmem.c, system_stm32f1xx.c
-```
+## 2. 세부적인 작동 원리와 차이의 의미
 
-> **특이사항**: 별도의 모듈 파일(motor.c, servo.c 등) 없이 **모든 코드가 main.c 단일 파일**에 집중.
+⚙️ DWT Cycle Counter<br>
+DWT는 ARM Cortex-M3 코어 내부에 내장된 디버그 모듈의 일부입니다. 
+DWT->CYCCNT 레지스터는 CPU 클럭이 튈 때마다 1씩 증가합니다.
+   * 시간적 의미: STM32F103을 최대 클럭인 72MHz로 구동할 경우, 1 사이클은 약 13.88나노초(ns)입니다. 즉, 단 몇 줄의 어셈블리 명령어가 실행되는 시간까지 정확하게 측정할 수 있습니다.
+   * 독립성: 인터럽트를 타지 않고 하드웨어적으로 알아서 값이 올라가므로, 다른 인터럽트가 걸려도 정확한 "클럭 소모량"을 측정합니다.
 
----
+⏱️ HAL_GetTick()일반적으로 HAL_GetTick()은 SysTick 타이머 인터럽트를 기반으로 작동합니다. SysTick 타이머가 1ms마다 인터럽트를 발생시키면, ISR(인터럽트 서비스 루틴)에서 글로벌 변수(uwTick)를 1씩 증가시키는 방식입니다.
+   * 시간적 의미: 1ms($1,000,000\text{ ns}$) 단위로만 값이 변합니다. 따라서 1ms 미만의 정밀도가 필요한 작업(예: 센서 데이터 통신 타이밍, 미세한 코드 최적화 성능 측정)에는 전혀 사용할 수 없습니다.
+   * 인터럽트 의존성: 만약 HAL_GetTick()보다 우선순위가 높은 인터럽트가 오랫동안 실행되거나, 코드 내에서 인터럽트를 완전히 비활성화(__disable_irq())하면 SysTick 카운터가 누락되어 실제 시간보다 느리게 가는 현상이 발생할 수 있습니다.
 
-## 2. 사용 주변장치 및 설정
+## 3. 코드 관점에서의 의미와 활용 예시① 성능 분석 및 프로파일링 (DWT 활용)어떤 알고리즘이나 함수의 순수 실행 시간을 측정하고 싶을 때는 DWT가 압도적으로 유리합니다.
 
-### 타이머
+```C
+// DWT 활성화 (최초 1회 필요)
+CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-| 타이머 | Mode | Prescaler | Period | 실제 주파수 | 용도 |
-|--------|------|-----------|--------|------------|------|
-| TIM2 | Input Capture (CH1~CH4) | 64-1 | 65535 | 1 MHz (1μs) | 초음파 ECHO 입력 캡처 |
-| TIM3 | PWM (CH1~CH4) | 64-1 | 1000-1 | 1 kHz | 좌/우 모터 PWM |
-| TIM4 | PWM (CH1, CH2) | 1280-1 | 1000-1 | 50 Hz | 서보모터 2축 |
+// 측정 시작
+uint32_t start_cycle = DWT->CYCCNT;
 
-#### TIM2 — 초음파 입력 캡처 (핵심 기술)
+// [측정 대상 코드]
+do_something_heavy();
 
-| 채널 | 극성 | 선택 | 연결 핀 | 역할 |
-|------|------|------|---------|------|
-| CH1 | Rising | Direct TI | PA0 | Sensor#1 ECHO 시작 |
-| CH2 | Falling | Indirect TI | PA0 (CH1과 동일) | Sensor#1 ECHO 종료 |
-| CH3 | Rising | Direct TI | PB10 | Sensor#2 ECHO 시작 |
-| CH4 | Falling | Indirect TI | PB10 (CH3과 동일) | Sensor#2 ECHO 종료 |
+// 측정 종료
+uint32_t end_cycle = DWT->CYCCNT;
+uint32_t total_cycles = end_cycle - start_cycle;
 
-- **리맵**: `__HAL_AFIO_REMAP_TIM2_PARTIAL_2()` → CH1/CH2=PA0, CH3/CH4=PB10
-- `echo_time[0] = CCR2 - CCR1` = Sensor#1 펄스폭 (μs)
-- `echo_time[1] = CCR4 - CCR3` = Sensor#2 펄스폭 (μs)
-
-#### TIM3 — 모터 PWM (좌/우 2채널 모터)
-
-| 채널 | 핀 | 용도 |
-|------|-----|------|
-| CH1 | PA6 | Left Motor 정방향 |
-| CH2 | PA7 | Left Motor 역방향 |
-| CH3 | PB0 | Right Motor 정방향 |
-| CH4 | PB1 | Right Motor 역방향 |
-
-- 1kHz PWM, 듀티 0~999
-- `toggle = (parsing_key % 10) >= 5`로 정/역방향 선택
-
-#### TIM4 — 서보 PWM
-
-| 채널 | 핀 | 용도 |
-|------|-----|------|
-| CH1 | PB6 | Servo#1 |
-| CH2 | PB7 | Servo#2 |
-
-- 50Hz, 펄스 0~999 (0.5ms~2.5ms, 일반 서보 범위)
-
-### USART2 — DMA 통신
-
-| 항목 | 설정 |
-|------|------|
-| Baud | 115200 |
-| Format | 8N1 |
-| RX DMA | DMA1 CH6, Circular, Very High Priority |
-| TX DMA | DMA1 CH7, Normal, Low Priority |
-| 인터럽트 | USART2 전역 IRQ 활성 |
-
-### GPIO
-
-| 핀 | 방향 | 라벨 | 용도 |
-|----|------|------|------|
-| PA0 | TIM2_CH1 | — | 초음파 ECHO #1 (IC) |
-| PA1 | Output | SR04_TRIG_0 | 초음파 TRIG (센서 공용) |
-| PA2 | USART2_TX | — | UART TX (DMA) |
-| PA3 | USART2_RX | — | UART RX (DMA) |
-| PA6~7 | TIM3_CH1~2 | — | 좌측 모터 PWM |
-| PB0~1 | TIM3_CH3~4 | — | 우측 모터 PWM |
-| PB2 | Output | LASER_PIN | 레이저 포인터 |
-| PB6~7 | TIM4_CH1~2 | — | 서보 PWM |
-| PB10 | TIM2_CH3 | — | 초음파 ECHO #2 (IC) |
-
----
-
-## 3. 전체 시스템 구조 (main.c 단일 파일)
-
-### 3.1 주요 전역 변수
-
-```c
-volatile uint8_t tx_write_ready = 1;   // DMA TX 완료 플래그
-uint16_t echo_time[2];                  // 초음파 측정값 (μs)
-uint16_t loop_cnt;                      // 루프 카운터
-uint8_t tx_buffer[100];                 // TX DMA 버퍼
-uint8_t rx_buffer[240];                 // RX DMA 버퍼 (Circular)
-uint8_t echo_buffer[240];              // RX 에코 버퍼
-uint16_t bookmark[10];                  // 패킷 파싱 북마크
-uint16_t servo_buffer__[2];            // 서보 현재값
-uint16_t motor_buffer[4];              // 모터 듀티값
+// 72MHz 기준 마이크로초(us) 변환
+float microseconds = (float)total_cycles / 72.0f; 
 ```
 
-### 3.2 초기화 순서
+② 일반적인 타임아웃 및 스케줄링 (GetTick 활용)
 
-1. HAL_Init() → SystemClock_Config()
-2. MX_GPIO_Init() → MX_DMA_Init() → MX_USART2_UART_Init()
-3. MX_TIM4_Init() → MX_TIM2_Init() → MX_TIM3_Init()
-4. `HAL_UART_Receive_DMA(&huart2, rx_buffer, RX_BUF_LEN)` — Circular RX 시작
-5. TIM2 IC 시작 (CH1~CH4) — 초음파 캡처 준비
-6. TIM3 PWM 시작 (CH1~CH4) — 모터 출력
-7. TIM4 PWM 시작 (CH1~CH2) — 서보 출력
+정밀도가 낮아도 상관없고 오랫동안 유지되는 타이밍(예: 1초마다 LED 플래싱, 500ms 통신 타임아웃 체크)에는 오버플로우 걱정이 없는 GetTick이 적합합니다.
 
-### 3.3 메인 루프 — 상세 흐름 (10Hz 고정 주기)
+```C
+uint32_t last_time = HAL_GetTick();
 
-```
-while (1):
-  │
-  ├─ [0] 시간 기준 리셋
-  │   └─ __disable_irq(); uwTick = 0; SysTick->VAL = 0; __enable_irq();
-  │   └─ loop_cnt >= 10000 → loop_cnt &= 7
-  │
-  ├─ [1] TIM2 CCR 레지스터 초기화
-  │   └─ CCR1~CCR4 = 0
-  │
-  ├─ [2] 초음파 거리 측정 (매 루프 실행)
-  │   ├─ TRIG 핀 → HIGH, TIM2 CNT=0
-  │   ├─ while (CNT < 10);  // 10μs 대기
-  │   ├─ CNT -= 10 보정
-  │   ├─ TRIG 핀 → LOW
-  │   ├─ while (CCR1*CCR2*CCR3*CCR4 == 0):
-  │   │   └─ if (CNT > 25000) → timeout 에러 TX → goto PASS_SONIC
-  │   ├─ echo_time[0] = CCR2 - CCR1  // Sensor #1
-  │   ├─ echo_time[1] = CCR4 - CCR3  // Sensor #2
-  │   ├─ if (240 ≤ echo_time[0] ≤ 23000):
-  │   │   └─ TX: "sensor_0 ==> %u mm"  (17 * t / 100)
-  │   └─ else: TX: "sensor_0_not_responsed"
-  │   (Sensor #2 동일)
-  │
-  ├─ [3] UART RX 상태 출력
-  │   ├─ rx_writing_position = RX_BUF_LEN - __HAL_DMA_GET_COUNTER
-  │   ├─ TX: writing/reading position 정보
-  │   └─ rx_echo_len = 수신 데이터 길이 계산
-  │
-  ├─ [4] 패킷 파싱 (rx_echo_len ≥ RX_PACKET_LEN(47)일 때)
-  │   ├─ SOL('{') / EOL('}') 검색 → bookmark[]
-  │   ├─ 완전한 패킷 검증 (eol-sol == 45)
-  │   ├─ 5개 float 값 추출 ("xxx.xxx" 형식)
-  │   │   └─ value_[0~4] 저장
-  │   └─ bookmark/arm_tick 초기화
-  │
-  ├─ [5] 파싱된 값 TX 에코
-  │   └─ TX: "at %u --> %f"
-  │
-  ├─ [6] 서보 제어
-  │   ├─ goal = 25 + 0.095f * value_[3+i]
-  │   ├─ delta 보간 (max 2/cycle) → 저역 통과 효과
-  │   └─ TIM4->CCR1 = servo_buffer__[0], CCR2 = servo_buffer__[1]
-  │
-  ├─ [7] 모터 + 레이저 제어
-  │   ├─ parsing_key = (uint32_t)value_[2]
-  │   ├─ [i=0~1] 좌/우 모터:
-  │   │   ├─ power = value_[i]
-  │   │   ├─ toggle = (parsing_key % 10 >= 5)
-  │   │   ├─ *(CCR[2*i + toggle])     = power
-  │   │   └─ *(CCR[2*i + toggle^1])   = 0
-  │   └─ LASER = (delta==0) & (parsing_key >= 5)
-  │
-  ├─ [8] Polling 시간 로깅
-  │   └─ TX: "LAST_TX AT ::: %lu / %u"
-  │
-  ├─ loop_cnt++
-  └─ while(HAL_GetTick() < 100);  // ← 100ms 고정 주기 보장
-```
-
-### 3.4 DMA TX 완료 콜백
-
-```c
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-    tx_write_ready = 1;
+while(1) {
+    if (HAL_GetTick() - last_time >= 500) { // 500ms 주기
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        last_time = HAL_GetTick();
+    }
 }
 ```
 
-- 모든 DMA TX 발송 전 `while(tx_write_ready == 0)`로 이전 전송 완료 대기
-- TX DMA는 Normal 모드이므로 1회 전송 후 재시작 필요
+## 4. 요약
 
----
-
-## 4. 사용자 정의 프로토콜 (UART 패킷 형식)
-
-### 패킷 구조
-
-```
-{xxx.xxx.xxx.xxx.xxx}
-```
-
-| 위치 | 필드 | 설명 |
-|------|------|------|
-| 0 | `{` | Start of Line (SOL) |
-| 1~7 | `xxx.xxx` | value_[0] — Left Motor Power (0~999) |
-| 8~9 | `..` | 구분자 (skip 2) |
-| 10~16 | `xxx.xxx` | value_[1] — Right Motor Power (0~999) |
-| 17~18 | `..` | 구분자 |
-| 19~25 | `xxx.xxx` | value_[2] — Parsing Key (방향+레이저) |
-| 26~27 | `..` | 구분자 |
-| 28~34 | `xxx.xxx` | value_[3] — Servo#1 Position (0~180) |
-| 35~36 | `..` | 구분자 |
-| 37~43 | `xxx.xxx` | value_[4] — Servo#2 Position (0~180) |
-| 44 | `}` | End of Line (EOL) |
-
-- 패킷 길이 = 45 chars (SOL/EOL 제외), RX_PACKET_LEN = 47
-- 각 value는 "xxx.xxx" (7자리, 소수점 3자리)
-
-### Value 해석
-
-| 인덱스 | 변수명 | 범위 | 용도 |
-|--------|--------|------|------|
-| value_[0] | Left Power | 0~999 | Left Motor PWM 듀티 |
-| value_[1] | Right Power | 0~999 | Right Motor PWM 듀티 |
-| value_[2] | Parsing Key | 0~999 | 방향+레이저 제어 |
-| value_[3] | Servo#1 Goal | 0~180 | Pan Servo 목표각 |
-| value_[4] | Servo#2 Goal | 0~180 | Tilt Servo 목표각 |
-
-### Parsing Key 구조 (value_[2])
-
-```
-parsing_key = 100*d2 + 10*d1 + d0
-Laser ← d0 ≥ 5          // 레이저 ON 조건
-Right Dir ← d1 ≥ 5      // 우측 모터 방향
-Left Dir  ← d2 ≥ 5      // 좌측 모터 방향
-```
-
----
-
-## 5. 시스템 타이밍
-
-```
-[Power On]
-  ├─ HAL / Clock Init (HSI → PLL 64MHz)
-  ├─ Peripherals Init (TIM2~4, USART2+DMA, GPIO)
-  ├─ DMA Circular RX 시작
-  ├─ TIM IC/PWM 시작
-  └─ main loop  (10 Hz 고정)
-       │
-       ┌<──────── 100ms (고정, while HAL_GetTick<100) ────────>┐
-       │                                                       │
-       ├─ [0ms] uwTick=0, SysTick->VAL=0 (time reset)
-       ├─ [0ms] TIM2 CCR clear
-       ├─ [0ms] TRIG → 10μs pulse (ultrasonic start)
-       ├─ [0ms~25ms] ECHO 대기 (timeout 25ms)
-       ├─ [~25ms] 거리 계산 + TX (echo_time * 17 / 100)
-       ├─ [~26ms] RX 상태 출력 (DMA position)
-       ├─ [~26ms] 패킷 파싱 (if available + prints)
-       ├─ [~27ms] 파싱값 에코 TX
-       ├─ [~28ms] 서보 제어 (CCR write)
-       ├─ [~28ms] 모터 + 레이저 제어 (CCR write)
-       ├─ [~29ms] Polling time 로깅 TX
-       └─ [~30ms] while(HAL_GetTick() < 100) 대기 (idle)
-```
-
-**핵심**: 매 루프 시작 시 `uwTick=0`, 종료 시 `while(HAL_GetTick() < 100)` → **10Hz 정확도 유지**.
-
----
-
-## 6. 장점
-
-| 항목 | 설명 |
-|------|------|
-| ✅ **DMA Circular RX** | UART 수신을 인터럽트 없이 버퍼링, CPU 부하 최소화 |
-| ✅ **Input Capture 초음파** | HAL_Delay polling 방식보다 정밀하고 CPU 효율적 |
-| ✅ **10Hz 고정 루프** | `uwTick` 리셋 방식으로 정확한 주기 제어 |
-| ✅ **맞춤형 프로토콜** | 상위 컨트롤러(PC)에서 5개 실시간 값 전송 → 모터+서보+레이저 일괄 제어 |
-| ✅ **서보 저역 통과 필터** | delta 제한(max 2/cycle)으로 부드러운 움직임 |
-| ✅ **듀얼 초음파** | TIM2 IC로 2개 센서 동시 측정 |
-| ✅ **PWM 속도 가변** | 모터 듀티 0~999로 속도/방향 동시 제어 |
-| ✅ **backup_main.c 보존** | 이전 버전과 차이(duty cycle 제한 ultrasonic) 확인 가능 |
-
----
-
-## 7. 개선점 및 문제점
-
-| 문제점 | 영향 | 제안 |
-|--------|------|------|
-| ❌ **main.c 단일 파일 (808줄)** | 유지보수 매우 어려움 | motor.c, servo.c, protocol.c 등 모듈 분리 |
-| ❌ **`while(tx_write_ready==0)`** | TX 병목 시 CPU 100% 점유 | TX 큐잉 또는 ISR 기반 비동기 처리 |
-| ❌ **매 루프 초음파 실행** | 25ms timeout + 4회 TX = 시간 낭비 | backup_main.c 방식(5 cycle마다) 또는 더 낮은 duty |
-| ❌ **`uwTick=0` 강제 리셋** | HAL_Delay() 사용 시 비정상 동작 | 전용 타이머로 loop timing 분리 |
-| ❌ **매직 넘버 과다** | `17`, `25`, `240`, `23000`, `100` 등 | `#define` 상수화 필요 |
-| ❌ **`and` 연산자 사용** | `and`, `or`는 iso646.h 매크로 — 가독성 저하 | `&&`, `\|\|` 사용 |
-| ❌ **sprintf + DMA TX = blocking** | TX 중에도 while 대기, 루프 지연 | TX 스트링 버퍼링 / 배치 전송 |
-| ❌ **TRIG 핀 1개로 2개 센서 공유** | 두 센서 동시에 TRIG → 신호 간섭 가능성 | TRIG를 개별 핀으로 분리 또는 시분할 |
-| ❌ **예외 처리 부족** | CCR=0 체크만으로 timeout 판별 | 별도 상태 플래그 도입 |
-| ❌ **arm_tick 패킷 파서 취약** | bookmark[10] 오버플로우 가능성 | 배열 경계 검증 추가 |
-| ❌ **float 연산** | value_ 저장/출력에 float 사용 | 고정소수점 또는 정수 스케일링 |
-| ❌ **goto 문** | `PASS_SONIC`, `PASS_PARSING`, `PASS_READY` | 구조적 분기로 변경 |
-| ❌ **TRIG 핀 리맵 확인 필요** | PA1이 SR04_TRIG, 매크로는 `SR04_TRIG_0_Pin` | backup_main.c는 2개 TRIG — 최종본은 1개로 축소 |
-| ❌ **HAL_TIM_IC_Start/Stop 안전성** | 루프마다 CCR=0만 하고 재시작 없음 | IC 시작 유지면 충분, CCR=0은 불필요 |
-
----
-
-## 8. 종합 평가
-
-| 항목 | 평가 |
-|------|------|
-| 프로젝트 규모 | **중** (~800줄, 단일 파일) |
-| 코드 완성도 | **중상** — 모든 기능 동작, 백업 존재 |
-| 확장성 | **하** — 단일 파일 + goto + 전역변수 |
-| 실시간성 | **중** — 10Hz 고정 주기, but TX blocking |
-| 하드웨어 활용 | **상** — TIM IC + DMA + PWM 동시 활용 |
-| 프로토콜 설계 | **상** — custom packet framing, 5개 값 통합 전송 |
-| 독창성 | **상** — 유일하게 DMA + IC + PC 연동 방식 |
-
-| 항목 | 5조 | 1조(SLAM) | 2조(smart_car) | 3조(Care_bot) |
-|------|-----|-----------|----------------|---------------|
-| 통신 | **DMA UART** | UART polling | UART polling | UART IT |
-| 초음파 | **Input Capture** | EXTI | polling | polling |
-| 모터 | **PWM 속도제어** | GPIO only | GPIO only | GPIO only |
-| 센서 수 | 초음파x2 | 초음파x6 | 초음파x2 | 초음파x2+IR+Line |
-| 구조 | 단일 파일 | header inline | 모듈화 | 모듈화 |
-
-> **결론**: 5조는 **Timer Input Capture + DMA Circular UART**를 활용한 점에서 기술적 차별화가 뚜렷함. PC ↔ MCU 간 맞춤형 패킷 프로토콜로 상위 레벨 제어가 가능하며, 10Hz 고정 루프와 서보 보간 필터 등 세부 설계에 신경을 썼음. 단, 사용자 코드 전량이 main.c 단일 파일에 집중되어 있고 `while(tx_write_ready)` blocking + `goto` 분기가 많아 **구조적 리팩토링이 가장 시급한 과제**.
+* 값의 차이: DWT->CYCCNT는 클럭 주기 단위로 매우 빠르게 증가하는 초정밀 데이터이며, HAL_GetTick()은 1ms마다 느리게 증가하는 소프트웨어적 데이터입니다.
+* 선택의 기준: 마이크로초($\mu s$) 단위 이하의 미세 제어나 함수 성능 측정이 필요하다면 DWT를, 밀리초($ms$) 단위의 전반적인 시스템 흐름 제어 및 타임아웃 처리에는 GetTick을 사용하는 것이 맞습니다.
