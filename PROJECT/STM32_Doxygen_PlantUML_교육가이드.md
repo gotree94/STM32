@@ -51,7 +51,7 @@ PlantUML 시퀀스 다이어그램으로 별도 작성 (4차시)
 
 ## 2. Doxygen + Graphviz 설치
 
-### 2-1. Windows (학생 PC 기준, STM32CubeIDE 환경)
+### 2-1. Windows (PC 기준, STM32CubeIDE 환경)
 
 1. **Doxygen 설치**
    - 공식 사이트: https://www.doxygen.nl/download.html
