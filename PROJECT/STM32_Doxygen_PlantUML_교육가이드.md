@@ -74,7 +74,7 @@ PlantUML 시퀀스 다이어그램으로 별도 작성 (4차시)
    - `doxywizard` — Doxygen 설치 시 함께 설치됨
    - 설정 파일을 명령행 대신 GUI로 작성 가능, 수업 시연용으로 적합
 
-### 2-2. Ubuntu / WSL (RTX 5090 워크스테이션 환경)
+### 2-2. Ubuntu / WSL 
 
 ```bash
 sudo apt update
