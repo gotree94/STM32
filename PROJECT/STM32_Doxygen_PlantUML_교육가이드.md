@@ -161,7 +161,9 @@ WARN_IF_UNDOCUMENTED     = YES
 WARN_LOGFILE             = ./docs/warnings.log
 ```
 
-> **포인트**: `WARN_IF_UNDOCUMENTED = YES` + `WARN_LOGFILE`을 켜두면, 주석을 빠뜨린 함수 목록이 로그 파일에 남습니다. 이 로그 자체를 과제 체크리스트로 활용할 수 있습니다.
+> **포인트**: <br>
+> `WARN_IF_UNDOCUMENTED = YES` + `WARN_LOGFILE`을 켜두면, 주석을 빠뜨린 함수 목록이 로그 파일에 남습니다. <br>
+> 이 로그 자체를 과제 체크리스트로 활용할 수 있습니다.
 
 ### 3-3. 문서 생성 실행
 
