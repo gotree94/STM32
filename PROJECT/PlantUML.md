@@ -500,6 +500,8 @@ repeat while (step_no < 44) is (진행중)
 
 → 생성물: full_mission.png — 44 step 전체 흐름
 
+![](007.png)
+
 ---
 
 # PlantUML 도구 설치 및 사용법
