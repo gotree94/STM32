@@ -280,8 +280,43 @@ MCU -> LCD: Show "대기" (done)
 
 → 생성물: mission_step.png — DRIVE → SCAN → (ROTATE) 1사이클
 
-
 ![](002.png)
+
+* 1. 시작 트리거
+   * IR_Remote → MCU: NEC START code 수신 → 동작 시작
+
+* 2. 전진 주행 구간
+   * MCU가 LCD에 "주행" 표시
+   * MCU → Motor: move_forward(duty=32767) (50% duty, 절반 속도)
+   * loop [Encoder pulses]: 바퀴가 돌 때마다 Encoder의 EXTI 인터럽트가 MCU를 깨우고, MCU가 엔코더 카운트를 갱신 (거리 측정용 펄스 카운팅)
+   * MCU → Motor: stop() — 목표 거리 도달 시 정지
+
+* 3. IMU 읽기 및 상태 보고
+   * MCU → MPU6050: 가속도계 읽기
+   * MCU → SLAM_PC: STEP,<no>,<dist>,... 형식으로 이동 거리/스텝 정보를 SLAM PC에 UART/시리얼 전송
+
+* 4. 초음파 스캔 구간 (Servo + Ultrasonic)
+   * LCD에 "스캔" 표시
+   * MCU → Servo: 0°→180° 스윕 시작
+   * loop [91 steps, 2°씩]: 서보가 2°씩 회전할 때마다
+
+   * Servo → MCU: "angle settled" (각도 도달 신호)
+   * MCU → Ultrasonic: trigger 발사
+   * Ultrasonic → MCU: echo pulse 수신
+   * MCU → SLAM_PC: S,<angle>,<d1>,<d2> (각도별 거리 데이터 2개, 아마 이중 에코나 이전/현재 비교값)
+   * → 즉 91개 각도 지점에서 라이다처럼 거리 스캔하여 SLAM_PC에 포인트클라우드 데이터 전송
+
+* 5. 조건부 회전 (alt 구간)
+   * 조건: step % 11 == 0 && step < 44 (특정 스텝마다, 즉 91스텝 스캔 중 4번 정도 회전 삽입되는 구조로 추정)
+   * LCD에 "회전" 표시
+   * MCU → Motor: turn_right()
+   * loop [until yaw >= 90°]: MPU6050의 GyroZ 값을 계속 읽으며 90도 회전할 때까지 대기 (자이로 기반 회전각 제어)
+   * MCU → Motor: stop()
+   * MCU → SLAM_PC: ROT,<yaw>,<ax>,... (회전 완료 후 yaw값과 가속도 데이터 전송)
+
+* 6. 종료
+   * LCD에 "대기 (done)" 표시
+
 
 ## 4. 액티비티 다이어그램 — 초음파 측정
 
