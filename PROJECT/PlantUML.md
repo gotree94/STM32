@@ -228,7 +228,7 @@ SCAN --> IDLE : step == 44 (완료)
 ```
 → 생성물: state_machine.png — 미션 진행 상태 기계
 
-![](002.png)
+![](000.png)
 
 ## 3. 시퀀스 다이어그램 — 미션 1 Step
 
@@ -281,7 +281,7 @@ MCU -> LCD: Show "대기" (done)
 → 생성물: mission_step.png — DRIVE → SCAN → (ROTATE) 1사이클
 
 
-![](003.png)
+![](002.png)
 
 ## 4. 액티비티 다이어그램 — 초음파 측정
 
@@ -305,7 +305,7 @@ stop
 ```
 → 생성물: ultrasonic_measure.png — 초음파 측정 알고리즘
 
-![](004.png)
+![](003.png)
 
 ## 5. 시퀀스 다이어그램 — IR 리모컨 NEC 디코드
 
@@ -341,7 +341,7 @@ note right of Main_Loop: START command = 0xC2
 
 → 생성물: ir_decode.png — NEC 프로토콜 디코딩
 
-![](005.png)
+![](004.png)
 
 
 ## 6. 타이밍 다이어그램 — 서보 PWM
@@ -388,7 +388,7 @@ servo is LOW : "17500us"
 
 → 생성물: servo_pwm.png — 서보 각도별 펄스 폭
 
-![](006.png)
+![](005.png)
 
 
 
@@ -461,6 +461,8 @@ node "PC (SLAM)" as pc {
 ```
 
 → 생성물: deployment.png — 부품별 물리적 배치
+
+![](006.png)
 
 ## 8. 전체 미션 시퀀스 — Step별 흐름
 
