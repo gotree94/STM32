@@ -427,12 +427,15 @@ servo is LOW : "17500us"
 
 ## 7. 배치 다이어그램 — 물리 시스템 구성
 
-* C4_Deployment 이슈 있음
 ```
 @startuml
+!include <C4/C4_Component>
 !include <C4/C4_Deployment>
 
-Deployment_Node(nucleo, "NUCLEO-F103RB", "") {
+LAYOUT_WITH_LEGEND()
+title Deployment Diagram - 4WD Robot Hardware Wiring
+
+Deployment_Node(nucleo, "NUCLEO-F103RB", "Main Controller Board") {
   Container(mcu, "STM32F103RBT6", "ARM Cortex-M3, 64MHz")
 }
 
@@ -458,8 +461,30 @@ Deployment_Node(display, "Display", "") {
 Deployment_Node(pc, "PC (SLAM)", "") {
   Component(slam, "SLAM Processor", "USART3 @ 115200")
 }
+
+' ===== Sensor connections =====
+Rel(ir, mcu, "IR Signal", "PB1, Falling Edge Interrupt")
+Rel(eco1, mcu, "Echo Pulse", "PB12")
+Rel(eco2, mcu, "Echo Pulse", "PB2")
+Rel(mpu, mcu, "Accel/Gyro Data", "Soft I2C, PC4/PC5")
+
+' ===== Actuator connections =====
+Rel(mcu, motor_LF, "PWM Duty", "TIM2_CH2")
+Rel(mcu, motor_LB, "PWM Duty", "TIM1_CH2")
+Rel(mcu, motor_RF, "PWM Duty", "TIM3_CH1")
+Rel(mcu, motor_RB, "PWM Duty", "TIM4_CH3")
+Rel(mcu, servo, "Angle Control", "PA11, Soft PWM (DWT)")
+
+' ===== Display connection =====
+Rel(mcu, lcd, "Display Data", "SPI1")
+
+' ===== Host PC connection =====
+Rel(mcu, slam, "STEP/S/ROT Data", "USART3, UART TX")
+
 @enduml
 ```
+
+![](006-1.png)
 
 ```
 @startuml
