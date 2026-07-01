@@ -378,6 +378,23 @@ note right of Main_Loop: START command = 0xC2
 
 ![](004.png)
 
+* 1. 인터럽트 발생 및 시간 측정
+   * IR_Receiver → EXTI1_Handler: falling edge interrupt (IR 수신 모듈의 출력이 Low로 떨어질 때마다 EXTI 인터럽트 발생)
+   * EXTI1_Handler → DWT_Counter: 현재 타임스탬프 캡처
+   * DWT_Counter → EXTI1_Handler: delta_us 반환 (직전 엣지와의 시간 간격, DWT 사이클 카운터 기반 마이크로초 단위 측정)
+
+   * 여기서 핵심은 DWT(Data Watchpoint and Trace) 카운터를 폴링/타이머 대신 써서, 인터럽트 핸들러 안에서 정밀하게 펄스 간격을 잰다는 점이에요. NVIC 인터럽트 지연이 있어도 CYCCNT 기반이라 us 단위 정밀도 유지가 가능합니다.
+
+* 2. NEC 프로토콜 디코딩 로직 (alt 블록)
+   * NEC 프로토콜은 펄스 간격(delta)의 길이로 비트를 구분합니다:
+   * 조건 (delta)의미처리> 13000 us리더 코드 (9ms 헤더 + 4.5ms 스페이스)프레임 리셋, 새 코드 수신 시작> 2000 us논리 '1' (562us 펄스 + 1690us 스페이스 ≈ 2250us)bit = 1> 1000 us논리 '0' (562us 펄스 + 562us 스페이스 ≈ 1125us)bit = 0그 외노이즈/반복코드repeat/ignore 처리
+   * → 이렇게 32비트(8비트 주소 + 8비트 반전주소 + 8비트 커맨드 + 8비트 반전커맨드)가 다 모이면 완료.
+
+* 3. 메인 루프로 전달
+   * EXTI1_Handler → Main_Loop: ir_ready = 1 플래그 설정 (인터럽트 컨텍스트는 최소화, 실제 처리는 메인 루프로 넘김 — 임베디드 인터럽트 설계의 정석)
+   * Main_Loop → EXTI1_Handler: read 32-bit ir_code 읽어감
+   * 노트: START command = 0xC2 — 특정 리모컨 버튼(커맨드 코드 0xC2)이 "주행 시작" 트리거로 매핑됨
+
 
 ## 6. 타이밍 다이어그램 — 서보 PWM
 
