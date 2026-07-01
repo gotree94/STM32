@@ -8,9 +8,7 @@
 2. [PlantUML로 시퀀스 다이어그램 작성](#2-plantuml로-시퀀스-다이어그램-작성)
 3. [STM32 인터럽트/HAL 콜백 흐름 예제](#3-stm32-인터럽트hal-콜백-흐름-예제)
 4. [수업 적용 체크리스트](#4-수업-적용-체크리스트)
-5. [트러블슈팅](#5-트러블슈팅)
 
----
 
 ---
 
@@ -151,17 +149,4 @@ deactivate IRQH
 
 ---
 
-## 5. 트러블슈팅
 
-| 증상 | 원인 | 해결 |
-|------|------|------|
-| 콜그래프가 전혀 안 나옴 | Graphviz 미설치 또는 PATH 미등록 | `dot -V` 실행해서 확인, Windows는 설치 시 PATH 옵션 체크 |
-| 콜그래프가 너무 복잡해서 못 알아봄 | HAL 라이브러리 전체를 INPUT에 포함 | `INPUT`을 본인 작성 코드(`Core/Src`)로 제한 |
-| static 함수가 그래프에 안 보임 | `EXTRACT_STATIC = NO` (기본값) | `EXTRACT_STATIC = YES`로 변경 |
-| PlantUML 미리보기가 안 뜸 | Java 미설치 | `java -version`으로 확인 후 JRE 설치 |
-| PlantUML 한글이 깨짐 | 폰트/인코딩 문제 | `.puml` 파일을 UTF-8로 저장, `skinparam defaultFontName "맑은 고딕"` 추가 |
-| Doxygen 한글 주석 깨짐 | 소스 파일 인코딩 불일치 | `Doxyfile`에 `INPUT_ENCODING = UTF-8` 추가, 소스 파일도 UTF-8(BOM 없음)로 저장 |
-
----
-
-*이 문서는 검토용 초안입니다. 실제 수업 적용 전 설치 환경(학생 PC 스펙, 사내 보안 정책 등)에 맞춰 세부 설정을 조정하시기 바랍니다.*
