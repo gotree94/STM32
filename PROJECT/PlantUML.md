@@ -139,32 +139,46 @@ deactivate IRQH
 
 ## 1. 컴포넌트 다이어그램 — 하드웨어 구성
 
-* C4_Component 이슈 있음.
 ```
 @startuml
 !include <C4/C4_Component>
 
+LAYOUT_LEFT_RIGHT()
+LAYOUT_WITH_LEGEND()
+
+title Component Diagram - STM32F103RBT6 4WD Robot Controller
+
 System_Boundary(mcu, "STM32F103RBT6") {
-  Component(spi1, "SPI1", "HAL", "160x80 ST7735S LCD")
-  Component(usart2, "USART2", "HAL", "Debug Console (115200)")
+  Component(spi1, "SPI1", "HAL", "160x80 ST7735S LCD Driver")
+  Component(usart2, "USART2", "HAL", "Debug Console (115200bps)")
   Component(usart3, "USART3", "HAL", "SLAM Data Output")
   Component(tim1_4, "TIM1-4", "HAL", "4ch x2 = 8ch PWM\n4WD Motor Control")
-  Component(exti1, "EXTI1", "HAL", "IR Receiver (NEC)")
-  Component(exti3_15, "EXTI3/15_10", "HAL", "Encoder Pulse Counter")
-  Component(soft_i2c, "Soft I2C", "Bit-bang", "MPU6050 IMU")
-  Component(soft_pwm, "Soft PWM", "DWT", "Servo (0-180deg)")
-  Component(dwt, "DWT_CYCCNT", "Core", "us timing, pulse measurement")
+  Component(exti1, "EXTI1", "HAL", "IR Receiver (NEC Protocol)")
+  Component(exti3_15, "EXTI3/15_10", "HAL", "Encoder Pulse Counter (2ch)")
+  Component(soft_i2c, "Soft I2C", "Bit-bang", "MPU6050 IMU Interface")
+  Component(soft_pwm, "Soft PWM", "DWT-based", "Servo Control (0-180deg)")
+  Component(dwt, "DWT_CYCCNT", "Core Peripheral", "us Timing / Ultrasonic Pulse Measurement")
 }
 
-Rel(spi1, "$lcd", "ST7735S TFT")
-Rel(usart2, "$pc", "USB-Serial")
-Rel(usart3, "$pc", "SLAM Mapper")
-Rel(tim1_4, "$motors", "4x DC Motor")
-Rel(exti1, "$ir", "IR Remote")
-Rel(exti3_15, "$encoders", "2ch Encoder")
-Rel(soft_i2c, "$mpu", "MPU6050 IMU")
-Rel(soft_pwm, "$servo", "Servo")
-Rel(dwt, "$ultrasonic", "2x HC-SR04")
+Component_Ext(lcd, "ST7735S TFT", "160x80 LCD", "상태/모드 표시")
+Component_Ext(pc, "SLAM_PC / Debug Host", "PC", "USB-Serial 연결")
+Component_Ext(motors, "4x DC Motor", "H-Bridge Driver", "4WD 구동부")
+Component_Ext(ir, "IR Remote", "NEC Protocol", "리모컨 START 트리거")
+Component_Ext(encoders, "2ch Encoder", "Hall/Optical", "주행 거리 피드백")
+Component_Ext(mpu, "MPU6050", "I2C IMU", "가속도/자이로 센서")
+Component_Ext(servo, "Servo Motor", "PWM", "초음파 스캔용 팬 구동")
+Component_Ext(ultrasonic, "2x HC-SR04", "Ultrasonic", "거리 측정 (Trigger/Echo)")
+
+Rel(spi1, lcd, "Uses", "SPI")
+Rel(usart2, pc, "Uses", "USB-Serial")
+Rel(usart3, pc, "Sends", "UART, STEP/S/ROT msgs")
+Rel(tim1_4, motors, "Drives", "PWM Duty")
+Rel(ir, exti1, "Sends", "IR Falling Edge")
+Rel(encoders, exti3_15, "Sends", "Pulse Interrupt")
+Rel(soft_i2c, mpu, "Reads", "I2C Bit-bang")
+Rel(soft_pwm, servo, "Drives", "PWM Angle")
+Rel(dwt, ultrasonic, "Measures", "Echo Pulse Width (us)")
+
 @enduml
 ```
 
