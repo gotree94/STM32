@@ -271,10 +271,7 @@ EXCLUDE_PATTERNS = */stm32f1xx_hal_conf.h */syscalls.c */system_stm32f1xx.c
 
 | 증상 | 원인 | 해결 |
 |------|------|------|
-| 콜그래프가 전혀 안 나옴 | Graphviz 미설치 또는 PATH 미등록 | `dot -V` 실행해서 확인, Windows는 설치 시 PATH 옵션 체크 |
-| 콜그래프가 너무 복잡해서 못 알아봄 | HAL 라이브러리 전체를 INPUT에 포함 | `INPUT`을 본인 작성 코드(`Core/Src`)로 제한 |
-| static 함수가 그래프에 안 보임 | `EXTRACT_STATIC = NO` (기본값) | `EXTRACT_STATIC = YES`로 변경 |
-| Doxygen 한글 주석 깨짐 | 소스 파일 인코딩 불일치 | `Doxyfile`에 `INPUT_ENCODING = UTF-8` 추가, 소스 파일도 UTF-8(BOM 없음)로 저장 |
+
 
 ---
 
