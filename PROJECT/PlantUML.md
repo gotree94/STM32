@@ -296,6 +296,34 @@ repeat while (ECHO == HIGH) not timeout
 stop
 @enduml
 ```
+→ 생성물: ultrasonic_measure.png — 초음파 측정 알고리즘
+
+## 5. 시퀀스 다이어그램 — IR 리모컨 NEC 디코드
+
+```
+@startuml
+participant IR_Receiver
+participant EXTI1_Handler
+participant DWT_Counter
+participant Main_Loop
+
+IR_Receiver -> EXTI1_Handler: falling edge interrupt
+EXTI1_Handler -> DWT_Counter: capture timestamp
+DWT_Counter --> EXTI1_Handler: delta_us
+alt delta > 13000
+  :leader code → reset frame
+else delta > 2000
+  :bit = 1
+else delta > 1000
+  :bit = 0
+else
+  :repeat/ignore
+end
+EXTI1_Handler -> Main_Loop: ir_ready = 1
+Main_Loop -> EXTI1_Handler: read 32-bit ir_code
+Note right: START command = 0xC2
+@enduml
+```
 
 ```
 @startuml
@@ -326,35 +354,6 @@ note right of Main_Loop: START command = 0xC2
 * 수정 포인트:
    * :leader code → reset frame → note over EXTI1_Handler: leader code → reset frame
    * :bit = 1 → note over EXTI1_Handler: bit = 1
-
-→ 생성물: ultrasonic_measure.png — 초음파 측정 알고리즘
-
-## 5. 시퀀스 다이어그램 — IR 리모컨 NEC 디코드
-
-```
-@startuml
-participant IR_Receiver
-participant EXTI1_Handler
-participant DWT_Counter
-participant Main_Loop
-
-IR_Receiver -> EXTI1_Handler: falling edge interrupt
-EXTI1_Handler -> DWT_Counter: capture timestamp
-DWT_Counter --> EXTI1_Handler: delta_us
-alt delta > 13000
-  :leader code → reset frame
-else delta > 2000
-  :bit = 1
-else delta > 1000
-  :bit = 0
-else
-  :repeat/ignore
-end
-EXTI1_Handler -> Main_Loop: ir_ready = 1
-Main_Loop -> EXTI1_Handler: read 32-bit ir_code
-Note right: START command = 0xC2
-@enduml
-```
 
 → 생성물: ir_decode.png — NEC 프로토콜 디코딩
 
