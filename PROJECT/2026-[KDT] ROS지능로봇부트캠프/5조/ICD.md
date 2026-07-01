@@ -1,4 +1,4 @@
-# 차량 시뮬레이션 ICD (Interface Control Document)
+# 5조 : 차량 시뮬레이션 ICD (Interface Control Document)
 
 ## 1. 통신 사양
 
