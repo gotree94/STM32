@@ -149,4 +149,277 @@ deactivate IRQH
 
 ---
 
+# smart_car PlantUML 문서화 가이드 (2조 샘플)
 
+## 1. 컴포넌트 다이어그램 — 하드웨어 구성
+
+```
+@startuml
+!include <C4/C4_Component>
+
+System_Boundary(mcu, "STM32F103RBT6") {
+  Component(spi1, "SPI1", "HAL", "160x80 ST7735S LCD")
+  Component(usart2, "USART2", "HAL", "Debug Console (115200)")
+  Component(usart3, "USART3", "HAL", "SLAM Data Output")
+  Component(tim1_4, "TIM1-4", "HAL", "4ch x2 = 8ch PWM\n4WD Motor Control")
+  Component(exti1, "EXTI1", "HAL", "IR Receiver (NEC)")
+  Component(exti3_15, "EXTI3/15_10", "HAL", "Encoder Pulse Counter")
+  Component(soft_i2c, "Soft I2C", "Bit-bang", "MPU6050 IMU")
+  Component(soft_pwm, "Soft PWM", "DWT", "Servo (0-180deg)")
+  Component(dwt, "DWT_CYCCNT", "Core", "us timing, pulse measurement")
+}
+
+Rel(spi1, "$lcd", "ST7735S TFT")
+Rel(usart2, "$pc", "USB-Serial")
+Rel(usart3, "$pc", "SLAM Mapper")
+Rel(tim1_4, "$motors", "4x DC Motor")
+Rel(exti1, "$ir", "IR Remote")
+Rel(exti3_15, "$encoders", "2ch Encoder")
+Rel(soft_i2c, "$mpu", "MPU6050 IMU")
+Rel(soft_pwm, "$servo", "Servo")
+Rel(dwt, "$ultrasonic", "2x HC-SR04")
+@enduml
+```
+
+→ 생성물: components.png — MCU와 외부 HW 연결 관계도
+
+## 2. 상태 다이어그램 — 전체 미션 흐름
+
+```
+@startuml
+state IDLE : IR 리모컨 START 대기
+state DRIVE : 10cm 전진 + 거리 측정
+state SCAN : 초음파 센서 0-180deg 스윕
+state ROTATE : 90도 회전 (자이로 유도)
+
+[*] --> IDLE
+IDLE --> DRIVE : IR start\n수신 (0xC2)
+DRIVE --> SCAN : 이동 완료
+SCAN --> DRIVE : 일반 step (step < 44)
+SCAN --> ROTATE : 11번째 step마다
+ROTATE --> DRIVE : 회전 완료
+SCAN --> IDLE : step == 44 (완료)
+@enduml
+```
+→ 생성물: state_machine.png — 미션 진행 상태 기계
+
+## 3. 시퀀스 다이어그램 — 미션 1 Step
+
+```
+@startuml
+actor IR_Remote
+participant MCU
+participant Motor
+participant Encoder
+participant MPU6050
+participant Ultrasonic
+participant Servo
+participant LCD
+participant SLAM_PC
+
+IR_Remote -> MCU: NEC START code
+MCU -> LCD: Show "주행"
+MCU -> Motor: move_forward(duty=32767)
+loop Encoder pulses
+  Encoder -> MCU: EXTI interrupt
+  MCU -> Motor: update encoder count
+end
+MCU -> Motor: stop()
+MCU -> MPU6050: read accelerometer
+MCU -> SLAM_PC: STEP,<no>,<dist>,...\n
+
+MCU -> LCD: Show "스캔"
+MCU -> Servo: sweep 0→180°
+loop 91 steps (2° each)
+  Servo -> MCU: angle settled
+  MCU -> Ultrasonic: fire trigger
+  Ultrasonic -> MCU: echo pulse
+  MCU -> SLAM_PC: S,<angle>,<d1>,<d2>\n
+end
+
+alt step % 11 == 0 && step < 44
+  MCU -> LCD: Show "회전"
+  MCU -> Motor: turn_right()
+  loop until yaw >= 90°
+    MPU6050 -> MCU: read GyroZ
+  end
+  MCU -> Motor: stop()
+  MCU -> SLAM_PC: ROT,<yaw>,<ax>,...\n
+end
+
+MCU -> LCD: Show "대기" (done)
+@enduml
+```
+
+→ 생성물: mission_step.png — DRIVE → SCAN → (ROTATE) 1사이클
+
+## 4. 액티비티 다이어그램 — 초음파 측정
+
+```
+@startuml
+start
+:TRIG 핀 10us HIGH;
+repeat
+  :ECHO 핀 폴링;
+repeat while (ECHO == LOW) not timeout
+:ECHO HIGH → start DWT counter;
+repeat
+  :ECHO 핀 폴링;
+repeat while (ECHO == HIGH) not timeout
+:ECHO LOW → stop DWT counter;
+:거리 계산 = pulse_us / 58.0;
+:x3 반복 → 중간값(median);
+:반환 (cm);
+stop
+@enduml
+```
+→ 생성물: ultrasonic_measure.png — 초음파 측정 알고리즘
+
+## 5. 시퀀스 다이어그램 — IR 리모컨 NEC 디코드
+
+```
+@startuml
+participant IR_Receiver
+participant EXTI1_Handler
+participant DWT_Counter
+participant Main_Loop
+
+IR_Receiver -> EXTI1_Handler: falling edge interrupt
+EXTI1_Handler -> DWT_Counter: capture timestamp
+DWT_Counter --> EXTI1_Handler: delta_us
+alt delta > 13000
+  :leader code → reset frame
+else delta > 2000
+  :bit = 1
+else delta > 1000
+  :bit = 0
+else
+  :repeat/ignore
+end
+EXTI1_Handler -> Main_Loop: ir_ready = 1
+Main_Loop -> EXTI1_Handler: read 32-bit ir_code
+Note right: START command = 0xC2
+@enduml
+```
+
+→ 생성물: ir_decode.png — NEC 프로토콜 디코딩
+
+## 6. 타이밍 다이어그램 — 서보 PWM
+
+```
+@startuml
+concise "PA11 (Servo)" as servo
+
+@0
+servo is HIGH : 500us (0°)
+@500us
+servo is LOW : 19500us
+@20ms
+servo is HIGH : 1500us (90°)
+@21500us
+servo is LOW : 18500us
+@40ms
+servo is HIGH : 2500us (180°)
+@42500us
+servo is LOW : 17500us
+@60ms
+@enduml
+```
+
+→ 생성물: servo_pwm.png — 서보 각도별 펄스 폭
+
+## 7. 배치 다이어그램 — 물리 시스템 구성
+
+```
+@startuml
+!include <C4/C4_Deployment>
+
+Deployment_Node(nucleo, "NUCLEO-F103RB", "") {
+  Container(mcu, "STM32F103RBT6", "ARM Cortex-M3, 64MHz")
+}
+
+Deployment_Node(sensors, "Sensor Board", "") {
+  Component(ir, "IR Receiver", "PB1, EXTI")
+  Component(eco1, "HC-SR04 #1", "PB12 (ECHO1)")
+  Component(eco2, "HC-SR04 #2", "PB2 (ECHO2)")
+  Component(mpu, "MPU6050", "PC4/PC5, Soft I2C")
+}
+
+Deployment_Node(actuators, "Actuator Board", "") {
+  Component(motor_LF, "Left-Front Motor", "TIM2_CH2")
+  Component(motor_LB, "Left-Back Motor", "TIM1_CH2")
+  Component(motor_RF, "Right-Front Motor", "TIM3_CH1")
+  Component(motor_RB, "Right-Back Motor", "TIM4_CH3")
+  Component(servo, "Servo S90", "PA11, Soft PWM")
+}
+
+Deployment_Node(display, "Display", "") {
+  Component(lcd, "ST7735S TFT", "160x80, SPI1")
+}
+
+Deployment_Node(pc, "PC (SLAM)", "") {
+  Component(slam, "SLAM Processor", "USART3 @ 115200")
+}
+@enduml
+```
+
+→ 생성물: deployment.png — 부품별 물리적 배치
+
+## 8. 전체 미션 시퀀스 — Step별 흐름
+
+```
+@startuml
+|Main Loop|
+repeat
+  :step_no = 1 to 44;
+  :test_distance_measure(step_no);
+  |LCD|
+  :Show "주행";
+  |SLAM_PC|
+  :STEP,no,dist,pulseL,pulseR,ax,ay,az,gz;
+  |Main Loop|
+  :stationary_scan();
+  |LCD|
+  :Show "스캔";
+  |SLAM_PC|
+  :S,angle,d1,d2 (91 lines);
+  |Main Loop|
+  if (step_no % 11 == 0 &&\nstep_no < 44) then (yes)
+    |Main Loop|
+    :test_rotate_90();
+    |LCD|
+    :Show "회전";
+    |SLAM_PC|
+    :ROT,yaw,ax,ay,az;
+  endif
+repeat while (step_no < 44) is (진행중)
+-> (완료);
+|LCD|
+:Show "대기";
+@enduml
+```
+
+→ 생성물: full_mission.png — 44 step 전체 흐름
+
+---
+
+# PlantUML 도구 설치 및 사용법
+
+```
+# VSCode 확장 설치
+code --install-extension jebbs.plantuml
+
+# 또는 PlantUML jar 직접 사용
+# 1. Java 설치 후 PlantUML.jar 다운로드
+# 2. 아래 명령으로 SVG/PNG 생성
+java -jar plantuml.jar -tsvg diagram.puml
+java -jar plantuml.jar -tpng diagram.puml
+```
+
+## 권장 작업 순서
+1. 상태 다이어그램 (#2) — 전체 미션 구조 이해에 가장 기본
+2. 컴포넌트 다이어그램 (#1) — 하드웨어 구성 파악
+3. 시퀀스 다이어그램 (#3) — 1 step 실제 동작 흐름
+4. 액티비티 다이어그램 (#4) — 초음파 측정 로직 상세
+5. IR 디코드 (#5), 서보 (#6) — 주변장치별 상세
+6. 배치 (#7) — 최종 보고서용
