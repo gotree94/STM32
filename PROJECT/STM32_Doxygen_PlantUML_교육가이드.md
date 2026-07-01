@@ -109,7 +109,7 @@ cd ~/stm32_project
 doxygen -g Doxyfile
 ```
 
-`Doxyfile`이 생성되며 약 280개 옵션이 들어있음. 수업에서는 다음 핵심 항목만 수정.
+`Doxyfile`이 생성되며 약 280개 옵션이 들어있음. 다음 핵심 항목만 수정.
 
 ### 3-2. STM32 HAL 프로젝트용 핵심 설정값
 
