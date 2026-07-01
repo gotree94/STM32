@@ -206,6 +206,8 @@ dwt --> (Ultrasonic)
 
 → 생성물: components.png — MCU와 외부 HW 연결 관계도
 
+![](001.png)
+
 ## 2. 상태 다이어그램 — 전체 미션 흐름
 
 ```
@@ -225,6 +227,8 @@ SCAN --> IDLE : step == 44 (완료)
 @enduml
 ```
 → 생성물: state_machine.png — 미션 진행 상태 기계
+
+![](002.png)
 
 ## 3. 시퀀스 다이어그램 — 미션 1 Step
 
@@ -276,6 +280,9 @@ MCU -> LCD: Show "대기" (done)
 
 → 생성물: mission_step.png — DRIVE → SCAN → (ROTATE) 1사이클
 
+
+![](003.png)
+
 ## 4. 액티비티 다이어그램 — 초음파 측정
 
 ```
@@ -297,6 +304,8 @@ stop
 @enduml
 ```
 → 생성물: ultrasonic_measure.png — 초음파 측정 알고리즘
+
+![](004.png)
 
 ## 5. 시퀀스 다이어그램 — IR 리모컨 NEC 디코드
 
@@ -331,6 +340,9 @@ note right of Main_Loop: START command = 0xC2
    * :bit = 1 → note over EXTI1_Handler: bit = 1
 
 → 생성물: ir_decode.png — NEC 프로토콜 디코딩
+
+![](005.png)
+
 
 ## 6. 타이밍 다이어그램 — 서보 PWM
 
@@ -375,6 +387,10 @@ servo is LOW : "17500us"
 ```
 
 → 생성물: servo_pwm.png — 서보 각도별 펄스 폭
+
+![](006.png)
+
+
 
 ## 7. 배치 다이어그램 — 물리 시스템 구성
 
