@@ -310,31 +310,6 @@ participant Main_Loop
 IR_Receiver -> EXTI1_Handler: falling edge interrupt
 EXTI1_Handler -> DWT_Counter: capture timestamp
 DWT_Counter --> EXTI1_Handler: delta_us
-alt delta > 13000
-  :leader code → reset frame
-else delta > 2000
-  :bit = 1
-else delta > 1000
-  :bit = 0
-else
-  :repeat/ignore
-end
-EXTI1_Handler -> Main_Loop: ir_ready = 1
-Main_Loop -> EXTI1_Handler: read 32-bit ir_code
-Note right: START command = 0xC2
-@enduml
-```
-
-```
-@startuml
-participant IR_Receiver
-participant EXTI1_Handler
-participant DWT_Counter
-participant Main_Loop
-
-IR_Receiver -> EXTI1_Handler: falling edge interrupt
-EXTI1_Handler -> DWT_Counter: capture timestamp
-DWT_Counter --> EXTI1_Handler: delta_us
 
 alt delta > 13000
   note over EXTI1_Handler: leader code → reset frame
@@ -361,21 +336,21 @@ note right of Main_Loop: START command = 0xC2
 
 ```
 @startuml
-concise "PA11 (Servo)" as servo
+robust "PA11 (Servo)" as servo
 
 @0
-servo is HIGH : 500us (0°)
-@500us
-servo is LOW : 19500us
-@20ms
-servo is HIGH : 1500us (90°)
-@21500us
-servo is LOW : 18500us
-@40ms
-servo is HIGH : 2500us (180°)
-@42500us
-servo is LOW : 17500us
-@60ms
+servo is HIGH : "500us (0°)"
+@500
+servo is LOW : "19500us"
+@20000
+servo is HIGH : "1500us (90°)"
+@21500
+servo is LOW : "18500us"
+@40000
+servo is HIGH : "2500us (180°)"
+@42500
+servo is LOW : "17500us"
+@60000
 @enduml
 ```
 
@@ -412,6 +387,39 @@ Deployment_Node(display, "Display", "") {
 
 Deployment_Node(pc, "PC (SLAM)", "") {
   Component(slam, "SLAM Processor", "USART3 @ 115200")
+}
+@enduml
+```
+
+```
+@startuml
+title Deployment Diagram
+
+node "NUCLEO-F103RB" as nucleo {
+  rectangle "STM32F103RBT6\nARM Cortex-M3, 64MHz" as mcu
+}
+
+node "Sensor Board" as sensors {
+  rectangle "IR Receiver\nPB1, EXTI" as ir
+  rectangle "HC-SR04 #1\nPB12 (ECHO1)" as eco1
+  rectangle "HC-SR04 #2\nPB2 (ECHO2)" as eco2
+  rectangle "MPU6050\nPC4/PC5, Soft I2C" as mpu
+}
+
+node "Actuator Board" as actuators {
+  rectangle "Left-Front Motor\nTIM2_CH2" as motor_LF
+  rectangle "Left-Back Motor\nTIM1_CH2" as motor_LB
+  rectangle "Right-Front Motor\nTIM3_CH1" as motor_RF
+  rectangle "Right-Back Motor\nTIM4_CH3" as motor_RB
+  rectangle "Servo S90\nPA11, Soft PWM" as servo
+}
+
+node "Display" as display {
+  rectangle "ST7735S TFT\n160x80, SPI1" as lcd
+}
+
+node "PC (SLAM)" as pc {
+  rectangle "SLAM Processor\nUSART3 @ 115200" as slam
 }
 @enduml
 ```
