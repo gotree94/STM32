@@ -273,6 +273,3 @@ EXCLUDE_PATTERNS = */stm32f1xx_hal_conf.h */syscalls.c */system_stm32f1xx.c
 |------|------|------|
 
 
----
-
-*이 문서는 검토용 초안입니다. 실제 수업 적용 전 설치 환경(학생 PC 스펙, 사내 보안 정책 등)에 맞춰 세부 설정을 조정하시기 바랍니다.*
