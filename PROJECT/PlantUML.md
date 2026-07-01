@@ -153,6 +153,7 @@ deactivate IRQH
 
 ## 1. 컴포넌트 다이어그램 — 하드웨어 구성
 
+* C4_Component 이슈 있음.
 ```
 @startuml
 !include <C4/C4_Component>
@@ -178,6 +179,28 @@ Rel(exti3_15, "$encoders", "2ch Encoder")
 Rel(soft_i2c, "$mpu", "MPU6050 IMU")
 Rel(soft_pwm, "$servo", "Servo")
 Rel(dwt, "$ultrasonic", "2x HC-SR04")
+@enduml
+```
+
+```
+@startuml
+skinparam componentStyle rectangle
+
+rectangle "STM32F103RBT6" {
+  [SPI1] as spi1
+  [USART2] as usart2
+  [USART3] as usart3
+  [TIM1-4] as tim
+  [Soft I2C] as i2c
+  [DWT] as dwt
+}
+
+spi1 --> (LCD)
+usart2 --> (PC Debug)
+usart3 --> (SLAM PC)
+tim --> (4x DC Motor)
+i2c --> (MPU6050)
+dwt --> (Ultrasonic)
 @enduml
 ```
 
@@ -273,6 +296,37 @@ repeat while (ECHO == HIGH) not timeout
 stop
 @enduml
 ```
+
+```
+@startuml
+participant IR_Receiver
+participant EXTI1_Handler
+participant DWT_Counter
+participant Main_Loop
+
+IR_Receiver -> EXTI1_Handler: falling edge interrupt
+EXTI1_Handler -> DWT_Counter: capture timestamp
+DWT_Counter --> EXTI1_Handler: delta_us
+
+alt delta > 13000
+  note over EXTI1_Handler: leader code → reset frame
+else delta > 2000
+  note over EXTI1_Handler: bit = 1
+else delta > 1000
+  note over EXTI1_Handler: bit = 0
+else
+  note over EXTI1_Handler: repeat/ignore
+end
+
+EXTI1_Handler -> Main_Loop: ir_ready = 1
+Main_Loop -> EXTI1_Handler: read 32-bit ir_code
+note right of Main_Loop: START command = 0xC2
+@enduml
+```
+* 수정 포인트:
+   * :leader code → reset frame → note over EXTI1_Handler: leader code → reset frame
+   * :bit = 1 → note over EXTI1_Handler: bit = 1
+
 → 생성물: ultrasonic_measure.png — 초음파 측정 알고리즘
 
 ## 5. 시퀀스 다이어그램 — IR 리모컨 NEC 디코드
