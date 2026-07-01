@@ -417,27 +417,6 @@ servo is LOW : "17500us"
 @60000
 @enduml
 ```
-
-```
-@startuml
-robust "PA11 (Servo)" as servo
-
-@0
-servo is HIGH : "500us (0°)"
-@500
-servo is LOW : "19500us"
-@20000
-servo is HIGH : "1500us (90°)"
-@21500
-servo is LOW : "18500us"
-@40000
-servo is HIGH : "2500us (180°)"
-@42500
-servo is LOW : "17500us"
-@60000
-@enduml
-```
-
 → 생성물: servo_pwm.png — 서보 각도별 펄스 폭
 
 ![](005.png)
@@ -446,6 +425,7 @@ servo is LOW : "17500us"
 
 ## 7. 배치 다이어그램 — 물리 시스템 구성
 
+* C4_Deployment 이슈 있음
 ```
 @startuml
 !include <C4/C4_Deployment>
