@@ -177,7 +177,7 @@ doxygen Doxyfile
 
 ## 4. STM32 HAL 프로젝트에 적용하기
 
-### 4-1. 학생 코드에 Doxygen 주석 작성 예시
+### 4-1. 코드에 Doxygen 주석 작성 예시
 
 ```c
 /**
@@ -230,6 +230,43 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 | Include 그래프로 헤더 의존성 확인 | 파일 페이지 상단 | 불필요한 include 여부 (코드 품질) |
 
 **평가 활용 예시**: `warnings.log`의 줄 수를 `wc -l warnings.log`로 세서 "문서화율" 점수로 활용 가능 (단, 형식적 채점 도구로만 보조 활용 — 내용 충실도는 별도 확인 필요).
+
+**warnings.log 활용 방법:**
+
+* 1. 직접 열어서 확인
+   * 메모장이나 VSCode로 docs/warnings.log 열기 — 줄 단위로 파일명 + 라인번호 + 내용 기록됨
+
+* 2. 필터링해서 보기
+
+```
+# 내 코드만 보고 싶을 때 (HAL/시스템 파일 제외)
+Get-Content docs/warnings.log | Select-String -NotMatch "stm32f1xx_hal_conf\.h|syscalls\.c|system_stm32f1xx\.c"
+
+# 특정 파일만 보고 싶을 때
+Get-Content docs/warnings.log | Select-String "main\.c"
+
+# 주석 없는 함수만 보고 싶을 때
+Get-Content docs/warnings.log | Where-Object { $_ -match "is not documented" }
+```
+
+* 3. 개수 기반 체크리스트
+
+```
+# 파일별 미문서 항목 개수 집계
+Get-Content docs/warnings.log |
+    Where-Object { $_ -match "is not documented" } |
+    ForEach-Object { ($_ -split ":")[0].Trim() } |
+    Group-Object | Sort-Object Count -Descending
+```
+
+* 4. Doxyfile에서 특정 파일 제외
+   * HAL 라이브러리나 CubeMX 생성 코드의 경고가 거슬리면 Doxyfile에 EXCLUDE_PATTERNS 추가:
+```
+EXCLUDE_PATTERNS = */stm32f1xx_hal_conf.h */syscalls.c */system_stm32f1xx.c
+```
+
+* 그러면 다음 빌드부터 내 코드(Core/Src/main.c 등)의 미문서 항목만 warnings.log에 남음
+
 
 ---
 
