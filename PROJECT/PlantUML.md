@@ -182,6 +182,8 @@ Rel(dwt, ultrasonic, "Measures", "Echo Pulse Width (us)")
 @enduml
 ```
 
+![](001-1.png)
+
 ```
 @startuml
 skinparam componentStyle rectangle
