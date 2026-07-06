@@ -1,4 +1,4 @@
-# 4WD_Control Serial ICD
+# 6조 : 4WD_Control Serial ICD
 
 ## 1. Hardware Overview
 
