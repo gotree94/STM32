@@ -1,7 +1,5 @@
 # EAI S4 LiDAR 분석 노트
 
-![](Lidar-001.jpg)
-
 ![](Lidar-002.jpg)
 
 
