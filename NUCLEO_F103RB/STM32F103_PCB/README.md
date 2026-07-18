@@ -3,7 +3,7 @@
 
 | | |
 |:-------:|:-------:|
-| ![](004.png) | ![](005.png) | 
+| <img src="004.png" sidth="30%"> | <img src="005.png" sidth="30%"> | 
 
 
 ## STMICRO LOGO
