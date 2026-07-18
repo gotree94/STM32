@@ -4,6 +4,8 @@
 
 * https://www.st.com/en/evaluation-tools/nucleo-f103rb.html#cad-resources
 
+<img src="007.png" width="45%">
+
 <img src="004.png" width="45%"> <img src="005.png" width="45%">
 
 ![](001.png) ![](003.png)
