@@ -1,5 +1,6 @@
 # EasyEDA STM32F103 PCB 설계
 
+## STM32 Nucleo-64 development board with STM32F103RB MCU, supports Arduino and ST morpho connectivity
 
 * https://www.st.com/en/evaluation-tools/nucleo-f103rb.html#cad-resources
 
