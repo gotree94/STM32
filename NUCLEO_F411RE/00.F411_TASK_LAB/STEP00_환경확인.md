@@ -26,12 +26,12 @@
 2. `File` → `Open Projects from File System...`
 3. `Directory`에 아래 경로 입력
    ```text
-   C:\Users\Administrator\STM32CubeIDE\workspace_2.2.0\START_PRJ
+   C:\Users\Administrator\STM32CubeIDE\workspace_2.2.0\F411_TASK_LAB
    ```
 4. `Finish`
-5. Project Explorer에서 `START_PRJ`가 보이는지 확인
+5. Project Explorer에서 `F411_TASK_LAB`가 보이는지 확인
 
-> 이미 워크스페이스에 `START_PRJ`가 있으면 그대로 열면 된다.
+> 이미 워크스페이스에 `F411_TASK_LAB`이 있으면 그대로 열면 된다.
 
 ---
 
@@ -42,7 +42,7 @@
    ```text
    Build Finished. 0 errors, 0 warnings.
    ```
-3. 산출물: `Debug\START_PRJ.elf`
+3. 산출물: `Debug\F411_TASK_LAB.elf`
 
 빌드가 안 되면:
 

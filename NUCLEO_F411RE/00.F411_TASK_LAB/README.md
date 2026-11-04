@@ -1,8 +1,8 @@
 # NUCLEO-F411RE 단계별 학습 노트
 
-> 보드: NUCLEO-F411RE (STM32F411RET6, Cortex-M4F, 512 KB Flash, 128 KB SRAM) <br>
-> 프로젝트: `C:\Users\Administrator\STM32CubeIDE\workspace_2.2.0\START_PRJ` <br>
-> 도구: STM32CubeIDE 2.2.0 / STM32Cube FW_F4 V1.28.3 <br>
+> 보드: NUCLEO-F411RE (STM32F411RET6, Cortex-M4F, 512 KB Flash, 128 KB SRAM)
+> 프로젝트: `F411_TASK_LAB` (`C:\Users\Administrator\STM32CubeIDE\workspace_2.2.0\F411_TASK_LAB`)
+> 도구: STM32CubeIDE 2.2.0 / STM32Cube FW_F4 V1.28.3
 > 최종 업데이트: 2026-11-04
 
 ---
@@ -51,3 +51,6 @@
 
 > 이후 단계는 실제로 시작할 때 파일을 새로 만든다.
 > STEP01이 끝나기 전에는 STEP02 코드를 작성하지 않는다.
+
+> 이전 `START_PRJ`는 백업으로 남겨 두었다.
+> 앞으로의 작업은 `F411_TASK_LAB`에서 진행한다.

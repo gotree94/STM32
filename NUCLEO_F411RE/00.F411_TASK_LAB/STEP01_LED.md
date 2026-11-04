@@ -62,7 +62,7 @@ if ((now - last) >= period)
 |---|---|
 | `Core/Src/main.c` | USER CODE 영역에 LED 태스크 + UART 출력 추가 |
 | `Core/Inc/main.h` | 변경 없음 (기존 `LD2_Pin`, `LD2_GPIO_Port` 사용) |
-| `START_PRJ.ioc` | 변경 없음 (PA5는 이미 GPIO_Output) |
+| `F411_TASK_LAB.ioc` | 변경 없음 (PA5는 이미 GPIO_Output) |
 
 > CubeMX가 생성한 초기 소스에는 LED **점멸 로직**이 없고, PA5 핀 설정만 있다.
 > 이 단계에서 점멸 로직을 처음 추가한 것이다.
@@ -94,6 +94,22 @@ static void UART_Print(const char *msg);
 /* USER CODE END PFP */
 ```
 
+> **`500U`의 `U`는 단위가 아니다.** C 언어의 `unsigned int` 정수 리터럴 접미사다.
+> 즉 `500U`는 "unsigned 500"이며, `HAL_GetTick()`이 밀리초(ms)를 반환하므로
+> 이 코드에서는 **500 ms**를 의미한다. 마이크로초(us)가 아니다.
+> `UART_PRINT_TIMEOUT_MS 100U`도 같은 이유로 100 ms다.
+>
+> | 표기 | 의미 |
+> |---|---|
+> | `500U` | `unsigned int` 500 |
+> | `500L` | `long` 500 |
+> | `500UL` | `unsigned long` 500 |
+> | `1.0f` | `float` 1.0 |
+>
+> `U`를 붙이는 이유는 signed/unsigned 비교 경고를 줄이고 타입을 명확히 하기 위해서다.
+> 마이크로초 단위가 필요하면 `HAL_GetTick()` 대신 1 MHz 타이머나 DWT 카운터를 사용하고,
+> 매크로 이름도 `LED_BLINK_PERIOD_US`처럼 단위를 바꿔야 한다.
+
 ### 5.2 초기화 (`main.c`, `USER CODE BEGIN 2`)
 
 ```c
@@ -101,7 +117,7 @@ static void UART_Print(const char *msg);
   g_ledLastTick = HAL_GetTick();
   g_ledState = 0U;
 
-  UART_Print("\r\n=== START_PRJ Step 1: LED Blink ===\r\n");
+  UART_Print("\r\n=== F411_TASK_LAB Step 1: LED Blink ===\r\n");
   UART_Print("LD2 (PA5) toggles every 500 ms (non-blocking).\r\n");
 ```
 
@@ -156,7 +172,7 @@ static void LED_Task(void)
 Build Finished. 0 errors, 0 warnings.
 
 text    data    bss     dec     hex    filename
-8756      12   1652   10420    28b4   START_PRJ.elf
+8760      12   1652   10424    28b8   F411_TASK_LAB.elf
 ```
 
 ---
@@ -174,7 +190,7 @@ text    data    bss     dec     hex    filename
 - 시리얼에 아래가 보인다.
 
 ```text
-=== START_PRJ Step 1: LED Blink ===
+=== F411_TASK_LAB Step 1: LED Blink ===
 LD2 (PA5) toggles every 500 ms (non-blocking).
 LED ON
 LED OFF
@@ -215,7 +231,7 @@ LED OFF
 
 이미 코드가 적용되어 있지만, CubeMX부터 직접 해보려면:
 
-1. `START_PRJ.ioc` 열기
+1. `F411_TASK_LAB.ioc` 열기
 2. PA5를 `GPIO_Output`으로 설정, Label `LD2`
 3. USART2가 `Asynchronous`, 115200인지 확인
 4. `GENERATE CODE`
