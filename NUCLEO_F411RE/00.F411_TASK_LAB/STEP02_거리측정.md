@@ -317,6 +317,11 @@ static void Sensor_Task(void)
 
 ## 7. 출력 형식
 
+> STEP02 시점의 `D` 형식은 아래 5개 필드다.
+> STEP03에서 보정 전/후 비교를 위해
+> `D,t_ms,distance_ref_mm,distance_mm,delta_mm,valid,errors`로 확장했다.
+> 자세한 내용은 `STEP03_온습도_보정.md`를 참고한다.
+
 ```text
 D,t_ms,distance_mm,valid,errors
 ```

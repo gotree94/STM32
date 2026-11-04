@@ -12,7 +12,8 @@
 
 - DHT11/DHT22로 온도와 습도를 읽는다.
 - 온도로 음속을 계산해 초음파 거리를 보정한다.
-- `E`의 `sound_speed_x10`과 `D`의 보정된 거리를 UART 로그로 확인한다.
+- **20 °C 고정 음속 거리(보정 전)**와 **온도 보정 거리(보정 후)**를 같은 `D` 행에 함께 출력해 비교한다.
+- `E`의 `sound_speed_x10`과 `D`의 두 거리/차이를 UART 로그로 확인한다.
 - DHT 읽기가 초음파 측정을 방해하지 않도록 **초음파가 idle일 때만** 읽는다.
 
 이번 단계에서 확정한 값:
@@ -176,8 +177,12 @@ v_x10 = 3313 + (606 × 235) / 1000
 거리 계산:
 
 ```text
-distance_mm = pulse_us × v_x10 / 20000
+distance_ref_mm = pulse_us × 3430 / 20000     (20 °C 고정, 보정 전)
+distance_mm     = pulse_us × v_x10 / 20000    (온도 보정 후)
+delta_mm        = distance_mm - distance_ref_mm
 ```
+
+두 거리는 **같은 펄스 폭**에서 계산하므로 온도 보정 효과만 직접 비교할 수 있다.
 
 기존 343.0 m/s 고정값 대비 23.5 °C에서는 약 0.7 % 거리가 길게 보정된다.
 1.685 m에서 약 12 mm 차이다.
@@ -190,9 +195,9 @@ distance_mm = pulse_us × v_x10 / 20000
 |---|---|
 | `Core/Inc/dht.h` | 새 파일. DHT 결과 구조체와 API |
 | `Core/Src/dht.c` | 새 파일. GPIO 전환, 40 bit 읽기, checksum, 자동 판별 |
-| `Core/Inc/ultrasonic.h` | `Ultrasonic_IsIdle()`, `Ultrasonic_SetSoundSpeedX10()` 추가 |
-| `Core/Src/ultrasonic.c` | 음속 변수 추가, 거리 계산에 적용 |
-| `Core/Src/main.c` | `Dht_Init()`, `Environment_Task()`, `E` CSV 출력, 음속 갱신 |
+| `Core/Inc/ultrasonic.h` | `distance_ref_mm` 추가, `Ultrasonic_IsIdle()`, `Ultrasonic_SetSoundSpeedX10()` 추가 |
+| `Core/Src/ultrasonic.c` | 음속 변수 추가, 보정 전/후 거리 동시 계산·중앙값 필터 |
+| `Core/Src/main.c` | `Dht_Init()`, `Environment_Task()`, `D` 행 확장, `E` CSV 출력, 음속 갱신 |
 | `F411_TASK_LAB.ioc` | 변경 없음 |
 
 > TIM2는 STEP02에서 이미 1 MHz로 동작 중이다.
@@ -257,12 +262,20 @@ void Ultrasonic_SetSoundSpeedX10(uint16_t speed_x10)
 
 static void US_StoreSample(uint32_t width_us)
 {
+  uint32_t distance_ref_mm = (width_us * 3430U) / 20000U;
   uint32_t distance_mm = (width_us * s_soundSpeedX10) / 20000U;
+
+  s_samplesRef[s_sampleIndex] = (uint16_t)distance_ref_mm;
+  s_samplesCorr[s_sampleIndex] = (uint16_t)distance_mm;
   ...
 }
 ```
 
-초기값은 `3430` (343.0 m/s)이다.
+- `distance_ref_mm`은 항상 20 °C 음속 343.0 m/s로 계산한다.
+- `distance_mm`은 DHT 온도로 보정한 음속을 사용한다.
+- 두 배열을 각각 중앙값 필터링해 같은 `D` 행에 출력한다.
+- 유효 범위(20~4000 mm) 판정은 보정 후 `distance_mm` 기준이다. 보정 전 값은 비교용으로 함께 저장한다.
+- 초기값은 `3430` (343.0 m/s)이다.
 
 ### 6.4 메인 루프 (`main.c`)
 
@@ -275,6 +288,23 @@ while (1)
   LED_Task();
   Sensor_Task();
   Environment_Task();
+}
+```
+
+`Sensor_Task()`의 `D` 출력:
+
+```c
+if (Ultrasonic_GetResult(&result) != 0U)
+{
+  int32_t delta_mm = (int32_t)result.distance_mm - (int32_t)result.distance_ref_mm;
+
+  snprintf(line, sizeof(line), "D,%lu,%u,%u,%d,%u,%lu\r\n",
+           (unsigned long)result.timestamp_ms,
+           (unsigned int)result.distance_ref_mm,
+           (unsigned int)result.distance_mm,
+           (int)delta_mm,
+           (unsigned int)result.valid,
+           (unsigned long)result.errors);
 }
 ```
 
@@ -312,13 +342,23 @@ static void Environment_Task(void)
 
 ## 7. 출력 형식
 
-기존 거리 CSV는 그대로 유지하고, 환경 CSV를 추가한다.
+기존 `D` 행에 보정 전/후 거리를 함께 넣고, `E` 행을 추가한다.
 
-### 7.1 거리
+### 7.1 거리 (보정 전/후 비교)
 
 ```text
-D,t_ms,distance_mm,valid,errors
+D,t_ms,distance_ref_mm,distance_mm,delta_mm,valid,errors
 ```
+
+| 필드 | 의미 |
+|---|---|
+| `D` | 거리 데이터 행 |
+| `t_ms` | 출력 시각 (ms) |
+| `distance_ref_mm` | 20 °C 고정 음속(343.0 m/s)으로 계산한 거리 |
+| `distance_mm` | DHT 온도로 보정한 음속으로 계산한 거리 |
+| `delta_mm` | `distance_mm - distance_ref_mm` (양수면 보정 후 더 멀게 계산) |
+| `valid` | 1 = 유효, 0 = 이번 1초 구간에 유효 샘플 없음 |
+| `errors` | 누적 오류 횟수 |
 
 ### 7.2 환경
 
@@ -329,7 +369,7 @@ E,t_ms,temp_c_x10,humidity_rh_x10,valid,errors,sound_speed_x10
 | 필드 | 의미 |
 |---|---|
 | `E` | 환경 데이터 행 |
-| `t_ms` | 읽기 시각 (ms) |
+| `t_ms` | DHT 읽기 시작 시각 (ms) |
 | `temp_c_x10` | 온도 × 10 (235 = 23.5 °C) |
 | `humidity_rh_x10` | 습도 × 10 (512 = 51.2 %RH) |
 | `valid` | 1 = 읽기 성공, 0 = 실패 |
@@ -342,18 +382,19 @@ E,t_ms,temp_c_x10,humidity_rh_x10,valid,errors,sound_speed_x10
 === F411_TASK_LAB Step 3: Temperature Compensation ===
 HC-SR04: TRIG=PA1, ECHO=PA0, 5 Hz sample, 1 Hz median
 DHT11/DHT22: DATA=PA4, 0.5 Hz, sound speed compensation
-D,1000,1685,1,0
-D,2000,1685,1,0
+D,1000,1685,1685,0,1,0
+D,2000,1685,1685,0,1,0
 E,2020,235,512,1,0,3455
-D,3000,1697,1,0
-D,4000,1697,1,0
+D,3000,1685,1697,12,1,0
+D,4000,1685,1697,12,1,0
 E,4020,235,513,1,0,3455
 ...
 ```
 
-- 첫 `E`가 출력되기 전까지는 기본 음속 343.0 m/s를 사용한다.
-- `E`가 출력된 다음 초부터 보정된 음속이 거리 계산에 적용된다.
-- DHT 읽기 실패 시 `valid=0`이 출력되고, 마지막으로 성공한 음속을 계속 사용한다.
+- 첫 `E`가 출력되기 전까지는 기본 음속 343.0 m/s를 사용하므로 두 거리가 같고 `delta_mm`은 0이다.
+- `E`가 출력된 다음 초부터 `distance_mm`에 보정된 음속이 적용된다.
+- DHT 읽기 실패 시 `E`의 `valid=0`이 출력되고, 마지막으로 성공한 음속을 계속 사용한다.
+- `valid=0`인 `D` 행은 두 거리와 `delta_mm`이 모두 0이다.
 
 ---
 
@@ -365,7 +406,7 @@ E,4020,235,513,1,0,3455
 Build Finished. 0 errors, 0 warnings.
 
 text    data    bss     dec     hex    filename
-15480     92    2148   17720    4538   F411_TASK_LAB.elf
+15588     92    2164   17844    45b4   F411_TASK_LAB.elf
 ```
 
 ---
@@ -381,11 +422,12 @@ text    data    bss     dec     hex    filename
 ### 9.1 기대 결과
 
 - 1초마다 `D,...` 거리 CSV가 출력된다.
+- `D`의 3번째 값(보정 전)과 4번째 값(보정 후), 5번째 값(차이)을 함께 비교할 수 있다.
 - 2초마다 `E,...` 환경 CSV가 출력된다.
 - `E`의 `valid=1`이고 `sound_speed_x10`이 3400~3500 근처로 나온다.
 - 실온 23 °C 근처라면 `temp_c_x10`이 220~240 근처다.
 - 센서에 입김을 불면 `humidity_rh_x10`이 올라간다.
-- 초음파 거리는 `E` 출력 이후부터 약간 길게 보정된다.
+- 첫 `E` 이후부터 `D`의 보정 후 거리와 `delta_mm`이 0이 아니게 된다.
 
 ### 9.2 보정 확인
 
@@ -395,8 +437,9 @@ text    data    bss     dec     hex    filename
 |---|---|
 | 기본 음속 | 343.0 m/s |
 | 보정 음속 | 345.5 m/s |
-| 보정 전 거리 | 약 1685 mm |
-| 보정 후 거리 | 약 1697 mm |
+| 보정 전 거리 (`distance_ref_mm`) | 약 1685 mm |
+| 보정 후 거리 (`distance_mm`) | 약 1697 mm |
+| 차이 (`delta_mm`) | 약 +12 mm |
 
 온도 차이가 10 °C 정도 나면 차이가 더 커진다.
 (20 °C vs 30 °C에서 약 1.9 %, 1.685 m 기준 약 32 mm)
@@ -414,7 +457,8 @@ text    data    bss     dec     hex    filename
 - [ ] 온도/습도가 상식적인 범위
 - [ ] 입김을 불면 습도가 변함
 - [ ] `sound_speed_x10`이 3400~3500 근처
-- [ ] `E` 출력 후 거리 값이 보정됨
+- [ ] `D`의 보정 전/후 거리와 `delta_mm`이 함께 출력됨
+- [ ] `E` 출력 후 `delta_mm`이 0이 아님
 - [ ] LD2가 계속 0.5초마다 점멸
 - [ ] DHT 오류가 계속 증가하지 않음
 
@@ -429,7 +473,9 @@ text    data    bss     dec     hex    filename
 | `E`의 `valid=0`이 반복됨 | 센서 전원 인가 후 1~2초 대기, DHT11/DHT22 모델 확인, 배선 길이 짧게 |
 | 온도/습도가 0 | checksum 실패 또는 자동 판별 실패. 배선/풀업 먼저 확인 |
 | 습도가 45.0 대신 4.5로 보임 | DHT11 원시값 해석 문제. `E`의 `humidity_rh_x10`이 450인지 확인 (450 = 45.0 %) |
-| 거리가 갑자기 커짐 | 음속 보정이 적용된 것. `E`의 `sound_speed_x10`과 비교 |
+| `D`의 두 거리가 계속 같음 | 첫 `E` 전이거나 `E`의 `valid=0`. `sound_speed_x10` 확인 |
+| `D`의 `delta_mm`이 음수 | 실온이 20 °C보다 낮은 것. 정상 |
+| 거리가 갑자기 커짐 | `distance_mm`만 커지고 `distance_ref_mm`은 그대로인지 확인 |
 | DHT 읽을 때 LED가 살짝 끊김 | 정상. 약 25 ms 블로킹 구간이 2초마다 한 번 있음 |
 | `D` 행은 나오는데 `E`가 늦게 나옴 | 첫 DHT 읽기는 부팅 후 2초 뒤에 시작됨 |
 | 빌드 오류 `DHT_PORT` 미정의 | `dht.c`의 `#include "main.h"` 확인 |
@@ -442,6 +488,7 @@ text    data    bss     dec     hex    filename
 현재 구현의 한계:
 
 - DHT 읽기 구간(약 25 ms)은 블로킹이다.
+- `distance_ref_mm`은 의도적으로 20 °C 고정 음속을 사용하므로 실제 온도가 20 °C가 아니면 오차가 있다.
 - DHT11은 정확도가 낮아 보정 효과가 과소/과대 평가될 수 있다.
 - 습도는 거리 계산에 직접 쓰지 않고 로그로만 출력한다.
 - 센서 자체의 최소/최대 거리와 빔 각도 한계는 그대로다.
@@ -463,5 +510,5 @@ DHT의 25 ms 블로킹 읽기도 별도 태스크로 분리해 LED/초음파 지
 - DHT 읽기 주기를 2초에서 5초로 바꿔 오류율과 반응 속도를 비교한다.
 - `E` 행에 `v_x10` 대신 `v(m/s)`를 소수점으로 출력해 본다.
 - DHT11과 DHT22를 각각 연결해 온도 정확도 차이를 비교한다.
-- 음속 보정을 잠시 끄고(`Ultrasonic_SetSoundSpeedX10(3430)`) 보정 전/후 거리를 비교한다.
+- `D`의 보정 전/후 거리와 `delta_mm`을 엑셀에 저장해 온도와의 관계를 그래프로 그려본다.
 - DHT 읽기 전후의 `HAL_GetTick()` 차이를 출력해 블로킹 시간을 직접 측정한다.
