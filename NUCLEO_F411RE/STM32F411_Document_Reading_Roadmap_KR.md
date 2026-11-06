@@ -12,12 +12,12 @@ STM32F411을 처음 제대로 다루거나 보드 설계와 펌웨어를 함께 
 
 | 순서 | 파일 | 우선순위 | 읽는 목적 |
 |---:|---|---|---|
-| 1 | `411-Product Specification/<br>DS10314-Datasheet - production data.pdf` | 필수 | 제품군, 메모리, 클록, 전기적 특성, <br>핀 배치 및 패키지 확인 |
-| 2 | `411-Reference Manuals/<br>RM0383-STM32F411xCE advanced Arm-based 32-bit MCUs.pdf` | 필수 | 주변장치 레지스터, 버스, <br>클록 트리, GPIO, 타이머, <br>ADC, 통신장치의 동작 이해 |
-| 3 | `411-Programming Manuals/<br>PM0214-STM32 Cortex-M4 MCUs and MPUs programming manual.pdf` | 필수 | Cortex-M4 명령어, 예외/인터럽트, <br>메모리 모델, FPU 및 코어 프로그래밍 이해 |
-| 4 | `411-Errata Sheets/<br>ES0287-STM32F411xCxE device errata.pdf` | 필수 | 실리콘 리비전별 제한사항과 우회 방법 확인 |
-| 5 | `411-Application Notes/<br>AN4488-Getting started with STM32F4xxxx MCU hardware development.pdf` | 매우 높음 | 전원, 리셋, 클록, <br>디커플링 등 MCU 하드웨어 설계의 출발점 |
-| 6 | `411-Application Notes/<br>AN4899-Guidelines for GPIO hardware settings and low-power consumption on STM32 MCUs.pdf` | 매우 높음 | GPIO 전기적 설정, <br>입력/출력 구성, 풀업·풀다운 및 저전력 설계 |
+| 1 | `411-Product Specification/ <br>DS10314-Datasheet - production data.pdf` | 필수 | 제품군, 메모리, 클록, 전기적 특성, <br>핀 배치 및 패키지 확인 |
+| 2 | `411-Reference Manuals/ <br>RM0383-STM32F411xCE advanced Arm-based 32-bit MCUs.pdf` | 필수 | 주변장치 레지스터, 버스, <br>클록 트리, GPIO, 타이머, <br>ADC, 통신장치의 동작 이해 |
+| 3 | `411-Programming Manuals/ <br>PM0214-STM32 Cortex-M4 MCUs and MPUs programming manual.pdf` | 필수 | Cortex-M4 명령어, 예외/인터럽트, <br>메모리 모델, FPU 및 코어 프로그래밍 이해 |
+| 4 | `411-Errata Sheets/ <br>ES0287-STM32F411xCxE device errata.pdf` | 필수 | 실리콘 리비전별 제한사항과 우회 방법 확인 |
+| 5 | `411-Application Notes/ <br>AN4488-Getting started with STM32F4xxxx MCU hardware development.pdf` | 매우 높음 | 전원, 리셋, 클록, <br>디커플링 등 MCU 하드웨어 설계의 출발점 |
+| 6 | `411-Application Notes/ <br>AN4899-Guidelines for GPIO hardware settings and low-power consumption on STM32 MCUs.pdf` | 매우 높음 | GPIO 전기적 설정, <br>입력/출력 구성, 풀업·풀다운 및 저전력 설계 |
 | 7 | `411-Application Notes/<br>AN4013-Introduction to timers for STM32 MCUs.pdf` | 매우 높음 | 타이머의 기본 구조와 입력 캡처, <br>출력 비교, PWM 등의 개념 |
 | 8 | `411-Application Notes/<br>AN4776-How to use general-purpose timer peripheral on STM32 MCUs.pdf` | 매우 높음 | 범용 타이머의 실제<br>설정과 응용 방법 |
 | 9 | `411-Application Notes/<br>AN4031-Using the STM32F2, STM32F4 and STM32F7 Series DMA controller.pdf` | 매우 높음 | DMA 스트림·채널·요청 매핑과 <br>CPU 부하를 줄이는 데이터 전송 |
