@@ -12,25 +12,25 @@ STM32F411을 처음 제대로 다루거나 보드 설계와 펌웨어를 함께 
 
 | 순서 | 파일 | 우선순위 | 읽는 목적 |
 |---:|---|---|---|
-| 1 | `411-Product Specification/DS10314-Datasheet - production data.pdf` | 필수 | 제품군, 메모리, 클록, 전기적 특성, <br>핀 배치 및 패키지 확인 |
-| 2 | `411-Reference Manuals/RM0383-STM32F411xCE advanced Arm-based 32-bit MCUs.pdf` | 필수 | 주변장치 레지스터, 버스, <br>클록 트리, GPIO, 타이머, <br>ADC, 통신장치의 동작 이해 |
-| 3 | `411-Programming Manuals/PM0214-STM32 Cortex-M4 MCUs and MPUs programming manual.pdf` | 필수 | Cortex-M4 명령어, 예외/인터럽트, <br>메모리 모델, FPU 및 코어 프로그래밍 이해 |
-| 4 | `411-Errata Sheets/ES0287-STM32F411xCxE device errata.pdf` | 필수 | 실리콘 리비전별 제한사항과 우회 방법 확인 |
-| 5 | `411-Application Notes/AN4488-Getting started with STM32F4xxxx MCU hardware development.pdf` | 매우 높음 | 전원, 리셋, 클록, <br>디커플링 등 MCU 하드웨어 설계의 출발점 |
-| 6 | `411-Application Notes/AN4899-Guidelines for GPIO hardware settings and low-power consumption on STM32 MCUs.pdf` | 매우 높음 | GPIO 전기적 설정, <br>입력/출력 구성, 풀업·풀다운 및 저전력 설계 |
-| 7 | `411-Application Notes/AN4013-Introduction to timers for STM32 MCUs.pdf` | 매우 높음 | 타이머의 기본 구조와 입력 캡처, <br>출력 비교, PWM 등의 개념 |
-| 8 | `411-Application Notes/AN4776-How to use general-purpose timer peripheral on STM32 MCUs.pdf` | 매우 높음 | 범용 타이머의 실제<br>설정과 응용 방법 |
-| 9 | `411-Application Notes/AN4031-Using the STM32F2, STM32F4 and STM32F7 Series DMA controller.pdf` | 매우 높음 | DMA 스트림·채널·요청 매핑과 <br>CPU 부하를 줄이는 데이터 전송 |
-| 10 | `411-Application Notes/AN2834-How to optimize the ADC accuracy in the STM32 MCUs.pdf` | 매우 높음 | ADC 정확도, 샘플링 시간, 기준전압, <br>아날로그 회로 및 보정 고려 |
-| 11 | `411-Application Notes/AN4646-Peripheral interconnections on STM32F401 and STM32F411 lines.pdf` | 높음 | 주변장치 간 내부 연결 및 <br>타이머·ADC 등 연동 설계 |
-| 12 | `411-Application Notes/AN4739-STM32Cube firmware examples for STM32F4 Series.pdf` | 높음 | STM32Cube 펌웨어 예제의 구성과 <br>주변장치별 실습 방향 파악 |
-| 13 | `411-Application Notes/AN4989-Introduction to debug toolbox for STM32 MCUs.pdf` | 높음 | 디버깅 도구와 문제 분석 방법 이해 |
-| 14 | `411-Application Notes/AN2606-Introduction to system memory boot mode on STM32 MCUs.pdf` | 높음 | System Memory 부트 모드와 <br>내장 부트로더 진입 조건 이해 |
-| 15 | `411-Application Notes/AN3155-How to use the USART protocol in the bootloader.pdf` | 높음 | USART를 이용한 ROM <br>부트로더 다운로드 절차 |
-| 16 | `411-Application Notes/AN3154-How to use CAN protocol in bootloader on STM32 MCUs.pdf` | 선택 | CAN 부트로더 프로토콜. F411의 해당 인터페이스/부트로더 <br>지원 여부를 AN2606에서 먼저 확인 |
-| 17 | `411-Application Notes/AN3156-How to use the USB DFU protocol in the bootloader on STM32 MCUs.pdf` | 선택 | USB DFU 부트로더 개념. F411의 USB 및<br> ROM 부트로더 지원 조건 확인 필요 |
-| 18 | `411-Application Notes/AN4221-How to use I2C protocol in bootloader on STM32 MCUs.pdf` | 선택 | I2C 부트로더 프로토콜. <br>F411의 실제 지원 여부 확인 필요 |
-| 19 | `411-Application Notes/AN4286-How to use SPI protocol in bootloader on STM32 MCUs.pdf` | 선택 | SPI 부트로더 프로토콜. <br>F411의 실제 지원 여부 확인 필요 |
+| 1 | `411-Product Specification/<br>DS10314-Datasheet - production data.pdf` | 필수 | 제품군, 메모리, 클록, 전기적 특성, <br>핀 배치 및 패키지 확인 |
+| 2 | `411-Reference Manuals/<br>RM0383-STM32F411xCE advanced Arm-based 32-bit MCUs.pdf` | 필수 | 주변장치 레지스터, 버스, <br>클록 트리, GPIO, 타이머, <br>ADC, 통신장치의 동작 이해 |
+| 3 | `411-Programming Manuals/<br>PM0214-STM32 Cortex-M4 MCUs and MPUs programming manual.pdf` | 필수 | Cortex-M4 명령어, 예외/인터럽트, <br>메모리 모델, FPU 및 코어 프로그래밍 이해 |
+| 4 | `411-Errata Sheets/<br>ES0287-STM32F411xCxE device errata.pdf` | 필수 | 실리콘 리비전별 제한사항과 우회 방법 확인 |
+| 5 | `411-Application Notes/<br>AN4488-Getting started with STM32F4xxxx MCU hardware development.pdf` | 매우 높음 | 전원, 리셋, 클록, <br>디커플링 등 MCU 하드웨어 설계의 출발점 |
+| 6 | `411-Application Notes/<br>AN4899-Guidelines for GPIO hardware settings and low-power consumption on STM32 MCUs.pdf` | 매우 높음 | GPIO 전기적 설정, <br>입력/출력 구성, 풀업·풀다운 및 저전력 설계 |
+| 7 | `411-Application Notes/<br>AN4013-Introduction to timers for STM32 MCUs.pdf` | 매우 높음 | 타이머의 기본 구조와 입력 캡처, <br>출력 비교, PWM 등의 개념 |
+| 8 | `411-Application Notes/<br>AN4776-How to use general-purpose timer peripheral on STM32 MCUs.pdf` | 매우 높음 | 범용 타이머의 실제<br>설정과 응용 방법 |
+| 9 | `411-Application Notes/<br>AN4031-Using the STM32F2, STM32F4 and STM32F7 Series DMA controller.pdf` | 매우 높음 | DMA 스트림·채널·요청 매핑과 <br>CPU 부하를 줄이는 데이터 전송 |
+| 10 | `411-Application Notes/<br>AN2834-How to optimize the ADC accuracy in the STM32 MCUs.pdf` | 매우 높음 | ADC 정확도, 샘플링 시간, 기준전압, <br>아날로그 회로 및 보정 고려 |
+| 11 | `411-Application Notes/<br>AN4646-Peripheral interconnections on STM32F401 and STM32F411 lines.pdf` | 높음 | 주변장치 간 내부 연결 및 <br>타이머·ADC 등 연동 설계 |
+| 12 | `411-Application Notes/<br>AN4739-STM32Cube firmware examples for STM32F4 Series.pdf` | 높음 | STM32Cube 펌웨어 예제의 구성과 <br>주변장치별 실습 방향 파악 |
+| 13 | `411-Application Notes/<br>AN4989-Introduction to debug toolbox for STM32 MCUs.pdf` | 높음 | 디버깅 도구와 문제 분석 방법 이해 |
+| 14 | `411-Application Notes/<br>AN2606-Introduction to system memory boot mode on STM32 MCUs.pdf` | 높음 | System Memory 부트 모드와 <br>내장 부트로더 진입 조건 이해 |
+| 15 | `411-Application Notes/<br>AN3155-How to use the USART protocol in the bootloader.pdf` | 높음 | USART를 이용한 ROM <br>부트로더 다운로드 절차 |
+| 16 | `411-Application Notes/<br>AN3154-How to use CAN protocol in bootloader on STM32 MCUs.pdf` | 선택 | CAN 부트로더 프로토콜. F411의 해당 인터페이스/부트로더 <br>지원 여부를 AN2606에서 먼저 확인 |
+| 17 | `411-Application Notes/<br>AN3156-How to use the USB DFU protocol in the bootloader on STM32 MCUs.pdf` | 선택 | USB DFU 부트로더 개념. F411의 USB 및<br> ROM 부트로더 지원 조건 확인 필요 |
+| 18 | `411-Application Notes/<br>AN4221-How to use I2C protocol in bootloader on STM32 MCUs.pdf` | 선택 | I2C 부트로더 프로토콜. <br>F411의 실제 지원 여부 확인 필요 |
+| 19 | `411-Application Notes/<br>AN4286-How to use SPI protocol in bootloader on STM32 MCUs.pdf` | 선택 | SPI 부트로더 프로토콜. <br>F411의 실제 지원 여부 확인 필요 |
 
 ### 핵심 원칙
 
