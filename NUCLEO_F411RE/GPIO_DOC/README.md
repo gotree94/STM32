@@ -1,6 +1,6 @@
 # GPIO
-   - [RM0008 Reference Manual (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
-   - [DS5319 Datasheet (STM32F101/2/3/5/7 Series)](https://www.st.com/resource/en/datasheet/stm32f103rb.pdf)
+   - [Datasheet - STM32F411xC STM32F411xE](https://www.st.com/resource/en/datasheet/stm32f411ce.pdf)
+   - [RM0383 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
 ## Table of Contents
 - [1. Architecture](#1-architecture)
