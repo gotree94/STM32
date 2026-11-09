@@ -1,8 +1,8 @@
 # NUCLEO-F411RE 단계별 학습 노트
 
-> 보드: NUCLEO-F411RE (STM32F411RET6, Cortex-M4F, 512 KB Flash, 128 KB SRAM)
-> 프로젝트: `F411_TASK_LAB` (`C:\Users\Administrator\STM32CubeIDE\workspace_2.2.0\F411_TASK_LAB`)
-> 도구: STM32CubeIDE 2.2.0 / STM32Cube FW_F4 V1.28.3
+> 보드: NUCLEO-F411RE (STM32F411RET6, Cortex-M4F, 512 KB Flash, 128 KB SRAM) <br>
+> 프로젝트: `F411_TASK_LAB` (`C:\Users\Administrator\STM32CubeIDE\workspace_2.2.0\F411_TASK_LAB`) <br>
+> 도구: STM32CubeIDE 2.2.0 / STM32Cube FW_F4 V1.28.3 <br>
 > 최종 업데이트: 2026-11-04
 
 ---
