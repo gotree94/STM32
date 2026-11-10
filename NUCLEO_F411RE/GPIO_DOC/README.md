@@ -56,7 +56,7 @@
 
 <details>
 <summary>Click to collapse</summary>
-<img src="./img/007-1.png"> <br>
+<img src="./img/007-1.png" width="120%"> <br>
    
 <img src="./img/010-1.png" width="85%"> <br>
 <img src="./img/011-1.png" width="85%"> <br>
@@ -66,7 +66,7 @@
 
 <details>
 <summary>Click to collapse</summary>
-<img src="./img/018.png" width="120%"> <br>
+<img src="./img/018.png"> <br>
 <img src="./img/019.png"> <br>
 <img src="./img/020.png" width="85%"> <br>
 <img src="./img/021.png" width="85%"> <br>
