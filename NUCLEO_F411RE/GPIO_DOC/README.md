@@ -330,7 +330,8 @@ I/O 포트가 아날로그 구성으로 설정된 경우:
 
 <img src="./img/F20.png"> <br>
 
-
+<img src="./img/841.png"> <br>
+<img src="./img/842.png"> <br>
 <img src="./img/843.png"> <br>
 <img src="./img/844.png"> <br>
 <img src="./img/845.png"> <br>
