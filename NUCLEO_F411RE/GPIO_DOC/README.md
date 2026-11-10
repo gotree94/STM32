@@ -8,8 +8,10 @@
 - [3. Register](#3-register)
 - [4. Test](#4-test)
 
+## 1.Architecture
+
 ---
-## STM32F103
+### STM32F103
 
 <img src="./img/arm-arch.png"> <br>
 
@@ -21,11 +23,11 @@
 <img src="./img/arm-arch-0.png" width="120%"> <br>
 
 ---
-## STM32F411
+### STM32F411
 
-### 메모리 및 버스 아키텍처
+#### 메모리 및 버스 아키텍처
 
-#### 시스템 아키텍처
+##### 시스템 아키텍처
 
 * STM32F411xC/E의 메인 시스템은 32비트 다중 계층(multilayer) AHB 버스 매트릭스로 구성되어 있으며, 이를 통해 다음 요소들이 상호 연결됩니다. <br>
 * 6개의 마스터(Master):
@@ -68,13 +70,8 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 디바이스가 리셋될 때마다 모든 주변 장치 클록은 비활성화됩니다(SRAM 및 플래시 메모리 인터페이스는 예외). 주변 장치를 사용하려면 먼저 RCC_AHBxENR 또는 RCC_APBxENR 레지스터를 통해 해당 주변 장치의 클록을 활성화해야 합니다.
 
 참고: APB 레지스터에 대해 16비트 또는 8비트 액세스를 수행하면, 해당 액세스는 32비트 액세스로 변환됩니다. 즉, 브리지가 16비트 또는 8비트 데이터를 복제하여 32비트 벡터를 구성합니다.
-
-
    
 <img src="./img/arm-arch-1.png"> <br>
-
-
-## 1.Architecture
 
 <details>
 <summary>Click to collapse</summary>
@@ -92,7 +89,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 <img src="./img/006.png"> <br>
 </details>
 
-### 1.2. CLOCK
+## 2. CLOCK
 
 <details>
 <summary>Clock System F103</summary>
@@ -110,7 +107,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 
 </details>
 
-## 2.MemoryMap
+## 3.MemoryMap
 
 <details>
 <summary>F103</summary>
@@ -133,14 +130,14 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 
 <summary>F411</summary>
 
-### 2.2 메모리 구성
+### 3.2 메모리 구성
 
 프로그램 메모리, 데이터 메모리, 레지스터 및 I/O 포트는 동일한 4GB 선형 주소 공간 내에 구성됩니다.
 메모리 내의 바이트는 리틀 엔디언(little endian) 형식으로 저장됩니다. 워드(word)에서 가장 낮은 주소의 바이트는 최하위 바이트(LSB, least significant byte)로 간주되며, 가장 높은 주소의 바이트는 최상위 바이트(MSB, most significant byte)로 간주됩니다.
 주변 장치(peripheral) 레지스터의 상세 매핑에 대해서는 관련 장(chapter)을 참조하십시오. 주소 지정이 가능한 메모리 공간은 각각 512MB 크기의 8개 주요 블록으로 나뉩니다.
 온칩(on-chip) 메모리나 주변 장치에 할당되지 않은 모든 메모리 영역은 '예약됨(Reserved)'으로 간주됩니다. 제품 데이터시트에 있는 메모리 맵 그림을 참조하십시오.
 
-### 2.3 메모리 맵
+### 3.3 메모리 맵
 
 메모리 맵에 대한 전체적인 구성도는 사용 중인 장치의 데이터시트를 참조하십시오. 표 1은 STM32F411xC/E 장치에서 사용할 수 있는 주변 장치들의 경계 주소를 나타냅니다.
 
@@ -150,7 +147,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 <img src="./img/011-1.png" width="85%"> <br>
 </details>
 
-## 3.Register
+## 4.Register
 
 <details>
 <summary>Click to collapse</summary>
@@ -160,7 +157,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 <img src="./img/021.png" width="85%"> <br>
 </details>
 
-## 4.Test
+## 5.Test (F103)
 
 <details>
 <summary>Click to collapse</summary>
