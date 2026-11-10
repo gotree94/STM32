@@ -240,21 +240,27 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 STM32F411xC/E 모델에서는 GPIO F/G/H/I/J/K를 사용할 수 없습니다(GPIOH0 및 GPIOH1은 제외).
 
 ### 8.1 GPIO 개요
-각 범용 입출력(GPIO) 포트에는 4개의 32비트 설정 레지스터(GPIOx_MODER, GPIOx_OTYPER, GPIOx_OSPEEDR, GPIOx_PUPDR), 2개의 32비트 데이터 레지스터(GPIOx_IDR, GPIOx_ODR), 32비트 세트/리셋 레지스터(GPIOx_BSRR), 32비트 잠금 레지스터(GPIOx_LCKR), 그리고 2개의 32비트 대체 기능 선택 레지스터(GPIOx_AFRH, GPIOx_AFRL)가 포함되어 있습니다. 
+
+각 범용 입출력(GPIO) 포트에는 4개의 32비트 설정 레지스터(GPIOx_MODER, GPIOx_OTYPER, GPIOx_OSPEEDR, GPIOx_PUPDR), <br>
+2개의 32비트 데이터 레지스터(GPIOx_IDR, GPIOx_ODR),  <br>
+32비트 세트/리셋 레지스터(GPIOx_BSRR),  <br>
+32비트 잠금 레지스터(GPIOx_LCKR),  <br>
+그리고 2개의 32비트 대체 기능 선택 레지스터(GPIOx_AFRH, GPIOx_AFRL)가 포함되어 있습니다. 
 
 ### 8.2 GPIO 주요 특징
-• 최대 16개의 I/O 제어 가능
-• 출력 상태: 푸시-풀(push-pull) 또는 오픈-드레인(open-drain) + 풀업/풀다운(pull-up/down)
-• 출력 데이터 소스: 출력 데이터 레지스터(GPIOx_ODR) 또는 주변 장치(대체 기능 출력)
-• 각 I/O별 속도 설정 가능
-• 입력 상태: 플로팅(floating), 풀업/풀다운, 아날로그
-• 입력 데이터 목적지: 입력 데이터 레지스터(GPIOx_IDR) 또는 주변 장치(대체 기능 입력)
-• 비트 설정 및 리셋 레지스터(GPIOx_BSRR)를 통한 GPIOx_ODR의 비트 단위 쓰기 접근 지원
-• I/O 구성을 고정할 수 있는 잠금 메커니즘(GPIOx_LCKR) 제공
-• 아날로그 기능 지원
-• 대체 기능(Alternate Function, AF) 입출력 선택 레지스터 (I/O당 최대 16개의 AF 지원)
-• 2클럭 주기마다 상태를 변경할 수 있는 고속 토글(fast toggle) 기능
-• 유연한 핀 멀티플렉싱을 통해 I/O 핀을 범용 I/O(GPIO) 또는 다양한 주변 장치 기능으로 활용 가능
+
+   * 최대 16개의 I/O 제어 가능
+   * 출력 상태: 푸시-풀(push-pull) 또는 오픈-드레인(open-drain) + 풀업/풀다운(pull-up/down)
+   * 출력 데이터 소스: 출력 데이터 레지스터(GPIOx_ODR) 또는 주변 장치(대체 기능 출력)
+   * 각 I/O별 속도 설정 가능
+   * 입력 상태: 플로팅(floating), 풀업/풀다운, 아날로그
+   * 입력 데이터 목적지: 입력 데이터 레지스터(GPIOx_IDR) 또는 주변 장치(대체 기능 입력)
+   * 비트 설정 및 리셋 레지스터(GPIOx_BSRR)를 통한 GPIOx_ODR의 비트 단위 쓰기 접근 지원
+   * I/O 구성을 고정할 수 있는 잠금 메커니즘(GPIOx_LCKR) 제공
+   * 아날로그 기능 지원
+   * 대체 기능(Alternate Function, AF) 입출력 선택 레지스터 (I/O당 최대 16개의 AF 지원)
+   * 2클럭 주기마다 상태를 변경할 수 있는 고속 토글(fast toggle) 기능
+   * 유연한 핀 멀티플렉싱을 통해 I/O 핀을 범용 I/O(GPIO) 또는 다양한 주변 장치 기능으로 활용 가능
 
 ### 8.3 GPIO 기능 설명
 
@@ -297,7 +303,7 @@ I/O 포트가 출력으로 설정된 경우:
 
 <img src="./img/F19.png"> <br>
 
-#### 8.3.11       대체 기능(Alternate function) 구성
+#### 8.3.11 대체 기능(Alternate function) 구성
 I/O 포트가 대체 기능으로 설정된 경우:
 • 출력 버퍼는 오픈 드레인(open-drain) 또는 푸시-풀(push-pull) 방식으로 구성할 수 있습니다.
 • 출력 버퍼는 주변 장치(peripheral)에서 오는 신호(송신기 활성화 및 데이터)에 의해 구동됩니다.
