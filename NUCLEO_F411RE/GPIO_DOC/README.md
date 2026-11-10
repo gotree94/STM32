@@ -80,7 +80,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 ## 2. CLOCK
 
 <details>
-<summary>Clock System F103</summary>
+<summary>F103</summary>
    
 <img src="./img/103-clock1.png"> <br>
 <img src="./img/103-clk2.png"> <br>
@@ -88,7 +88,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 </details>
 
 <details>
-<summary>Clock System F411</summary>
+<summary>F411</summary>
 
 <img src="./img/411-clk1.png"> <br>
 <img src="./img/411-clk2.png"> <br>
@@ -260,7 +260,7 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 ## 6.Test (F103)
 
 <details>
-<summary>Click to collapse</summary>
+<summary>F103</summary>
 
 #### 1.	LED test 프로그램을 작성합니다.
 <img src="./img/1001.png"> <br>
@@ -306,3 +306,54 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 <img src="./img/1014.png"> <br>
 
 </details>
+
+
+<details>
+<summary>F411</summary>
+
+#### 1.	LED test 프로그램을 작성합니다.
+<img src="./img/1001.png"> <br>
+
+#### 2.	디버그를 시작합니다.
+<img src="./img/1002.png"> <br>
+
+#### 3.	디버그 메뉴에서 실행을 시작합니다.
+<img src="./img/1003.png"> <br>
+
+#### 4.	LD2_GPIO_Port 위에 마우스를 올리면 관련 정보들이 나옵니다.
+<img src="./img/1004.png"> <br>
+<img src="./img/1005.png"> <br>
+
+#### 5.	GPIO A 관련 정보를 위에서 확인하면 관련 레지스터 및 주소 옵셋을 확인할 수 있습니다.<br>
+<img src="./img/1006.png"> <br>
+
+#### 6.	메모리 값을 확인 및 접근하기 위해서 아래에서 Memory 탭을 누릅니다.<br>
+<img src="./img/1007.png"> <br>
+
+#### 7.	플러스 버튼을 눌러서 관련 번지를 입력합니다. 값을 0x40010800을 입력합니다.<br>
+<img src="./img/1008.png"> <br>
+
+#### 8.	오른쪽에 관련 메모리 범위와 값이 표현됩니다.<br>
+<img src="./img/1009.png"> <br>
+
+#### 9.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다.<br>
+<img src="./img/1010.png"> <br>
+
+#### 10.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다. <br>
+#### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1 실행전);<br>
+<img src="./img/1011.png"> <br>
+
+#### 11.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다. <br>
+#### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);<br>
+<img src="./img/1012.png"> <br>
+
+#### 12.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다. <br>
+#### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);<br>   
+<img src="./img/1013.png"> <br>
+
+#### 13.	C-F 위치의 레지스터에서 값을 직접 입력하면서 LED의 상태를 확인하고, 레지스터의 위치와 비교해보면서 동작시켜 봅니다.<br>
+<img src="./img/1014.png"> <br>
+
+</details>
+
+
