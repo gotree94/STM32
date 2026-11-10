@@ -216,7 +216,7 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 ## 4. GPIO
 
 <details>
-<summary>F103 GPIO</summary>
+<summary>F103</summary>
    
 ## **2.3.21 GPIOs (general-purpose inputs/outputs)**
 
@@ -232,7 +232,7 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 </details>
 
 <details>
-<summary>F411 GPIO</summary>
+<summary>F411</summary>
    
 ## **2.3.21 GPIOs (general-purpose inputs/outputs)**
 
@@ -250,7 +250,7 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 ## 5.Register
 
 <details>
-<summary>Click to collapse</summary>
+<summary>F103</summary>
 <img src="./img/018.png"> <br>
 <img src="./img/019.png"> <br>
 <img src="./img/020.png" width="85%"> <br>
