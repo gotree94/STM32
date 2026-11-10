@@ -461,16 +461,13 @@ SFR: 저장 공간이긴 한데, 이 공간에 값을 쓰거나 읽는 행위 �
 #### 9.	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1); 실행
 <img src="./img/F411_R_009.png"> <br>
 
-#### 10. HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0); 실행
-#### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1 실행전);<br>
+#### 10. HAL_Delay(1000); 실행
 <img src="./img/F411_R_010.png"> <br>
 
-#### 11.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다. <br>
-#### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);<br>
+#### 11. HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0); <br>
 <img src="./img/F411_R_011.png"> <br>
 
-#### 12.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다. <br>
-#### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);<br>   
+#### 12. HAL_Delay(1000); 실행
 <img src="./img/F411_R_012.png"> <br>
 
 </details>
