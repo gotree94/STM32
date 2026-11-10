@@ -13,6 +13,9 @@
 ---
 ### STM32F103
 
+<details>
+<summary>F103</summary>
+   
 <img src="./img/arm-arch.png"> <br>
 
 * 각 GPIO 핀은 소프트웨어로 출력(푸시풀 또는 오픈 드레인), 입력(풀업 또는 풀다운 여부 선택), 또는 주변 장치의 대체 기능으로 구성할 수 있습니다.<br>
@@ -22,9 +25,14 @@
 
 <img src="./img/arm-arch-0.png" width="120%"> <br>
 
+</details>
+   
 ---
 ### STM32F411
 
+<details>
+<summary>F411</summary>
+   
 #### 메모리 및 버스 아키텍처
 
 ##### 시스템 아키텍처
@@ -73,7 +81,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
    
 <img src="./img/arm-arch-1.png"> <br>
 
-
+</details>
 
 ## 2. CLOCK
 
