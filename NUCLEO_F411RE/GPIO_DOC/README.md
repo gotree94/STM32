@@ -452,16 +452,16 @@ SFR: 저장 공간이긴 한데, 이 공간에 값을 쓰거나 읽는 행위 �
 #### 6.	SystemClock_Config(); 실행
 <img src="./img/F411_R_006.png"> <br>
 
-#### 7.	플러스 버튼을 눌러서 관련 번지를 입력합니다. 값을 0x40010800을 입력합니다.<br>
+#### 7.	MX_GPIO_Init(); 실행
 <img src="./img/F411_R_007.png"> <br>
 
-#### 8.	오른쪽에 관련 메모리 범위와 값이 표현됩니다.<br>
+#### 8.	MX_USART2_UART_Init(); 실행
 <img src="./img/F411_R_008.png"> <br>
 
-#### 9.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다.<br>
+#### 9.	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1); 실행
 <img src="./img/F411_R_009.png"> <br>
 
-#### 10.	우선은 값들의 변화를 확인하기 위해서 브레이크 포인트 부터 한단계씩 실행하면서 값의 변화를 확인합니다. <br>
+#### 10. HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0); 실행
 #### (HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1 실행전);<br>
 <img src="./img/F411_R_010.png"> <br>
 
