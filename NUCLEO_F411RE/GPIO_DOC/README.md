@@ -23,7 +23,7 @@
 <img src="./img/arm-arch-0.png" width="120%"> <br>
 
 <details>
-<summary>F103 GPIO/summary>
+<summary>F103 GPIO</summary>
    
 ## **2.3.21 GPIOs (general-purpose inputs/outputs)**
 
