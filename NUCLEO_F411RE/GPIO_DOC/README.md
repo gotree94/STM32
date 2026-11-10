@@ -614,6 +614,97 @@ SFR: 저장 공간이긴 한데, 이 공간에 값을 쓰거나 읽는 행위 �
 
 동작 설명: 1초를 더 기다린 뒤, b.n(Branch) 명령어를 만나 코드가 다시 맨 위로 되돌아갑니다. 이 과정이 계속 반복되면서 LED가 깜빡이게 됩니다.
 
+```asm
+          HAL_GPIO_WritePin:
+08000f0c:   push    {r7}
+08000f0e:   sub     sp, #12
+08000f10:   add     r7, sp, #0
+08000f12:   str     r0, [r7, #4]
+08000f14:   mov     r3, r1
+08000f16:   strh    r3, [r7, #2]
+08000f18:   mov     r3, r2
+08000f1a:   strb    r3, [r7, #1]
+416         if(PinState != GPIO_PIN_RESET)
+08000f1c:   ldrb    r3, [r7, #1]
+08000f1e:   cmp     r3, #0
+08000f20:   beq.n   0x8000f2a <HAL_GPIO_WritePin+30>
+418           GPIOx->BSRR = GPIO_Pin;
+08000f22:   ldrh    r2, [r7, #2]
+08000f24:   ldr     r3, [r7, #4]
+08000f26:   str     r2, [r3, #24]
+424       }
+08000f28:   b.n     0x8000f32 <HAL_GPIO_WritePin+38>
+422           GPIOx->BSRR = (uint32_t)GPIO_Pin << 16U;
+08000f2a:   ldrh    r3, [r7, #2]
+08000f2c:   lsls    r2, r3, #16
+08000f2e:   ldr     r3, [r7, #4]
+08000f30:   str     r2, [r3, #24]
+424       }
+08000f32:   nop     
+08000f34:   adds    r7, #12
+08000f36:   mov     sp, r7
+08000f38:   ldr.w   r7, [sp], #4
+08000f3c:   bx      lr
+08000f3e:   movs    r0, r0
+
+---
+
+          HAL_Delay:
+080009f0:   push    {r7, lr}
+080009f2:   sub     sp, #16
+080009f4:   add     r7, sp, #0
+080009f6:   str     r0, [r7, #4]
+392         uint32_t tickstart = HAL_GetTick();
+080009f8:   bl      0x80009d8 <HAL_GetTick>
+080009fc:   str     r0, [r7, #8]
+393         uint32_t wait = Delay;
+080009fe:   ldr     r3, [r7, #4]
+08000a00:   str     r3, [r7, #12]
+396         if (wait < HAL_MAX_DELAY)
+08000a02:   ldr     r3, [r7, #12]
+08000a04:   cmp.w   r3, #4294967295
+08000a08:   beq.n   0x8000a16 <HAL_Delay+38>
+398           wait += (uint32_t)(uwTickFreq);
+08000a0a:   ldr     r3, [pc, #40]   @ (0x8000a34 <HAL_Delay+68>)
+08000a0c:   ldrb    r3, [r3, #0]
+08000a0e:   mov     r2, r3
+08000a10:   ldr     r3, [r7, #12]
+08000a12:   add     r3, r2
+08000a14:   str     r3, [r7, #12]
+401         while((HAL_GetTick() - tickstart) < wait)
+08000a16:   nop     
+08000a18:   bl      0x80009d8 <HAL_GetTick>
+08000a1c:   mov     r2, r0
+08000a1e:   ldr     r3, [r7, #8]
+08000a20:   subs    r3, r2, r3
+08000a22:   ldr     r2, [r7, #12]
+08000a24:   cmp     r2, r3
+08000a26:   bhi.n   0x8000a18 <HAL_Delay+40>
+404       }
+
+를 콜하는건가?
+```
+
+1. HAL_GPIO_WritePin 함수 내부의 핵심 동작 (불 켜기/끄기)
+
+* 인자값 저장: main에서 R0(포트 주소), R1(핀 번호), R2(1 또는 0)로 넘겨준 값들을 함수 내부의 임시 공간(스택, [r7, #...])에 안전하게 백업해 둡니다. (0x8000f12 ~ 0x8000f1a)
+* 조건 분기 (if문):
+	* 0x8000f1c: 전달받은 값이 0인지 아닌지 비교(cmp r3, #0)합니다.
+ 	* 불을 켤 때 (1): 0x8000f26의 str r2, [r3, #24]를 통해 포트 주소로부터 +24번째 오프셋(BSRR 레지스터)에 그대로 값을 써서 핀을 High(3.3V)로 만듭니다.
+  	* 불을 끌 때 (0): 0x8000f2c에서 그 값을 왼쪽으로 16칸 밀치고(lsls r2, r3, #16), 똑같이 BSRR 레지스터(+24)에 써서 핀을 Low(0V)로 떨어뜨립니다. (STM32의 BSRR 특성상 하위 16비트는 Set, 상위 16비트는 Reset 역할을 합니다.)
+
+2. HAL_Delay 함수 내부의 핵심 동작 (1초 대기)
+
+* 시간 측정 시작 (tickstart):
+	* 0x8000f98: HAL_GetTick() 함수를 불러서 "지금 현재 시간(틱 카운트)"이 얼마인지 확인하고 tickstart에 저장합니다.
+
+* 대기 시간 계산 (wait):
+	* 0x80009fe: main에서 넘겨준 1000(ms)을 대기 시간(wait)으로 잡습니다.
+
+* 반복문 대기 (while):
+	* 0x8000a18 ~ 0x8000a26: 끊임없이 현재 시간을 다시 가져와서(HAL_GetTick()), (현재 시간 - 시작 시간) < 1000 조건을 만족할 때까지 계속 제자리에서 돌며(bhi.n) 시간을 떼웁니다. 1초가 지나면 이 루프를 빠져나와 함수가 종료(bx lr)됩니다.
+
+
 
 ---
 
