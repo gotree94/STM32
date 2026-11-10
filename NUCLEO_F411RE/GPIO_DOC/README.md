@@ -1,6 +1,6 @@
 # GPIO
-   - [Datasheet - STM32F411xC STM32F411xE](https://www.st.com/resource/en/datasheet/stm32f411ce.pdf)
-   - [RM0383 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+   - [Datasheet - STM32F411xC STM32F411xE : Arm Cortex-M4 32b MCU+FPU, 125 DMIPS, 512KB Flash, 128KB RAM, USB OTG FS, 11 TIMs,1 ADC,13 comm. interfaces](https://www.st.com/resource/en/datasheet/stm32f411ce.pdf)
+   - [RM0383 Reference Manual : STM32F411xC/E advanced Arm  -based 32-bit MCUs](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
 ## Table of Contents
 - [1. Architecture](#1-architecture)
