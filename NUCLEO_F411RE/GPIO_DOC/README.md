@@ -11,8 +11,6 @@
 ## 1.Architecture
 
 ---
-### STM32F103
-
 <details>
 <summary>F103</summary>
    
@@ -28,8 +26,6 @@
 </details>
    
 ---
-### STM32F411
-
 <details>
 <summary>F411</summary>
    
