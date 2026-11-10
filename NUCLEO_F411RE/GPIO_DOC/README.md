@@ -81,6 +81,8 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 
 <details>
 <summary>F103</summary>
+
+<img src="./img/004.png"> <br>
    
 <img src="./img/103-clock1.png"> <br>
 <img src="./img/103-clk2.png"> <br>
@@ -226,7 +228,7 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 * I/Os on APB2 with up to 18 MHz toggling speed.
 
 <img src="./img/003.png"> <br>
-<img src="./img/004.png"> <br>
+
 <img src="./img/005.png"> <br>
 <img src="./img/006.png"> <br>
 </details>
