@@ -93,9 +93,9 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 </details>
 
 <img src="./img/103-clock1.png"> <br>
-<img src="./img/103-clock2.png"> <br>
-<img src="./img/411-clock1.png"> <br>
-<img src="./img/411-clock2.png"> <br>
+<img src="./img/103-clk2.png"> <br>
+<img src="./img/411-clk1.png"> <br>
+<img src="./img/411-clk2.png"> <br>
 
 ## 2.MemoryMap
 
