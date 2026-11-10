@@ -22,6 +22,22 @@
 
 <img src="./img/arm-arch-0.png" width="120%"> <br>
 
+<details>
+<summary>F103 GPIO/summary>
+   
+## **2.3.21 GPIOs (general-purpose inputs/outputs)**
+
+* Each of the GPIO pins can be configured by software as output (push-pull or open-drain), as input (with or without pull-up or pull-down) or as peripheral alternate function.
+* Most of the GPIO pins are shared with digital or analog alternate functions. All GPIOs are high current- capable.
+* The I/Os alternate function configuration can be locked if needed following a specific sequence in order to avoid spurious writing to the I/Os registers.
+* I/Os on APB2 with up to 18 MHz toggling speed.
+
+<img src="./img/003.png"> <br>
+<img src="./img/004.png"> <br>
+<img src="./img/005.png"> <br>
+<img src="./img/006.png"> <br>
+</details>
+
 ---
 ### STM32F411
 
@@ -74,7 +90,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 <img src="./img/arm-arch-1.png"> <br>
 
 <details>
-<summary>Click to collapse</summary>
+<summary>F411 GPIO</summary>
    
 ## **2.3.21 GPIOs (general-purpose inputs/outputs)**
 
