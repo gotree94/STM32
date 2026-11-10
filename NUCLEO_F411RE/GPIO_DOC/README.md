@@ -22,22 +22,6 @@
 
 <img src="./img/arm-arch-0.png" width="120%"> <br>
 
-<details>
-<summary>F103 GPIO</summary>
-   
-## **2.3.21 GPIOs (general-purpose inputs/outputs)**
-
-* Each of the GPIO pins can be configured by software as output (push-pull or open-drain), as input (with or without pull-up or pull-down) or as peripheral alternate function.
-* Most of the GPIO pins are shared with digital or analog alternate functions. All GPIOs are high current- capable.
-* The I/Os alternate function configuration can be locked if needed following a specific sequence in order to avoid spurious writing to the I/Os registers.
-* I/Os on APB2 with up to 18 MHz toggling speed.
-
-<img src="./img/003.png"> <br>
-<img src="./img/004.png"> <br>
-<img src="./img/005.png"> <br>
-<img src="./img/006.png"> <br>
-</details>
-
 ---
 ### STM32F411
 
@@ -89,21 +73,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
    
 <img src="./img/arm-arch-1.png"> <br>
 
-<details>
-<summary>F411 GPIO</summary>
-   
-## **2.3.21 GPIOs (general-purpose inputs/outputs)**
 
-* Each of the GPIO pins can be configured by software as output (push-pull or open-drain), as input (with or without pull-up or pull-down) or as peripheral alternate function.
-* Most of the GPIO pins are shared with digital or analog alternate functions. All GPIOs are high current- capable.
-* The I/Os alternate function configuration can be locked if needed following a specific sequence in order to avoid spurious writing to the I/Os registers.
-* I/Os on APB2 with up to 18 MHz toggling speed.
-
-<img src="./img/003.png"> <br>
-<img src="./img/004.png"> <br>
-<img src="./img/005.png"> <br>
-<img src="./img/006.png"> <br>
-</details>
 
 ## 2. CLOCK
 
@@ -123,7 +93,41 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 
 </details>
 
-## 3.MemoryMap
+## 3. GPIO
+
+<details>
+<summary>F103 GPIO</summary>
+   
+## **2.3.21 GPIOs (general-purpose inputs/outputs)**
+
+* Each of the GPIO pins can be configured by software as output (push-pull or open-drain), as input (with or without pull-up or pull-down) or as peripheral alternate function.
+* Most of the GPIO pins are shared with digital or analog alternate functions. All GPIOs are high current- capable.
+* The I/Os alternate function configuration can be locked if needed following a specific sequence in order to avoid spurious writing to the I/Os registers.
+* I/Os on APB2 with up to 18 MHz toggling speed.
+
+<img src="./img/003.png"> <br>
+<img src="./img/004.png"> <br>
+<img src="./img/005.png"> <br>
+<img src="./img/006.png"> <br>
+</details>
+
+<details>
+<summary>F411 GPIO</summary>
+   
+## **2.3.21 GPIOs (general-purpose inputs/outputs)**
+
+* Each of the GPIO pins can be configured by software as output (push-pull or open-drain), as input (with or without pull-up or pull-down) or as peripheral alternate function.
+* Most of the GPIO pins are shared with digital or analog alternate functions. All GPIOs are high current- capable.
+* The I/Os alternate function configuration can be locked if needed following a specific sequence in order to avoid spurious writing to the I/Os registers.
+* I/Os on APB2 with up to 18 MHz toggling speed.
+
+<img src="./img/003.png"> <br>
+<img src="./img/004.png"> <br>
+<img src="./img/005.png"> <br>
+<img src="./img/006.png"> <br>
+</details>
+
+## 4.MemoryMap
 
 <details>
 <summary>F103</summary>
@@ -146,14 +150,14 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 
 <summary>F411</summary>
 
-### 3.2 메모리 구성
+### 4.2 메모리 구성
 
 프로그램 메모리, 데이터 메모리, 레지스터 및 I/O 포트는 동일한 4GB 선형 주소 공간 내에 구성됩니다.
 메모리 내의 바이트는 리틀 엔디언(little endian) 형식으로 저장됩니다. 워드(word)에서 가장 낮은 주소의 바이트는 최하위 바이트(LSB, least significant byte)로 간주되며, 가장 높은 주소의 바이트는 최상위 바이트(MSB, most significant byte)로 간주됩니다.
 주변 장치(peripheral) 레지스터의 상세 매핑에 대해서는 관련 장(chapter)을 참조하십시오. 주소 지정이 가능한 메모리 공간은 각각 512MB 크기의 8개 주요 블록으로 나뉩니다.
 온칩(on-chip) 메모리나 주변 장치에 할당되지 않은 모든 메모리 영역은 '예약됨(Reserved)'으로 간주됩니다. 제품 데이터시트에 있는 메모리 맵 그림을 참조하십시오.
 
-### 3.3 메모리 맵
+### 4.3 메모리 맵
 
 메모리 맵에 대한 전체적인 구성도는 사용 중인 장치의 데이터시트를 참조하십시오. 표 1은 STM32F411xC/E 장치에서 사용할 수 있는 주변 장치들의 경계 주소를 나타냅니다.
 
@@ -163,7 +167,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 <img src="./img/011-1.png" width="85%"> <br>
 </details>
 
-## 4.Register
+## 5.Register
 
 <details>
 <summary>Click to collapse</summary>
@@ -173,7 +177,7 @@ APB1 및 APB2의 최대 동작 주파수에 대한 자세한 내용은 해당 �
 <img src="./img/021.png" width="85%"> <br>
 </details>
 
-## 5.Test (F103)
+## 6.Test (F103)
 
 <details>
 <summary>Click to collapse</summary>
