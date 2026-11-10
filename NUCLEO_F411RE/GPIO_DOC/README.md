@@ -329,6 +329,17 @@ I/O 포트가 아날로그 구성으로 설정된 경우:
 그림 21은 I/O 포트 비트의 고임피던스 아날로그 입력 구성을 보여줍니다.
 
 <img src="./img/F20.png"> <br>
+
+
+<img src="./img/843.png"> <br>
+<img src="./img/844.png"> <br>
+<img src="./img/845.png"> <br>
+<img src="./img/846.png"> <br>
+<img src="./img/847.png"> <br>
+<img src="./img/848.png"> <br>
+<img src="./img/849.png"> <br>
+<img src="./img/8410.png"> <br>
+
 </details>
 
 ## 5.Register
