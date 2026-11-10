@@ -10,7 +10,6 @@
 
 ## 1.Architecture
 
----
 <details>
 <summary>F103</summary>
    
@@ -25,7 +24,6 @@
 
 </details>
    
----
 <details>
 <summary>F411</summary>
    
