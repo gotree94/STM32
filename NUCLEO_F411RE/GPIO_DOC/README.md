@@ -39,14 +39,11 @@
 <details>
 <summary>Click to collapse</summary>
 <img src="./img/007.png"> <br>
-<img src="./img/007-1.png"> <br>
    
 <img src="./img/008.png" width="85%"> <br>
 <img src="./img/009.png" width="85%"> <br>
 <img src="./img/010.png" width="85%"> <br>
-<img src="./img/010-1.png" width="85%"> <br>
 <img src="./img/011.png" width="85%"> <br>
-<img src="./img/011-1.png" width="85%"> <br>
 <img src="./img/012.png" width="85%"> <br>
 <img src="./img/013.png" width="85%"> <br>
 <img src="./img/014.png" width="85%"> <br>
@@ -56,6 +53,14 @@
 <img src="./img/017-1.png" width="85%"> <br>
 </details>
 
+
+<details>
+<summary>Click to collapse</summary>
+<img src="./img/007-1.png"> <br>
+   
+<img src="./img/010-1.png" width="85%"> <br>
+<img src="./img/011-1.png" width="85%"> <br>
+</details>
 
 ## 3.Register
 
