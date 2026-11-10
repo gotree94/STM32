@@ -328,7 +328,7 @@ I/O 포트가 아날로그 구성으로 설정된 경우:
 아날로그 구성 상태인 I/O 핀은 5V 내성(5V tolerant)을 가질 수 없습니다.
 그림 21은 I/O 포트 비트의 고임피던스 아날로그 입력 구성을 보여줍니다.
 
-<img src="./img/F20.png"> <br>
+<img src="./img/F21.png"> <br>
 
 <img src="./img/841.png"> <br>
 <img src="./img/842.png"> <br>
