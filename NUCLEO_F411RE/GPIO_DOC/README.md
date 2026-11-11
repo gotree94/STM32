@@ -231,6 +231,12 @@ USART 주변 장치는 내부 16 MHz 오실레이터(HSI) 주파수에서 작동
 
 <img src="./img/005.png"> <br>
 <img src="./img/006.png"> <br>
+
+<img src="./img/018.png"> <br>
+<img src="./img/019.png"> <br>
+<img src="./img/020.png" width="85%"> <br>
+<img src="./img/021.png" width="85%"> <br>
+
 </details>
 
 <details>
@@ -343,17 +349,7 @@ I/O 포트가 아날로그 구성으로 설정된 경우:
 
 </details>
 
-## 5.Register
-
-<details>
-<summary>F103</summary>
-<img src="./img/018.png"> <br>
-<img src="./img/019.png"> <br>
-<img src="./img/020.png" width="85%"> <br>
-<img src="./img/021.png" width="85%"> <br>
-</details>
-
-## 6.Test (F103)
+## 5.Test (F103)
 
 <details>
 <summary>F103</summary>
