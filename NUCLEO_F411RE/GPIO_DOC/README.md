@@ -431,6 +431,8 @@ SFR: 저장 공간이긴 한데, 이 공간에 값을 쓰거나 읽는 행위 �
 
 <img src="./img/F411_R_003.png"> <br>
 
+**Window > Show View > Othrer > Disassembly**
+
 <img src="./img/F411_R_013.png"> <br>
 
 <img src="./img/F411_R_014.png"> <br>
