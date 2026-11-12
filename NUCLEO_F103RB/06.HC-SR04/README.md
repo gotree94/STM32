@@ -96,6 +96,7 @@ long unsigned int echo(void)
    if( echo >= 240 && echo <= 23000 ) return echo;
    else return 0;
 }
+/* USER CODE END 0 */
 ```
 
 ```c
