@@ -8,7 +8,7 @@
 - [3. Register](#3-register)
 - [4. Test](#4-test)
 
-## 1.Architecture
+## 1. Architecture
 
 <details>
 <summary>F103</summary>
