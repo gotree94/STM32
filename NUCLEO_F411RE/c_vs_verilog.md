@@ -1,4 +1,4 @@
-# Verilog HDL vs C 언어 비교
+# C vs Verilog HDL 언어 비교
 
 C 언어는 **CPU가 순차적으로 실행하는 소프트웨어**를 작성하는 언어이고, Verilog HDL은 **동시에 동작하는 하드웨어 회로를 기술(Description)** 하는 언어입니다. 문법은 비슷해 보여도 코드가 의미하는 바가 근본적으로 다릅니다.
 
