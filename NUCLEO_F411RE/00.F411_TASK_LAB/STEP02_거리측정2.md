@@ -103,6 +103,9 @@ HC-SR04 ECHO ---- 1 kΩ ----+---- PA0
 ![](img/020.png) <br>
 ![](img/021.png) <br>
 
+![](img/F0010TEK.JPG) <br>
+![](img/F0011TEK.JPG) <br>
+
 
 ### ultrasonic.h
 
