@@ -49,6 +49,421 @@
 | `Debug/Core/Src/subdir.mk` | `dht.c`를 빌드 소스/오브젝트/의존성/clean에 추가 |
 | `Debug/objects.list` | 링커 입력에 `./Core/Src/dht.o` 추가 |
 
+
+### dht.h
+
+```c
+#ifndef DHT_H
+#define DHT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdint.h>
+
+typedef struct
+{
+  uint32_t timestamp_ms;
+  uint32_t errors;
+  int16_t temperature_c_x10;
+  uint16_t humidity_rh_x10;
+  uint8_t valid;
+} Dht_Result;
+
+void Dht_Init(void);
+void Dht_Task(void);
+uint8_t Dht_GetResult(Dht_Result *result);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+```
+
+### dht.c
+
+```c
+#include "dht.h"
+#include "main.h"
+
+extern TIM_HandleTypeDef htim1;
+
+#define DHT_PORT GPIOA
+#define DHT_PIN GPIO_PIN_4
+
+#define DHT_TIMER_TICKS_PER_US 1U
+
+#define DHT_READ_PERIOD_MS 2000U
+#define DHT_START_LOW_US 20000U
+#define DHT_RELEASE_US 30U
+#define DHT_RESPONSE_TIMEOUT_US 200U
+#define DHT_BIT_TIMEOUT_US 200U
+#define DHT_ONE_THRESHOLD_US 50U
+
+static uint32_t s_lastReadTick;
+static uint32_t s_errorCount;
+static Dht_Result s_result;
+static volatile uint8_t s_resultReady;
+
+static void DHT_SetPinOutput(void);
+static void DHT_SetPinInput(void);
+static uint32_t DHT_NowUs(void);
+static uint32_t DHT_ElapsedUs(uint32_t start);
+static void DHT_DelayUs(uint32_t us);
+static uint8_t DHT_WaitLevel(GPIO_PinState level, uint32_t timeout_us, uint32_t *duration);
+static uint8_t DHT_ReadRaw(uint8_t *data);
+static uint8_t DHT_Decode(const uint8_t *data, int32_t *temperature_c_x10, uint32_t *humidity_rh_x10);
+
+void Dht_Init(void)
+{
+  GPIO_InitTypeDef gpio = {0};
+
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  gpio.Pin = DHT_PIN;
+  gpio.Mode = GPIO_MODE_INPUT;
+  gpio.Pull = GPIO_PULLUP;
+  gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(DHT_PORT, &gpio);
+
+  s_lastReadTick = HAL_GetTick();
+  s_errorCount = 0U;
+  s_resultReady = 0U;
+  s_result.timestamp_ms = 0U;
+  s_result.errors = 0U;
+  s_result.temperature_c_x10 = 0;
+  s_result.humidity_rh_x10 = 0U;
+  s_result.valid = 0U;
+}
+
+void Dht_Task(void)
+{
+  uint32_t now = HAL_GetTick();
+  uint8_t data[5];
+  int32_t temperature_c_x10;
+  uint32_t humidity_rh_x10;
+  uint8_t ok = 0U;
+
+  if ((now - s_lastReadTick) < DHT_READ_PERIOD_MS)
+  {
+    return;
+  }
+  s_lastReadTick = now;
+
+  DHT_SetPinOutput();
+  HAL_GPIO_WritePin(DHT_PORT, DHT_PIN, GPIO_PIN_RESET);
+  DHT_DelayUs(DHT_START_LOW_US);
+  HAL_GPIO_WritePin(DHT_PORT, DHT_PIN, GPIO_PIN_SET);
+  DHT_DelayUs(DHT_RELEASE_US);
+  DHT_SetPinInput();
+
+  if (DHT_ReadRaw(data) != 0U)
+  {
+    uint8_t checksum = (uint8_t)(data[0] + data[1] + data[2] + data[3]);
+
+    if (checksum == data[4])
+    {
+      if (DHT_Decode(data, &temperature_c_x10, &humidity_rh_x10) != 0U)
+      {
+        s_result.temperature_c_x10 = (int16_t)temperature_c_x10;
+        s_result.humidity_rh_x10 = (uint16_t)humidity_rh_x10;
+        s_result.valid = 1U;
+        ok = 1U;
+      }
+    }
+  }
+
+  if (ok == 0U)
+  {
+    s_result.valid = 0U;
+    s_errorCount++;
+  }
+
+  s_result.timestamp_ms = now;
+  s_result.errors = s_errorCount;
+  s_resultReady = 1U;
+}
+
+uint8_t Dht_GetResult(Dht_Result *result)
+{
+  if ((result == NULL) || (s_resultReady == 0U))
+  {
+    return 0U;
+  }
+
+  *result = s_result;
+  s_resultReady = 0U;
+  return 1U;
+}
+
+static void DHT_SetPinOutput(void)
+{
+  GPIO_InitTypeDef gpio = {0};
+
+  gpio.Pin = DHT_PIN;
+  gpio.Mode = GPIO_MODE_OUTPUT_OD;
+  gpio.Pull = GPIO_PULLUP;
+  gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(DHT_PORT, &gpio);
+}
+
+static void DHT_SetPinInput(void)
+{
+  GPIO_InitTypeDef gpio = {0};
+
+  gpio.Pin = DHT_PIN;
+  gpio.Mode = GPIO_MODE_INPUT;
+  gpio.Pull = GPIO_PULLUP;
+  gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(DHT_PORT, &gpio);
+}
+
+static uint32_t DHT_NowUs(void)
+{
+  return (uint32_t)(__HAL_TIM_GET_COUNTER(&htim1) / DHT_TIMER_TICKS_PER_US);
+}
+
+static uint32_t DHT_ElapsedUs(uint32_t start)
+{
+  return (uint16_t)(DHT_NowUs() - start);
+}
+
+static void DHT_DelayUs(uint32_t us)
+{
+  uint32_t start = DHT_NowUs();
+
+  while (DHT_ElapsedUs(start) < us)
+  {
+  }
+}
+
+static uint8_t DHT_WaitLevel(GPIO_PinState level, uint32_t timeout_us, uint32_t *duration)
+{
+  uint32_t start = DHT_NowUs();
+
+  while (HAL_GPIO_ReadPin(DHT_PORT, DHT_PIN) != level)
+  {
+    if (DHT_ElapsedUs(start) >= timeout_us)
+    {
+      return 0U;
+    }
+  }
+
+  if (duration != NULL)
+  {
+    *duration = DHT_ElapsedUs(start);
+  }
+
+  return 1U;
+}
+
+static uint8_t DHT_ReadRaw(uint8_t *data)
+{
+  uint32_t duration;
+  uint8_t i;
+  uint8_t bit;
+
+  for (i = 0U; i < 5U; i++)
+  {
+    data[i] = 0U;
+  }
+
+  if (DHT_WaitLevel(GPIO_PIN_RESET, DHT_RESPONSE_TIMEOUT_US, NULL) == 0U)
+  {
+    return 0U;
+  }
+  if (DHT_WaitLevel(GPIO_PIN_SET, DHT_RESPONSE_TIMEOUT_US, NULL) == 0U)
+  {
+    return 0U;
+  }
+
+  for (i = 0U; i < 40U; i++)
+  {
+    if (DHT_WaitLevel(GPIO_PIN_RESET, DHT_BIT_TIMEOUT_US, NULL) == 0U)
+    {
+      return 0U;
+    }
+    if (DHT_WaitLevel(GPIO_PIN_SET, DHT_BIT_TIMEOUT_US, NULL) == 0U)
+    {
+      return 0U;
+    }
+    if (DHT_WaitLevel(GPIO_PIN_RESET, DHT_BIT_TIMEOUT_US, &duration) == 0U)
+    {
+      return 0U;
+    }
+
+    bit = (duration > DHT_ONE_THRESHOLD_US) ? 1U : 0U;
+    data[i / 8U] = (uint8_t)((data[i / 8U] << 1U) | bit);
+  }
+
+  return 1U;
+}
+
+static uint8_t DHT_Decode(const uint8_t *data, int32_t *temperature_c_x10, uint32_t *humidity_rh_x10)
+{
+  uint32_t humidity;
+  int32_t temperature;
+
+  humidity = ((uint32_t)data[0] << 8) | data[1];
+  temperature = (int32_t)(((uint16_t)(data[2] & 0x7FU) << 8) | data[3]);
+  if ((data[2] & 0x80U) != 0U)
+  {
+    temperature = -temperature;
+  }
+
+  if ((humidity <= 1000U) && (temperature >= -400) && (temperature <= 800))
+  {
+    *humidity_rh_x10 = humidity;
+    *temperature_c_x10 = temperature;
+    return 1U;
+  }
+
+  if ((data[1] <= 9U) && (data[3] <= 9U))
+  {
+    humidity = ((uint32_t)data[0] * 10U) + data[1];
+    temperature = ((int32_t)data[2] * 10) + (int32_t)data[3];
+
+    if ((humidity <= 1000U) && (temperature >= 0) && (temperature <= 800))
+    {
+      *humidity_rh_x10 = humidity;
+      *temperature_c_x10 = temperature;
+      return 1U;
+    }
+  }
+
+  return 0U;
+}
+```
+
+### main.c
+
+```c
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "ultrasonic.h"
+#include "dht.h"
+/* USER CODE END Includes */
+```
+
+```c
+/* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+  if (ch == '\n')
+  {
+    HAL_UART_Transmit(&huart2, (uint8_t *)"\r", 1, 0xFFFF);
+  }
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+static uint16_t Sensor_SoundSpeedX10(int16_t temperature_c_x10, uint16_t humidity_rh_x10)
+{
+  int32_t speed_x10;
+
+  speed_x10 = 3313 + ((606 * (int32_t)temperature_c_x10) / 1000);
+  speed_x10 += (12 * (int32_t)humidity_rh_x10) / 1000;
+
+  if (speed_x10 < 2500)
+  {
+    speed_x10 = 2500;
+  }
+  else if (speed_x10 > 4000)
+  {
+    speed_x10 = 4000;
+  }
+
+  return (uint16_t)speed_x10;
+}
+
+static void Sensor_Task(void)
+{
+  Ultrasonic_Result result;
+  Dht_Result dht;
+  char line[96];
+  int32_t temperature;
+
+  Dht_Task();
+  Ultrasonic_Task();
+
+  if (Dht_GetResult(&dht) != 0U)
+  {
+    temperature = (int32_t)dht.temperature_c_x10;
+    (void)snprintf(line, sizeof(line), "TH,%lu,%d,%u,%u,%lu\n",
+                   (unsigned long)dht.timestamp_ms,
+                   (int)temperature,
+                   (unsigned int)dht.humidity_rh_x10,
+                   (unsigned int)dht.valid,
+                   (unsigned long)dht.errors);
+    printf("%s", line);
+    printf("ENV,%c%u.%uC,%u.%u%%RH\n",
+           (temperature < 0) ? '-' : '+',
+           (unsigned int)((temperature < 0) ? -temperature : temperature) / 10U,
+           (unsigned int)((temperature < 0) ? -temperature : temperature) % 10U,
+           (unsigned int)dht.humidity_rh_x10 / 10U,
+           (unsigned int)dht.humidity_rh_x10 % 10U);
+
+    if (dht.valid != 0U)
+    {
+      uint16_t speed_x10 = Sensor_SoundSpeedX10(dht.temperature_c_x10,
+                                                dht.humidity_rh_x10);
+      Ultrasonic_SetSoundSpeedX10(speed_x10);
+      printf("S,%u\n", (unsigned int)speed_x10);
+    }
+  }
+
+  if (Ultrasonic_GetResult(&result) != 0U)
+  {
+    (void)snprintf(line, sizeof(line), "D,%lu,%u,%u,%lu\n",
+                   (unsigned long)result.timestamp_ms,
+                   (unsigned int)result.distance_mm,
+                   (unsigned int)result.valid,
+                   (unsigned long)result.errors);
+    printf("%s", line);
+    printf("C,%u\n", (unsigned int)Ultrasonic_GetLastEchoTicks());
+  }
+}
+/* USER CODE END 0 */
+```
+
+```c
+  /* USER CODE BEGIN 2 */
+  Ultrasonic_Init();
+  Dht_Init();
+  printf("\n=== F411_TASK_LAB Step 3: Ultrasonic + DHT ===\n");
+  printf("HC-SR04: TRIG=PA1, ECHO=PA0, 5 Hz sample, 1 Hz median\n");
+  printf("DHTxx: DATA=PA4, 2 s sample, TIM1 1 MHz timebase\n");
+  printf("TIM1: PCLK2=%luHz divider=%lu ARR=%lu tick=%luHz\n",
+         (unsigned long)HAL_RCC_GetPCLK2Freq(),
+         (unsigned long)(htim1.Init.Prescaler + 1U),
+         (unsigned long)htim1.Init.Period,
+         (unsigned long)(HAL_RCC_GetPCLK2Freq() / (htim1.Init.Prescaler + 1U)));
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+    Sensor_Task();
+  }
+  /* USER CODE END 3 */
+```
+
+
 > Eclipse/STM32CubeIDE에서 다시 빌드하면 `subdir.mk`와 `objects.list`는 `.cproject`의 `Core` 소스 경로로부터 자동 재생성되며, `Core/Src/dht.c`가 자동 포함된다. 위 수정은 커맨드라인 `make` 즉시 빌드를 위해 반영한 것이다.
 
 ### 3.1 `dht.c` 수정 내용 (첨부 소스 → 메인 적합화)
