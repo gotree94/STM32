@@ -435,7 +435,6 @@ static void US_Publish(uint32_t now)
   s_sampleCount = 0U;
   s_sampleIndex = 0U;
 }
-
 ```
 
 ### main.c
