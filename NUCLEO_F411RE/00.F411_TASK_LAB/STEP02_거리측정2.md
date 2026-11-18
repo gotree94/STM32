@@ -106,8 +106,9 @@ HC-SR04 ECHO ---- 1 kΩ ----+---- PA0
 ![](img/F0010TEK.JPG) <br>
 ![](img/F0011TEK.JPG) <br>
 
+## 4. 코드 수정 상세
 
-###  3.3 ultrasonic.h : API
+###  4.1 ultrasonic.h : API
 
 ```c
 #ifndef ULTRASONIC_H
@@ -151,7 +152,7 @@ void Ultrasonic_OnEchoEdge(void);
 ```
 
 
-### 3.4 `ultrasonic.c` - 거리 계산 핵심
+### 4.2 `ultrasonic.c` - 거리 계산 핵심
 
 ```c
 #define US_TIMER_TICKS_PER_US 1U
@@ -179,6 +180,8 @@ static void US_StoreSample(uint32_t width_ticks)
 - `US_REFERENCE_SOUND_SPEED_X10 = 3430`은 343.0 m/s입니다.
 - `/20000`은 mm/us로 환산한 뒤 왕복 시간을 2로 나누는 부분입니다.
 - `width = (uint16_t)(fall_cnt - rise_cnt)`이므로 TIM1 16-bit 오버플로도 처리됩니다.
+
+#### 전체코드
 
 ```c
 #include "ultrasonic.h"
@@ -472,7 +475,7 @@ static void US_Publish(uint32_t now)
 }
 ```
 
-### 3.5 `main.c` - EXTI 콜백 분기
+### 4.3 `main.c` - EXTI 콜백 분기
 
 ```c
 /* USER CODE BEGIN 4 */
@@ -489,6 +492,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 /* USER CODE END 4 */
 ```
+
+#### 전체코드
 
 ```c
 /* USER CODE BEGIN Includes */
@@ -537,7 +542,6 @@ static void Sensor_Task(void)
 /* USER CODE END 0 */
 ```
 
-
 ```c
   /* USER CODE BEGIN 2 */
   Ultrasonic_Init();
@@ -580,7 +584,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 /* USER CODE END 4 */
 ```
 
-### 3.6 `stm32f4xx_it.c` / `stm32f4xx_it.h`
+### 4.4 `stm32f4xx_it.c` / `stm32f4xx_it.h`
 
 ```c
 void EXTI0_IRQHandler(void)
@@ -598,6 +602,8 @@ void EXTI15_10_IRQHandler(void)
 void EXTI0_IRQHandler(void);
 void EXTI15_10_IRQHandler(void);
 ```
+
+#### 전체코드
 
 ```c
 /**
@@ -622,7 +628,7 @@ void EXTI15_10_IRQHandler(void)
 /* USER CODE END 1 */
 ```
 
-## 4. 시리얼 출력 형식
+## 5. 시리얼 출력 형식
 
 부팅 직후 배너 예시:
 
@@ -646,7 +652,7 @@ C,9801
 
 검증이 끝나면 `printf("C,%u\n", ...)` 한 줄만 제거하고 `D,` 라인만 남겨도 됩니다.
 
-## 5. 측정 흐름
+## 6. 측정 흐름
 
 1. 200 ms마다 TRIG(PA1)를 10 us 동안 HIGH로 유지합니다.
 2. ECHO(PA0) Rising 인터럽트에서 `TIM1->CNT`를 저장합니다.
@@ -656,7 +662,7 @@ C,9801
 6. 5개 샘플의 중앙값을 계산해 1초마다 UART2로 publish합니다.
 7. B1 버튼을 누르면 같은 EXTI 콜백에서 LD2를 토글합니다.
 
-## 6. 실험 결과와 분석
+## 7. 실험 결과와 분석
 
 | 조건 | 스코프로 본 ECHO 폭 | `C` 카운트 | 계산 거리 | 판정 |
 |---|---:|---:|---:|---|
@@ -682,7 +688,7 @@ C,9801
 - 센서를 각도 조정해 타겟 면에 정확히 마주하게 한 뒤 9.7 ms, 1681 mm가 나와 계산식이 검증되었습니다.
 - 음속은 온도에 따라 변하지만(약 0.17 %/°C) 이번 차이처럼 2배 수준의 오차는 만들지 못합니다.
 
-## 7. 주의사항
+## 8. 주의사항
 
 - `HAL_GPIO_EXTI_Callback()`은 모든 GPIO EXTI가 공유하므로 반드시 `GPIO_Pin`을 확인해야 합니다.
 - TIM1은 16-bit 카운터이므로 `uint16_t` 뺄셈으로 오버플로를 처리합니다.
@@ -692,7 +698,7 @@ C,9801
 
 ----
 
-## 8. SWV / 트레이스 관찰 설정
+## 9. SWV / 트레이스 관찰 설정
 
 CubeMX에서 `SYS → Debug = Trace Asynchronous SW`를 선택하면 `PA13=SWDIO`, `PA14=SWCLK`, `PB3=SWO`가 할당됩니다.
 
