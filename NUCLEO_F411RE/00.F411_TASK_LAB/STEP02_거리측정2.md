@@ -101,7 +101,7 @@ HC-SR04 ECHO ---- 1 kΩ ----+---- PA0
 
 ### ultrasonic.h
 
-```
+```c
 #ifndef ULTRASONIC_H
 #define ULTRASONIC_H
 
@@ -145,7 +145,7 @@ void Ultrasonic_OnEchoEdge(void);
 
 ### ultrasonic.c
 
-```
+```c
 #include "ultrasonic.h"
 #include "main.h"
 
@@ -459,14 +459,14 @@ static void US_Publish(uint32_t now)
 
 ### main.c
 
-```
+```c
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "ultrasonic.h"
 /* USER CODE END Includes */
 ```
 
-```
+```c
 /* USER CODE BEGIN 0 */
 #ifdef __GNUC__
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
@@ -507,7 +507,7 @@ static void Sensor_Task(void)
 ```
 
 
-```
+```c
   /* USER CODE BEGIN 2 */
   Ultrasonic_Init();
   printf("\n=== F411_TASK_LAB Step 2: Ultrasonic ===\n");
@@ -520,7 +520,7 @@ static void Sensor_Task(void)
   /* USER CODE END 2 */
 ```
 
-```
+```c
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -533,7 +533,7 @@ static void Sensor_Task(void)
   /* USER CODE END 3 */
 ```
 
-```
+```c
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -551,7 +551,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 ### stm32f4xx_it.c
 
-```
+```c
 /**
   * @brief This function handles EXTI line0 interrupt.
   */
