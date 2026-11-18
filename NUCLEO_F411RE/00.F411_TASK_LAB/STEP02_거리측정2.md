@@ -347,9 +347,6 @@ void Ultrasonic_OnEchoEdge(void)
     {
       s_echoStartCnt = now;
       s_echoRising = 1U;
-      g_trace_echo_edge = 1U;
-      g_trace_echo_state = 1U;
-      g_trace_edge_count++;
     }
   }
   else if (s_echoRising != 0U)
@@ -357,10 +354,6 @@ void Ultrasonic_OnEchoEdge(void)
     width = (uint16_t)(now - s_echoStartCnt);
     s_echoRising = 0U;
     s_echoWidthTicks = width;
-    g_trace_echo_ticks = width;
-    g_trace_echo_edge = 0U;
-    g_trace_echo_state = 0U;
-    g_trace_edge_count++;
 
     if ((width >= US_MIN_ECHO_TICKS) && (width <= US_MAX_ECHO_TICKS))
     {
@@ -644,6 +637,51 @@ void Ultrasonic_Init(void)
 }
 ```
 
+```c
+void Ultrasonic_OnEchoEdge(void)
+{
+  uint16_t now;
+  uint16_t width;
+
+  if (s_htim == NULL)
+  {
+    return;
+  }
+
+  now = US_GetCounter();
+
+  if (HAL_GPIO_ReadPin(ECHO_GPIO_Port, ECHO_Pin) == GPIO_PIN_SET)
+  {
+    if ((s_state == US_STATE_WAIT_ECHO) && (s_echoRising == 0U))
+    {
+      s_echoStartCnt = now;
+      s_echoRising = 1U;
+      g_trace_echo_edge = 1U;
+      g_trace_echo_state = 1U;
+      g_trace_edge_count++;
+    }
+  }
+  else if (s_echoRising != 0U)
+  {
+    width = (uint16_t)(now - s_echoStartCnt);
+    s_echoRising = 0U;
+    s_echoWidthTicks = width;
+    g_trace_echo_ticks = width;
+    g_trace_echo_edge = 0U;
+    g_trace_echo_state = 0U;
+    g_trace_edge_count++;
+
+    if ((width >= US_MIN_ECHO_TICKS) && (width <= US_MAX_ECHO_TICKS))
+    {
+      s_echoDone = 1U;
+    }
+    else
+    {
+      s_echoDone = 2U;
+    }
+  }
+}
+```
 
 
 
