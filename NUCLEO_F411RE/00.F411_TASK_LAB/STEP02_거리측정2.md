@@ -744,6 +744,9 @@ Debug Configuration에서는 다음을 확인합니다.
 | `g_trace_b1_irq` | `EXTI15_10_IRQHandler()` 진입마다 토글 |
 | `g_trace_b1_irq_count` | B1 EXTI 인터럽트 진입 횟수 |
 
+
+![](img/027.png) <br>
+
 ### 8.1 비교기 등록 절차
 
 Debugger 탭에서 `Debug probe=ST-LINK`, `Interface=SWD`, `Freq=Auto`, `SWV=Enable`이 보이면 설정은 정상입니다. Comparator 등록은 Debug Configuration이 아니라 **디버그 실행 후 SWV 뷰**에서 합니다.
