@@ -545,16 +545,7 @@ C,2968
 
 ---
 
-## 6. 빌드 및 검증
-
-```powershell
-$env:PATH = "C:\ST\STM32CubeIDE_2.2.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740\tools\bin;" + $env:PATH
-make all
-```
-
-- `-Wall -fsyntax-only` 검사 결과: 경고/에러 없음
-- 링크 성공: `Finished building target: F411_LAB.elf`
-- STM32CubeIDE에서는 `Project > Build Project` 또는 `Ctrl+B`로 동일하게 빌드 가능
+## 6. 검증
 
 실측 확인 방법:
 1. 보드에 다운로드 후 시리얼 모니터를 115200-8N1로 설정
