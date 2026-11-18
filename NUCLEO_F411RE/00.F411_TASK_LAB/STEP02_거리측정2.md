@@ -700,6 +700,13 @@ C,9801
 
 ## 9. SWV / 트레이스 관찰 설정
 
+![](img/022.png) <br>
+![](img/023.png) <br>
+![](img/024.png) <br>
+![](img/025.png) <br>
+![](img/026.png) <br>
+
+
 CubeMX에서 `SYS → Debug = Trace Asynchronous SW`를 선택하면 `PA13=SWDIO`, `PA14=SWCLK`, `PB3=SWO`가 할당됩니다.
 
 ```properties
