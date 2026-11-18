@@ -569,15 +569,41 @@ void EXTI0_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 void EXTI15_10_IRQHandler(void)
 {
-  g_trace_b1_irq ^= 1U;
-  g_trace_b1_irq_count++;
   HAL_GPIO_EXTI_IRQHandler(B1_Pin);
 }
 /* USER CODE END 1 */
 ```
 
 
+----
 
+## Debug
+
+
+```c
+/**
+  * @brief This function handles EXTI line0 interrupt.
+  */
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(ECHO_Pin);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+
+  /* USER CODE END EXTI0_IRQn 1 */
+}
+
+/* USER CODE BEGIN 1 */
+void EXTI15_10_IRQHandler(void)
+{
+  g_trace_b1_irq ^= 1U;
+  g_trace_b1_irq_count++;
+  HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+}
+/* USER CODE END 1 */
+```
 
 
 
