@@ -260,7 +260,6 @@ void Ultrasonic_Task(void)
 
         s_echoStartTick = now;
         s_state = US_STATE_WAIT_ECHO;
-        g_trace_echo_state = 2U;
       }
       break;
 
@@ -282,8 +281,6 @@ void Ultrasonic_Task(void)
       {
         s_errorCount++;
         s_state = US_STATE_IDLE;
-        g_trace_echo_edge = 0U;
-        g_trace_echo_state = 0U;
       }
       break;
 
@@ -634,6 +631,77 @@ void Ultrasonic_Init(void)
   g_trace_echo_edge = 0U;
   g_trace_echo_state = 0U;
   g_trace_edge_count = 0U;
+}
+```
+
+```c
+void Ultrasonic_Task(void)
+{
+  uint32_t now;
+  uint16_t trigStartCnt;
+
+  if (s_htim == NULL)
+  {
+    return;
+  }
+
+  now = HAL_GetTick();
+
+  switch (s_state)
+  {
+    case US_STATE_IDLE:
+      if ((now - s_lastSampleTick) >= US_SAMPLE_PERIOD_MS)
+      {
+        s_lastSampleTick = now;
+        s_echoRising = 0U;
+        s_echoDone = 0U;
+
+        trigStartCnt = US_GetCounter();
+        HAL_GPIO_WritePin(TRIG_GPIO_Port, TRIG_Pin, GPIO_PIN_SET);
+        while ((uint16_t)(US_GetCounter() - trigStartCnt) < US_TRIG_PULSE_US)
+        {
+        }
+        HAL_GPIO_WritePin(TRIG_GPIO_Port, TRIG_Pin, GPIO_PIN_RESET);
+
+        s_echoStartTick = now;
+        s_state = US_STATE_WAIT_ECHO;
+        g_trace_echo_state = 2U;
+      }
+      break;
+
+    case US_STATE_WAIT_ECHO:
+      if (s_echoDone != 0U)
+      {
+        if (s_echoDone == 1U)
+        {
+          US_StoreSample(s_echoWidthTicks);
+        }
+        else
+        {
+          s_errorCount++;
+        }
+        s_echoDone = 0U;
+        s_state = US_STATE_IDLE;
+      }
+      else if ((now - s_echoStartTick) >= US_ECHO_TIMEOUT_MS)
+      {
+        s_errorCount++;
+        s_state = US_STATE_IDLE;
+        g_trace_echo_edge = 0U;
+        g_trace_echo_state = 0U;
+      }
+      break;
+
+    default:
+      s_state = US_STATE_IDLE;
+      break;
+  }
+
+  if ((now - s_lastPublishTick) >= US_PUBLISH_PERIOD_MS)
+  {
+    s_lastPublishTick = now;
+    US_Publish(now);
+  }
 }
 ```
 
