@@ -821,6 +821,13 @@ Statistical Profiling은 comparators 등록 없이 트레이스만 켜면 `EXTI0
 ### stm32f4xx_it.c
 
 ```c
+/* USER CODE BEGIN PV */
+volatile uint8_t g_trace_b1_irq;
+volatile uint32_t g_trace_b1_irq_count;
+/* USER CODE END PV */
+```
+
+```c
 /**
   * @brief This function handles EXTI line0 interrupt.
   */
