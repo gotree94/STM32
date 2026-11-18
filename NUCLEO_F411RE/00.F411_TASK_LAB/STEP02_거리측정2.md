@@ -81,19 +81,19 @@ HC-SR04 ECHO ---- 1 kΩ ----+---- PA0
 
 ---
 
-![](../img/001.png) <br>
-![](../img/002.png) <br>
-![](../img/003.png) <br>
-![](../img/004.png) <br>
-![](../img/005.png) <br>
-![](../img/006.png) <br>
-![](../img/007.png) <br>
-![](../img/008.png) <br>
-![](../img/009.png) <br>
-![](../img/010.png) <br>
-![](../img/011.png) <br>
-![](../img/012.png) <br>
-![](../img/013.png) <br>
-![](../img/014.png) <br>
-![](../img/015.png) <br>
-![](../img/016.png) <br>
+![](img/001.png) <br>
+![](img/002.png) <br>
+![](img/003.png) <br>
+![](img/004.png) <br>
+![](img/005.png) <br>
+![](img/006.png) <br>
+![](img/007.png) <br>
+![](img/008.png) <br>
+![](img/009.png) <br>
+![](img/010.png) <br>
+![](img/011.png) <br>
+![](img/012.png) <br>
+![](img/013.png) <br>
+![](img/014.png) <br>
+![](img/015.png) <br>
+![](img/016.png) <br>
