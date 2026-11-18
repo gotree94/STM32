@@ -80,3 +80,20 @@ HC-SR04 ECHO ---- 1 kΩ ----+---- PA0
 - PA0/PA1은 NUCLEO의 Arduino 아날로그 헤더 A0/A1 위치다.
 
 ---
+
+![](../img/001.png) <br>
+![](../img/002.png) <br>
+![](../img/003.png) <br>
+![](../img/004.png) <br>
+![](../img/005.png) <br>
+![](../img/006.png) <br>
+![](../img/007.png) <br>
+![](../img/008.png) <br>
+![](../img/009.png) <br>
+![](../img/010.png) <br>
+![](../img/011.png) <br>
+![](../img/012.png) <br>
+![](../img/013.png) <br>
+![](../img/014.png) <br>
+![](../img/015.png) <br>
+![](../img/016.png) <br>
