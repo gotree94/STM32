@@ -151,11 +151,6 @@ void Ultrasonic_OnEchoEdge(void);
 
 extern TIM_HandleTypeDef htim1;
 
-volatile uint16_t g_trace_echo_ticks;
-volatile uint8_t g_trace_echo_edge;
-volatile uint8_t g_trace_echo_state;
-volatile uint32_t g_trace_edge_count;
-
 #define US_SAMPLE_PERIOD_MS 200U
 #define US_PUBLISH_PERIOD_MS 1000U
 #define US_ECHO_TIMEOUT_MS 35U
@@ -607,7 +602,14 @@ void EXTI15_10_IRQHandler(void)
 
 
 
+### ultrasonic.c
 
+```c
+volatile uint16_t g_trace_echo_ticks;
+volatile uint8_t g_trace_echo_edge;
+volatile uint8_t g_trace_echo_state;
+volatile uint32_t g_trace_edge_count;
+```
 
 
 
