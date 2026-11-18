@@ -818,7 +818,7 @@ Statistical Profiling은 comparators 등록 없이 트레이스만 켜면 `EXTI0
 - Watch의 4개 값은 같은 순간의 원자적 스냅샷이 아닙니다. comparator별 FIFO와 SWO 대역폭 때문에 `edge=0`, `state=1`처럼 섞여 보일 수 있으므로 정확한 타이밍은 각 변수의 History를 따로 봐야 합니다.
 - Timeline Graph는 이미지로만 저장되지만, `SWV Data Trace`의 History는 텍스트/CSV로 저장할 수 있습니다. 이번에 저장한 `SWV_데이터_트레이스.txt`가 숫자 원본 데이터입니다.
 
-
+### stm32f4xx_it.c
 
 ```c
 /**
