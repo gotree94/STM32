@@ -746,6 +746,11 @@ Debug Configuration에서는 다음을 확인합니다.
 
 
 ![](img/027.png) <br>
+![](img/028.png) <br>
+![](img/029.png) <br>
+![](img/030.png) <br>
+![](img/031.png) <br>
+![](img/032.png) <br>
 
 ### 8.1 비교기 등록 절차
 
