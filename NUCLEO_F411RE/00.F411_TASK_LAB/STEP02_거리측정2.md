@@ -228,10 +228,6 @@ void Ultrasonic_Init(void)
   s_result.distance_mm = 0U;
   s_result.valid = 0U;
   s_result.errors = 0U;
-  g_trace_echo_ticks = 0U;
-  g_trace_echo_edge = 0U;
-  g_trace_echo_state = 0U;
-  g_trace_edge_count = 0U;
 }
 
 void Ultrasonic_Task(void)
@@ -611,6 +607,42 @@ volatile uint8_t g_trace_echo_state;
 volatile uint32_t g_trace_edge_count;
 ```
 
+
+```c
+void Ultrasonic_Init(void)
+{
+  s_htim = &htim1;
+  HAL_GPIO_WritePin(TRIG_GPIO_Port, TRIG_Pin, GPIO_PIN_RESET);
+
+  if (HAL_TIM_Base_Start(s_htim) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  s_state = US_STATE_IDLE;
+  s_lastSampleTick = HAL_GetTick();
+  s_lastPublishTick = s_lastSampleTick;
+  s_echoStartTick = 0U;
+  s_echoStartCnt = 0U;
+  s_echoWidthTicks = 0U;
+  s_echoRising = 0U;
+  s_echoDone = 0U;
+  s_sampleCount = 0U;
+  s_sampleIndex = 0U;
+  s_errorCount = 0U;
+  s_soundSpeedX10 = US_DEFAULT_SOUND_SPEED_X10;
+  s_resultReady = 0U;
+  s_result.timestamp_ms = 0U;
+  s_result.distance_ref_mm = 0U;
+  s_result.distance_mm = 0U;
+  s_result.valid = 0U;
+  s_result.errors = 0U;
+  g_trace_echo_ticks = 0U;
+  g_trace_echo_edge = 0U;
+  g_trace_echo_state = 0U;
+  g_trace_edge_count = 0U;
+}
+```
 
 
 
