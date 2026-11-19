@@ -143,52 +143,6 @@ const osMutexAttr_t myMutex01_attributes = {
 ```
 
 ```c
-
-```
-
-
----
-
-## 4. 태스크 동작 타이밍
-
-```
-[FreeRTOS 1 ms tick]
- myTask03(DHT)     : 100 ms마다 Dht_Task() 호출 → 내부 2 s 게이트 → 실제 읽기 2 s마다 1회 (약 24 ms 블로킹)
- myTask02(US)      : 10 ms마다 Ultrasonic_Task() → 내부 200 ms 샘플 / 1000 ms 퍼블리시 → D, C 출력 1 Hz
- defaultTask       : osDelay(1) 대기
- ISR(EXTI0)        : 에코 엣지에서 TIM1 카운터만 읽어 펄스 폭 저장 (인터럽트 우선순위 5)
-```
-
-- DHT가 24 ms 블로킹해도 초음파 샘플 주기(200 ms)와 에코 타임아웃(35 ms)보다 짧아 충돌하지 않습니다.
-- 음속 값(`uint16_t`) 갱신은 DHT 태스크, 참조는 초음파 태스크에서 이루어지지만 32비트 코어에서 16비트 대입은 원자적이라 별도 동기화가 필요 없습니다.
-
----
-
-## 5. 시리얼 출력 (115200-8N1)
-
-| 프리픽스 | 형식 | 발생 주기 |
-|---|---|---|
-| `D` | `D,<time_ms>,<distance_mm>,<valid>,<errors>` | 1 Hz (음속 보정 적용) |
-| `C` | `C,<echo_ticks>` | 1 Hz (에코 폭, 1 MHz = µs) |
-| `TH` | `TH,<time_ms>,<temp_x10>,<rh_x10>,<valid>,<errors>` | 2 s |
-| `ENV` | `ENV,<+/-><T>.<t>C,<RH>.<r>%RH` | 2 s |
-| `S` | `S,<speed_x10>` | DHT 유효 시 2 s |
-
-예시:
-
-```
-=== F411_TASK_LAB Step 4: FreeRTOS Ultrasonic + DHT ===
-HC-SR04: TRIG=PA1, ECHO=PA0, 5 Hz sample, 1 Hz median
-DHTxx: DATA=PA4, 2 s sample, TIM1 1 MHz timebase
-Tasks: US=10 ms poll, DHT=100 ms poll, UART mutex
-D,10234,512,1,0
-C,2981
-TH,10400,205,503,1,0
-ENV,+20.5C,50.3%RH
-S,3441
-```
-
-```c
   /* USER CODE BEGIN 2 */
   Ultrasonic_Init();
   Dht_Init();
@@ -366,6 +320,47 @@ void StartDhtTask(void *argument)
 }
 ```
 
+
+---
+
+## 4. 태스크 동작 타이밍
+
+```
+[FreeRTOS 1 ms tick]
+ myTask03(DHT)     : 100 ms마다 Dht_Task() 호출 → 내부 2 s 게이트 → 실제 읽기 2 s마다 1회 (약 24 ms 블로킹)
+ myTask02(US)      : 10 ms마다 Ultrasonic_Task() → 내부 200 ms 샘플 / 1000 ms 퍼블리시 → D, C 출력 1 Hz
+ defaultTask       : osDelay(1) 대기
+ ISR(EXTI0)        : 에코 엣지에서 TIM1 카운터만 읽어 펄스 폭 저장 (인터럽트 우선순위 5)
+```
+
+- DHT가 24 ms 블로킹해도 초음파 샘플 주기(200 ms)와 에코 타임아웃(35 ms)보다 짧아 충돌하지 않습니다.
+- 음속 값(`uint16_t`) 갱신은 DHT 태스크, 참조는 초음파 태스크에서 이루어지지만 32비트 코어에서 16비트 대입은 원자적이라 별도 동기화가 필요 없습니다.
+
+---
+
+## 5. 시리얼 출력 (115200-8N1)
+
+| 프리픽스 | 형식 | 발생 주기 |
+|---|---|---|
+| `D` | `D,<time_ms>,<distance_mm>,<valid>,<errors>` | 1 Hz (음속 보정 적용) |
+| `C` | `C,<echo_ticks>` | 1 Hz (에코 폭, 1 MHz = µs) |
+| `TH` | `TH,<time_ms>,<temp_x10>,<rh_x10>,<valid>,<errors>` | 2 s |
+| `ENV` | `ENV,<+/-><T>.<t>C,<RH>.<r>%RH` | 2 s |
+| `S` | `S,<speed_x10>` | DHT 유효 시 2 s |
+
+예시:
+
+```
+=== F411_TASK_LAB Step 4: FreeRTOS Ultrasonic + DHT ===
+HC-SR04: TRIG=PA1, ECHO=PA0, 5 Hz sample, 1 Hz median
+DHTxx: DATA=PA4, 2 s sample, TIM1 1 MHz timebase
+Tasks: US=10 ms poll, DHT=100 ms poll, UART mutex
+D,10234,512,1,0
+C,2981
+TH,10400,205,503,1,0
+ENV,+20.5C,50.3%RH
+S,3441
+```
 
 ## 6. 빌드 / 검증
 
