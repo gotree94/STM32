@@ -1,0 +1,18 @@
+/*
+ * NUCLEO-F411RE sensor pins used by F411_TASK_LAB STEP05.
+ *
+ * TRIG : PA1 (push-pull output)
+ * ECHO : PA0 (input, both-edge interrupt)
+ * DHT  : PA4 (bi-directional, external pull-up required)
+ */
+
+/ {
+	f411_sensors: f411_sensors {
+		compatible = "f411,sensors";
+		status = "okay";
+
+		trigger-gpios = <&gpioa 1 GPIO_ACTIVE_HIGH>;
+		echo-gpios = <&gpioa 0 GPIO_ACTIVE_HIGH>;
+		dht-gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+	};
+};

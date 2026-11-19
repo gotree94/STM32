@@ -1,0 +1,28 @@
+# Copyright (c) 2026 F411_TASK_LAB
+# SPDX-License-Identifier: Apache-2.0
+
+title: F411_TASK_LAB sensor pins
+
+description: |
+  GPIO lines used by the HC-SR04 ultrasonic sensor and the DHT11/DHT22
+  sensor on NUCLEO-F411RE.
+
+compatible: "f411,sensors"
+
+include: base.yaml
+
+properties:
+  trigger-gpios:
+    type: phandle-array
+    required: true
+    description: HC-SR04 TRIG pin
+
+  echo-gpios:
+    type: phandle-array
+    required: true
+    description: HC-SR04 ECHO pin
+
+  dht-gpios:
+    type: phandle-array
+    required: true
+    description: DHT data pin
