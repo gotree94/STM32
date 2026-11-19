@@ -90,6 +90,63 @@ speed_x10 = 3313 + (606 × T_x10) / 1000 + (12 × RH_x10) / 1000
 - `T_x10` = 온도 ×10 (0.1 °C), `RH_x10` = 습도 ×10 (0.1 %RH)
 - 2500~4000 범위로 클램프, `dht.valid == 1`일 때만 `Ultrasonic_SetSoundSpeedX10()` 호출
 
+
+```c
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "cmsis_os.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "ultrasonic.h"
+#include "dht.h"
+/* USER CODE END Includes */
+```
+
+```c
+/* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim1;
+
+UART_HandleTypeDef huart2;
+
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for myTask02 */
+osThreadId_t myTask02Handle;
+const osThreadAttr_t myTask02_attributes = {
+  .name = "myTask02",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for myTask03 */
+osThreadId_t myTask03Handle;
+const osThreadAttr_t myTask03_attributes = {
+  .name = "myTask03",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal1,
+};
+/* Definitions for myMutex01 */
+osMutexId_t myMutex01Handle;
+const osMutexAttr_t myMutex01_attributes = {
+  .name = "myMutex01"
+};
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+```
+
+```c
+
+```
+
+
 ---
 
 ## 4. 태스크 동작 타이밍
@@ -131,7 +188,184 @@ ENV,+20.5C,50.3%RH
 S,3441
 ```
 
----
+```c
+  /* USER CODE BEGIN 2 */
+  Ultrasonic_Init();
+  Dht_Init();
+  printf("\n=== F411_TASK_LAB Step 4: FreeRTOS Ultrasonic + DHT ===\n");
+  printf("HC-SR04: TRIG=PA1, ECHO=PA0, 5 Hz sample, 1 Hz median\n");
+  printf("DHTxx: DATA=PA4, 2 s sample, TIM1 1 MHz timebase\n");
+  printf("Tasks: US=10 ms poll, DHT=100 ms poll, UART mutex\n");
+  printf("TIM1: PCLK2=%luHz divider=%lu ARR=%lu tick=%luHz\n",
+         (unsigned long)HAL_RCC_GetPCLK2Freq(),
+         (unsigned long)(htim1.Init.Prescaler + 1U),
+         (unsigned long)htim1.Init.Period,
+         (unsigned long)(HAL_RCC_GetPCLK2Freq() / (htim1.Init.Prescaler + 1U)));
+  /* USER CODE END 2 */
+```
+
+```c
+  /* Init scheduler */
+  osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of myMutex01 */
+  myMutex01Handle = osMutexNew(&myMutex01_attributes);
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of myTask02 */
+  myTask02Handle = osThreadNew(StartUltrasonicTask, NULL, &myTask02_attributes);
+
+  /* creation of myTask03 */
+  myTask03Handle = osThreadNew(StartDhtTask, NULL, &myTask03_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+```
+
+* /* USER CODE END 4 */ 아래
+
+```c
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
+```
+
+```c
+/* USER CODE BEGIN Header_StartUltrasonicTask */
+/**
+* @brief Function implementing the myTask02 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartUltrasonicTask */
+void StartUltrasonicTask(void *argument)
+{
+  /* USER CODE BEGIN StartUltrasonicTask */
+  Ultrasonic_Result result;
+  char line[80];
+
+  for(;;)
+  {
+    Ultrasonic_Task();
+
+    if (Ultrasonic_GetResult(&result) != 0U)
+    {
+      (void)snprintf(line, sizeof(line), "D,%lu,%u,%u,%lu\n",
+                     (unsigned long)result.timestamp_ms,
+                     (unsigned int)result.distance_mm,
+                     (unsigned int)result.valid,
+                     (unsigned long)result.errors);
+
+      (void)osMutexAcquire(myMutex01Handle, osWaitForever);
+      printf("%s", line);
+      printf("C,%u\n", (unsigned int)Ultrasonic_GetLastEchoTicks());
+      (void)osMutexRelease(myMutex01Handle);
+    }
+
+    osDelay(10);
+  }
+  /* USER CODE END StartUltrasonicTask */
+}
+```
+
+```c
+/* USER CODE BEGIN Header_StartDhtTask */
+/**
+* @brief Function implementing the myTask03 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartDhtTask */
+void StartDhtTask(void *argument)
+{
+  /* USER CODE BEGIN StartDhtTask */
+  Dht_Result dht;
+  char line[96];
+  int32_t temperature;
+  uint16_t speed_x10;
+
+  for(;;)
+  {
+    Dht_Task();
+
+    if (Dht_GetResult(&dht) != 0U)
+    {
+      temperature = (int32_t)dht.temperature_c_x10;
+      (void)snprintf(line, sizeof(line), "TH,%lu,%d,%u,%u,%lu\n",
+                     (unsigned long)dht.timestamp_ms,
+                     (int)temperature,
+                     (unsigned int)dht.humidity_rh_x10,
+                     (unsigned int)dht.valid,
+                     (unsigned long)dht.errors);
+
+      (void)osMutexAcquire(myMutex01Handle, osWaitForever);
+      printf("%s", line);
+      printf("ENV,%c%u.%uC,%u.%u%%RH\n",
+             (temperature < 0) ? '-' : '+',
+             (unsigned int)((temperature < 0) ? -temperature : temperature) / 10U,
+             (unsigned int)((temperature < 0) ? -temperature : temperature) % 10U,
+             (unsigned int)dht.humidity_rh_x10 / 10U,
+             (unsigned int)dht.humidity_rh_x10 % 10U);
+
+      if (dht.valid != 0U)
+      {
+        speed_x10 = Sensor_SoundSpeedX10(dht.temperature_c_x10,
+                                         dht.humidity_rh_x10);
+        Ultrasonic_SetSoundSpeedX10(speed_x10);
+        printf("S,%u\n", (unsigned int)speed_x10);
+      }
+      (void)osMutexRelease(myMutex01Handle);
+    }
+
+    osDelay(100);
+  }
+  /* USER CODE END StartDhtTask */
+}
+```
+
 
 ## 6. 빌드 / 검증
 
