@@ -408,3 +408,102 @@ make all    # Debug 폴더에서 실행
 | `Core/Inc/FreeRTOSConfig.h`, `Core/Src/freertos.c` | CubeMX 생성 |
 | `Middlewares/Third_Party/FreeRTOS/**` | CubeMX 생성 (heap_4, CMSIS_RTOS_V2, port ARM_CM4F) |
 | `Debug/**` 메이크파일 | FreeRTOS 소스/인클루드 경로 반영 위해 재생성 |
+
+
+---
+
+### 주기 확인
+
+```c
+/* USER CODE BEGIN Header_StartUltrasonicTask */
+/**
+* @brief Function implementing the myTask02 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartUltrasonicTask */
+void StartUltrasonicTask(void *argument)
+{
+  /* USER CODE BEGIN StartUltrasonicTask */
+  Ultrasonic_Result result;
+  char line[80];
+
+  for(;;)
+  {
+	  HAL_GPIO_TogglePin(TASK1_GPIO_Port, TASK1_Pin);  // 주기 측정용
+	Ultrasonic_Task();
+
+    if (Ultrasonic_GetResult(&result) != 0U)
+    {
+      (void)snprintf(line, sizeof(line), "D,%lu,%u,%u,%lu\n",
+                     (unsigned long)result.timestamp_ms,
+                     (unsigned int)result.distance_mm,
+                     (unsigned int)result.valid,
+                     (unsigned long)result.errors);
+
+      (void)osMutexAcquire(myMutex01Handle, osWaitForever);
+      printf("%s", line);
+      printf("C,%u\n", (unsigned int)Ultrasonic_GetLastEchoTicks());
+      (void)osMutexRelease(myMutex01Handle);
+    }
+    osDelay(10);
+  }
+  /* USER CODE END StartUltrasonicTask */
+}
+
+/* USER CODE BEGIN Header_StartDhtTask */
+/**
+* @brief Function implementing the myTask03 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartDhtTask */
+void StartDhtTask(void *argument)
+{
+  /* USER CODE BEGIN StartDhtTask */
+  Dht_Result dht;
+  char line[96];
+  int32_t temperature;
+  uint16_t speed_x10;
+
+  for(;;)
+  {
+	  HAL_GPIO_TogglePin(TASK_GPIO_Port, TASK_Pin);  // 주기 측정용
+    Dht_Task();
+
+    if (Dht_GetResult(&dht) != 0U)
+    {
+      temperature = (int32_t)dht.temperature_c_x10;
+      (void)snprintf(line, sizeof(line), "TH,%lu,%d,%u,%u,%lu\n",
+                     (unsigned long)dht.timestamp_ms,
+                     (int)temperature,
+                     (unsigned int)dht.humidity_rh_x10,
+                     (unsigned int)dht.valid,
+                     (unsigned long)dht.errors);
+
+      (void)osMutexAcquire(myMutex01Handle, osWaitForever);
+      printf("%s", line);
+      printf("ENV,%c%u.%uC,%u.%u%%RH\n",
+             (temperature < 0) ? '-' : '+',
+             (unsigned int)((temperature < 0) ? -temperature : temperature) / 10U,
+             (unsigned int)((temperature < 0) ? -temperature : temperature) % 10U,
+             (unsigned int)dht.humidity_rh_x10 / 10U,
+             (unsigned int)dht.humidity_rh_x10 % 10U);
+
+      if (dht.valid != 0U)
+      {
+        speed_x10 = Sensor_SoundSpeedX10(dht.temperature_c_x10,
+                                         dht.humidity_rh_x10);
+        Ultrasonic_SetSoundSpeedX10(speed_x10);
+        printf("S,%u\n", (unsigned int)speed_x10);
+      }
+      (void)osMutexRelease(myMutex01Handle);
+    }
+
+    osDelay(100);
+  }
+  /* USER CODE END StartDhtTask */
+}
+```
+
+
