@@ -4,11 +4,13 @@
 
 ![](Fig.NUCLEO-F103RB.png)
 
+음속 : 초속 약 340m/s
+
 |       |       |
 |:-------:|:-------:|
 | ![](002.png) | ![](003.png) | 
 
- <img src="101.png" width="30%"> <img src="102.png" width="58%">
+<img src="101.png" width="30%"> <img src="102.png" width="58%">
 
 <img src="103.png" width="55%"> <img src="104.png" width="40%">
 
@@ -96,6 +98,7 @@ long unsigned int echo(void)
    if( echo >= 240 && echo <= 23000 ) return echo;
    else return 0;
 }
+/* USER CODE END 0 */
 ```
 
 ```c
